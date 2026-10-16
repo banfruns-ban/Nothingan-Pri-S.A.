@@ -2,12 +2,12 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package Vehicles.Entity;
+package cat.copernic.projecte1Grup3.Usuaris.Agent.Controller;
 
 /**
  *
  * @author Usuario
  */
-public class vehiclesEntity {
+public class agentController {
     
 }

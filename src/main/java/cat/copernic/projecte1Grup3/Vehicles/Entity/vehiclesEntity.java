@@ -2,12 +2,12 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package Usuaris.Administrador.Entity;
+package cat.copernic.projecte1Grup3.Vehicles.Entity;
 
 /**
  *
  * @author Usuario
  */
-public class administradorEntity {
+public class vehiclesEntity {
     
 }

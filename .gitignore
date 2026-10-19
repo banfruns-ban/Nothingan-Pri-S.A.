@@ -1,33 +1,46 @@
-HELP.md
+# Archivos de compilación y ejecutables (Maven / Gradle)
 target/
+build/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+!**/src/main/**/build/
+!**/src/test/**/build/
 
-### STS ###
+# Archivos de configuración con contraseñas y datos sensibles
+src/main/resources/application.properties
+src/main/resources/application-*.properties
+src/main/resources/application.yml
+src/main/resources/application-*.yml
+
+# Archivos de ayuda inicial
+HELP.md
+
+# Configuración de STS (Spring Tool Suite) y Eclipse
 .apt_generated
 .classpath
 .factorypath
 .project
-.settings
+.settings/
 .springBeans
 .sts4-cache
 
-### IntelliJ IDEA ###
-.idea
+# Configuración de IntelliJ IDEA
+.idea/
 *.iws
 *.iml
 *.ipr
 
-### NetBeans ###
+# Configuración de Visual Studio Code
+.vscode/
+
+# Configuración de NetBeans
 /nbproject/private/
 /nbbuild/
 /dist/
 /nbdist/
 /.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
 
-### VS Code ###
-.vscode/
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db

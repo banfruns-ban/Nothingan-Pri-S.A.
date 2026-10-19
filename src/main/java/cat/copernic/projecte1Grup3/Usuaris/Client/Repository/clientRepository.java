@@ -3,11 +3,13 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package cat.copernic.projecte1Grup3.Usuaris.Client.Repository;
-
-/**
- *
- * @author Usuario
- */
-public class clientLogic {
+import cat.copernic.projecte1Grup3.Usuaris.Client.Entity.clientEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
     
+
+
+
+
+public interface clientRepository extends JpaRepository<clientEntity, String> {
+
 }

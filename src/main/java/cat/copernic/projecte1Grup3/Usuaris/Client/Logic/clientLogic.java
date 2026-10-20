@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import java.time.LocalDate;
 @Service
 public class clientLogic {
 
@@ -50,33 +50,13 @@ public class clientLogic {
     public Optional<clientDocuments> obtenirDocuments(String dni) {
         return clientRepositoryMongo.findById(dni);
     }
+    
+    
 
-    // ---------- Editar ----------
-    // Solo se copian los campos editables. DNI, premium y estat NO se tocan.
-    @Transactional
-    public void actualitzar(String dni, clientEntity dades) {
-        clientEntity c = clientRepository.findById(dni)
-                .orElseThrow(() -> new IllegalArgumentException("Client no trobat"));
 
-        c.setNom(dades.getNom());
-        c.setCorreu(dades.getCorreu());
-        c.setNacionalitat(dades.getNacionalitat());
-        c.setAdreca(dades.getAdreca());
-        c.setTipusLlicencia(dades.getTipusLlicencia());
-        c.setDataCaducitatDNI(dades.getDataCaducitatDNI());
-        clientRepository.save(c);
-    }
 
-    // ---------- Borrar (MySQL y Mongo) ----------
-    // Primero MySQL: si Mongo falla, queda un documento huérfano (inofensivo),
-    // pero nunca un cliente sin sus imágenes.
-    @Transactional
-    public void eliminar(String dni) {
-        clientRepository.deleteById(dni);
-        clientRepositoryMongo.deleteById(dni);
-    }
 
-    // ---------- Validación del administrador ----------
+
     @Transactional
     public void canviarEstat(String dni, String estat) {
         if (!VALIDAT.equals(estat) && !REBUTJAT.equals(estat) && !PENDENT.equals(estat)) {

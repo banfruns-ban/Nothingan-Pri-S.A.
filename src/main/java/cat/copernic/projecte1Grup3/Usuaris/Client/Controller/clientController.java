@@ -1,13 +1,171 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package cat.copernic.projecte1Grup3.Usuaris.Client.Controller;
 
-/**
- *
- * @author Usuario
- */
+import cat.copernic.projecte1Grup3.Usuaris.Client.Documents.clientDocuments;
+import cat.copernic.projecte1Grup3.Usuaris.Client.Entity.clientEntity;
+import cat.copernic.projecte1Grup3.Usuaris.Client.Logic.clientLogic;
+import cat.copernic.projecte1Grup3.Usuaris.Client.Repository.clientRepository;
+import cat.copernic.projecte1Grup3.Usuaris.Client.Repository.clientRepositoryMongo;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+@Controller
 public class clientController {
-    
+
+    private final clientRepository clientRepository;
+    private final clientRepositoryMongo clientRepositoryMongo;
+    private final clientLogic clientLogic;
+
+    public clientController(clientRepository clientRepository,
+                            clientRepositoryMongo clientRepositoryMongo,
+                            clientLogic clientLogic) {
+        this.clientRepository = clientRepository;
+        this.clientRepositoryMongo = clientRepositoryMongo;
+        this.clientLogic = clientLogic;
+    }
+
+    // =====================================================
+    // ALTA
+    // =====================================================
+
+    @GetMapping("/clients/nou")
+    public String mostrarFormulari(Model model) {
+        model.addAttribute("client", new clientEntity());
+        return "altaUsuari";
+    }
+
+    @PostMapping("/clients/alta")
+    public String altaClient(
+            @ModelAttribute("client") clientEntity client,
+            @RequestParam("fotoDniFrontal") MultipartFile fotoDniFrontal,
+            @RequestParam("fotoDniPosterior") MultipartFile fotoDniPosterior,
+            @RequestParam("fotoCarnet") MultipartFile fotoCarnet,
+            RedirectAttributes redirectAttributes) {
+
+        client.setDni(client.getDni().toUpperCase());
+
+        if (clientRepository.existsById(client.getDni())) {
+            redirectAttributes.addFlashAttribute(
+                    "error", "Ja existeix un client amb aquest DNI");
+            return "redirect:/clients/nou";
+        }
+
+        if (!valida(fotoDniFrontal) || !valida(fotoDniPosterior) || !valida(fotoCarnet)) {
+            redirectAttributes.addFlashAttribute(
+                    "error", "Cal pujar les 3 imatges (PNG o JPG, màxim 5MB)");
+            return "redirect:/clients/nou";
+        }
+
+        // Valores que decide el servidor, no el formulario
+        client.setPremium(false);
+        client.setEstatValidacio("PENDENT");
+
+        try {
+            clientRepository.save(client);                          // MySQL
+
+            clientDocuments doc = new clientDocuments();
+            doc.setDni(client.getDni());
+            doc.setFotoDniFrontal(fotoDniFrontal.getBytes());
+            doc.setTipusFotoDniFrontal(fotoDniFrontal.getContentType());
+            doc.setFotoDniPosterior(fotoDniPosterior.getBytes());
+            doc.setTipusFotoDniPosterior(fotoDniPosterior.getContentType());
+            doc.setFotoCarnet(fotoCarnet.getBytes());
+            doc.setTipusFotoCarnet(fotoCarnet.getContentType());
+            clientRepositoryMongo.save(doc);                        // MongoDB
+
+            System.out.println("Guardado en Mongo: " + doc.getDni());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (clientRepository.existsById(client.getDni())) {
+                clientRepository.deleteById(client.getDni());       // deshacer MySQL
+            }
+            redirectAttributes.addFlashAttribute(
+                    "error", "No s'ha pogut completar el registre");
+            return "redirect:/clients/nou";
+        }
+
+        redirectAttributes.addFlashAttribute(
+                "missatge", "Client donat d'alta correctament!");
+        return "redirect:/clients/nou";
+    }
+
+    // =====================================================
+    // LISTAR, VER Y BUSCAR
+    // =====================================================
+
+    @GetMapping("/clients")
+    public String llistar(@RequestParam(required = false) String q,
+                          @RequestParam(required = false) String estat,
+                          Model model) {
+        model.addAttribute("clients", clientLogic.llistar(q, estat));
+        model.addAttribute("q", q);
+        model.addAttribute("estat", estat);
+        return "llistaClients";
+    }
+
+    @GetMapping("/clients/{dni}")
+    public String detall(@PathVariable String dni, Model model, RedirectAttributes ra) {
+        return clientLogic.obtenir(dni).map(c -> {
+            model.addAttribute("client", c);
+            return "detallClient";
+        }).orElseGet(() -> {
+            ra.addFlashAttribute("error", "Client no trobat");
+            return "redirect:/clients";
+        });
+    }
+
+    // Devuelve los bytes de la imagen guardada en Mongo: tipus = frontal | posterior | carnet
+    @GetMapping("/clients/{dni}/imatge/{tipus}")
+    @ResponseBody
+    public ResponseEntity<byte[]> imatge(@PathVariable String dni, @PathVariable String tipus) {
+        return (ResponseEntity<byte[]>) clientLogic.obtenirDocuments(dni).map(d -> {
+            byte[] bytes;
+            String mime;
+            switch (tipus) {
+                case "frontal" -> {
+                    bytes = d.getFotoDniFrontal();
+                    mime = d.getTipusFotoDniFrontal();
+                }
+                case "posterior" -> {
+                    bytes = d.getFotoDniPosterior();
+                    mime = d.getTipusFotoDniPosterior();
+                }
+                case "carnet" -> {
+                    bytes = d.getFotoCarnet();
+                    mime = d.getTipusFotoCarnet();
+                }
+                default -> {
+                    return ResponseEntity.<byte[]>notFound().build();
+                }
+            }
+            if (bytes == null || mime == null) {
+                return ResponseEntity.<byte[]>notFound().build();
+            }
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(mime))
+                    .body(bytes);
+             }).orElse(ResponseEntity.notFound().build());
+    }
+   
+
+    // =====================================================
+    // AUXILIAR
+    // =====================================================
+
+    private boolean valida(MultipartFile f) {
+        String tipus = f.getContentType();
+        return !f.isEmpty()
+                && f.getSize() <= 5 * 1024 * 1024
+                && ("image/png".equals(tipus) || "image/jpeg".equals(tipus));
+    }
 }

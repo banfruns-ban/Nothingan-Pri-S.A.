@@ -4,10 +4,13 @@
  */
 package cat.copernic.projecte1Grup3.Usuaris.Client.Repository;
 
+import cat.copernic.projecte1Grup3.Usuaris.Client.Documents.clientDocuments;
+import org.springframework.data.mongodb.repository.MongoRepository;
+
 /**
  *
- * @author Usuario
+ * @author User
  */
-public class clientLogic {
-    
+public interface clientRepositoryMongo extends MongoRepository<clientDocuments, String> {
+
 }

@@ -140,6 +140,14 @@ public class clientLogic {
             throw new IllegalArgumentException("Les imatges han de ser PNG o JPG de màxim 5MB");
         }
     }
+    
+     @Transactional
+    public void eliminar(String dni) {
+        clientRepository.deleteById(dni);
+        clientRepositoryMongo.deleteById(dni);
+        
+    }
+    
 
     @Transactional
     public void canviarEstat(String dni, String estat) {

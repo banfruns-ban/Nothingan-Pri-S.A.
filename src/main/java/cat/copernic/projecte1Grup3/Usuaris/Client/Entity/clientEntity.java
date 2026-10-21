@@ -1,16 +1,12 @@
-
 package cat.copernic.projecte1Grup3.Usuaris.Client.Entity;
 
-import cat.copernic.projecte1Grup3.Ressenya.Entity.ressenyaEntity;
 import cat.copernic.projecte1Grup3.Usuaris.Entity.usuariEntity;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.Table;
-import java.util.ArrayList;
-import java.util.List;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "Clients")
@@ -26,7 +22,7 @@ public class clientEntity extends usuariEntity {
     @Column(name = "adreca", nullable = false)
     private String adreca;
 
-    @Column(name = "tipus_llicencia" ,nullable = false)
+    @Column(name = "tipus_llicencia", nullable = false)
     private String tipusLlicencia;
 
     @Column(name = "premium", nullable = false)
@@ -35,7 +31,24 @@ public class clientEntity extends usuariEntity {
     @Column(name = "estat_validacio", nullable = false)
     private String estatValidacio;
 
-    
+    // ---- Camps nous (sense nullable = false perquè els clients antics no els tenen) ----
+    @Column(name = "telefon")
+    private String telefon;
+
+    @Column(name = "data_naixement")
+    private LocalDate dataNaixement;
+
+    @Column(name = "data_registre")
+    private LocalDate dataRegistre;
+
+    // La data de registre s'omple sola en guardar un client nou
+    @PrePersist
+    void alCrear() {
+        if (dataRegistre == null) {
+            dataRegistre = LocalDate.now();
+        }
+    }
+
     public clientEntity() {
         super();
     }
@@ -48,9 +61,9 @@ public class clientEntity extends usuariEntity {
                         String estatValidacio,
                         String dni,
                         String nom,
-                        String correu) {
+                        String email) {
 
-        super(dni, nom, correu);
+        super(dni, nom, email);
 
         this.dataCaducitatDNI = dataCaducitatDNI;
         this.nacionalitat = nacionalitat;
@@ -60,63 +73,31 @@ public class clientEntity extends usuariEntity {
         this.estatValidacio = estatValidacio;
     }
 
-    // Getters y setters
-    public String getDataCaducitatDNI() {
-        return dataCaducitatDNI;
-    }
+    // ---------- Getters i setters ----------
+    public String getDataCaducitatDNI() { return dataCaducitatDNI; }
+    public void setDataCaducitatDNI(String dataCaducitatDNI) { this.dataCaducitatDNI = dataCaducitatDNI; }
 
-    public void setDataCaducitatDNI(String dataCaducitatDNI) {
-        this.dataCaducitatDNI = dataCaducitatDNI;
-    }
+    public String getNacionalitat() { return nacionalitat; }
+    public void setNacionalitat(String nacionalitat) { this.nacionalitat = nacionalitat; }
 
-    public String getNacionalitat() {
-        return nacionalitat;
-    }
+    public String getAdreca() { return adreca; }
+    public void setAdreca(String adreca) { this.adreca = adreca; }
 
-    public void setNacionalitat(String nacionalitat) {
-        this.nacionalitat = nacionalitat;
-    }
+    public String getTipusLlicencia() { return tipusLlicencia; }
+    public void setTipusLlicencia(String tipusLlicencia) { this.tipusLlicencia = tipusLlicencia; }
 
-    public String getAdreca() {
-        return adreca;
-    }
+    public boolean isPremium() { return premium; }
+    public void setPremium(boolean premium) { this.premium = premium; }
 
-    public void setAdreca(String adreca) {
-        this.adreca = adreca;
-    }
+    public String getEstatValidacio() { return estatValidacio; }
+    public void setEstatValidacio(String estatValidacio) { this.estatValidacio = estatValidacio; }
 
-    public String getTipusLlicencia() {
-        return tipusLlicencia;
-    }
+    public String getTelefon() { return telefon; }
+    public void setTelefon(String telefon) { this.telefon = telefon; }
 
-    public void setTipusLlicencia(String tipusLlicencia) {
-        this.tipusLlicencia = tipusLlicencia;
-    }
+    public LocalDate getDataNaixement() { return dataNaixement; }
+    public void setDataNaixement(LocalDate dataNaixement) { this.dataNaixement = dataNaixement; }
 
-    public boolean isPremium() {
-        return premium;
-    }
-
-    public void setPremium(boolean premium) {
-        this.premium = premium;
-    }
-
-    public String getEstatValidacio() {
-        return estatValidacio;
-    }
-
-    public void setEstatValidacio(String estatValidacio) {
-        this.estatValidacio = estatValidacio;
-    }
-    
-    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ressenyaEntity> ressenyes = new ArrayList<>();
-
-    public List<ressenyaEntity> getRessenyes() { return ressenyes; }
-    public void setRessenyes(List<ressenyaEntity> ressenyes) { this.ressenyes = ressenyes; }
-
-    public void addRessenya(ressenyaEntity r) {
-        ressenyes.add(r);
-        r.setClient(this);
-}
+    public LocalDate getDataRegistre() { return dataRegistre; }
+    public void setDataRegistre(LocalDate dataRegistre) { this.dataRegistre = dataRegistre; }
 }

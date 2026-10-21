@@ -9,7 +9,11 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+<<<<<<< src/main/java/cat/copernic/projecte1Grup3/Usuaris/Client/Logic/clientLogic.java
  
+=======
+import java.time.LocalDate;
+>>>>>>> src/main/java/cat/copernic/projecte1Grup3/Usuaris/Client/Logic/clientLogic.java
 @Service
 public class clientLogic {
  
@@ -76,6 +80,13 @@ public class clientLogic {
     }
     
 
+    
+
+
+
+
+
+>>>>>>> src/main/java/cat/copernic/projecte1Grup3/Usuaris/Client/Logic/clientLogic.java
     @Transactional
     public void canviarEstat(String dni, String estat) {
         if (!VALIDAT.equals(estat) && !REBUTJAT.equals(estat) && !PENDENT.equals(estat)) {

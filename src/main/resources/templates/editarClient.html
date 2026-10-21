@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="ca" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Modificació de client</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: Inter, "Segoe UI", Arial, sans-serif; background: #f1f5f9; color: #0f172a; font-size: 12px; }
+        .app { display: grid; grid-template-columns: 220px 1fr; min-height: 100vh; }
+
+        .lateral { background: #0f172a; color: #cbd5e1; padding: 18px 14px; }
+        .marca { display: flex; align-items: center; gap: 10px; padding: 4px 6px 18px; }
+        .marca .logo { width: 36px; height: 36px; border-radius: 50%; background: #1e3a8a; color: #fff;
+                       display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; }
+        .marca strong { display: block; color: #fff; font-size: 12px; letter-spacing: .3px; }
+        .marca small { font-size: 8px; letter-spacing: .6px; color: #94a3b8; }
+        .menu { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 4px; }
+        .menu a { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 6px;
+                  color: #cbd5e1; text-decoration: none; font-size: 12px; }
+        .menu a:hover { background: #1e293b; }
+        .menu a.actiu { background: #fff; color: #0f172a; font-weight: 600; }
+        .menu .punt { width: 12px; height: 12px; border-radius: 3px; background: #475569; flex: none; }
+        .menu a.actiu .punt { background: #2563eb; }
+
+        .contingut { display: flex; flex-direction: column; min-width: 0; }
+        .barra { background: #0f172a; color: #fff; padding: 12px 24px; display: flex; align-items: center; gap: 12px; font-size: 11px; }
+        .barra .etiqueta { background: #2563eb; border-radius: 4px; padding: 3px 8px; font-size: 9px; font-weight: 700; letter-spacing: .4px; }
+        main { padding: 24px 28px 40px; max-width: 980px; width: 100%; }
+        .enrere { color: #475569; text-decoration: none; font-size: 11px; display: inline-block; margin-bottom: 14px; }
+        .enrere:hover { color: #2563eb; }
+
+        .capcalera { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; flex-wrap: wrap; }
+        .avatar { width: 52px; height: 52px; border-radius: 50%; color: #fff; font-size: 17px; font-weight: 700;
+                  display: flex; align-items: center; justify-content: center; flex: none; background: #2563eb; }
+        .capcalera h1 { font-size: 20px; margin: 0; }
+        .capcalera .sub { color: #64748b; font-size: 11px; margin-top: 2px; }
+
+        .missatge { padding: 10px 12px; border-radius: 6px; margin-bottom: 14px; font-size: 12px; }
+        .missatge.error { background: #fee2e2; color: #991b1b; }
+
+        .targeta { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 18px 20px; margin-bottom: 14px; }
+        .targeta h2 { font-size: 11px; letter-spacing: .5px; text-transform: uppercase; color: #64748b; margin: 0 0 14px; }
+        .nota { color: #94a3b8; font-size: 10px; margin: -6px 0 14px; }
+
+        .fila { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+        .fila:last-child { margin-bottom: 0; }
+        label.camp { display: block; font-size: 10px; color: #475569; margin-bottom: 4px; font-weight: 600; }
+        .entrada { width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 12px;
+                   font-family: inherit; background: #fff; }
+        .entrada:focus { outline: 2px solid #bfdbfe; border-color: #3b82f6; }
+        .entrada[readonly] { background: #f1f5f9; color: #64748b; }
+
+        .premium { display: flex; align-items: center; gap: 10px; padding: 10px; border: 1px solid #e2e8f0;
+                   border-radius: 6px; min-height: 38px; font-size: 12px; font-weight: 600; cursor: pointer; }
+        .premium input { width: 16px; height: 16px; }
+
+        .docs { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+        .doc figure { margin: 0 0 8px; }
+        .doc img { width: 100%; height: 150px; object-fit: contain; background: #f8fafc;
+                   border: 1px solid #e2e8f0; border-radius: 8px; }
+        .doc figcaption { font-size: 10px; color: #64748b; margin-top: 4px; }
+        .doc input[type=file] { width: 100%; font-size: 11px; }
+        .doc .avis-fitxer { color: #dc2626; font-size: 10px; margin-top: 4px; display: none; }
+
+        .botons { display: flex; gap: 8px; margin-top: 4px; }
+        .btn { border-radius: 6px; padding: 10px 16px; font-size: 12px; font-weight: 600; cursor: pointer;
+               text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+               border: 1px solid #e2e8f0; background: #fff; color: #0f172a; font-family: inherit; }
+        .btn:hover { background: #f8fafc; }
+        .btn-primari { background: #2563eb; border-color: #2563eb; color: #fff; }
+        .btn-primari:hover { background: #1d4ed8; }
+
+        @media (max-width: 800px) {
+            .app { grid-template-columns: 1fr; }
+            .lateral { display: none; }
+            .fila { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div class="app">
+
+    <aside class="lateral">
+        <div class="marca">
+            <div class="logo">N</div>
+            <div>
+                <strong>NOTHINGAN PRI S.A</strong>
+                <small>PANEL DE CONTROL AGENT</small>
+            </div>
+        </div>
+        <ul class="menu">
+            <li><a href="#"><span class="punt"></span>Dashboard</a></li>
+            <li><a href="#"><span class="punt"></span>Flota de Vehicles</a></li>
+            <li><a class="actiu" th:href="@{/clients}"><span class="punt"></span>Gestió de Clients</a></li>
+            <li><a href="#"><span class="punt"></span>Reserves Actives</a></li>
+        </ul>
+    </aside>
+
+    <div class="contingut">
+        <div class="barra">
+            <span class="etiqueta">CRM CLIENTS</span>
+            <span>Panell d'Agent - Modificació de client</span>
+        </div>
+
+        <main>
+            <a class="enrere" th:href="@{/clients/{d}(d=${client.dni})}">&larr; Tornar a la fitxa del client</a>
+
+            <div class="capcalera">
+                <span class="avatar" id="avatar" th:attr="data-nom=${client.nom}"
+                      th:text="${client.nom != null and !#strings.isEmpty(client.nom)} ? ${#strings.toUpperCase(#strings.substring(client.nom,0,1))} : '?'">?</span>
+                <div>
+                    <h1>Modificació de client</h1>
+                    <div class="sub" th:text="${client.nom} + ' · DNI / NIE ' + ${client.dni}">Nom · DNI</div>
+                </div>
+            </div>
+
+            <div class="missatge error" th:if="${error}" th:text="${error}"></div>
+
+            <form th:action="@{/clients/{d}/editar(d=${client.dni})}" th:object="${client}"
+                  method="post" enctype="multipart/form-data">
+
+                <!-- Dades personals -->
+                <section class="targeta">
+                    <h2>Dades personals</h2>
+                    <div class="fila">
+                        <div>
+                            <label class="camp">DNI / NIE</label>
+                            <input class="entrada" type="text" th:value="${client.dni}" readonly>
+                        </div>
+                        <div>
+                            <label class="camp" for="nom">Nom complet</label>
+                            <input class="entrada" type="text" id="nom" th:field="*{nom}" required>
+                        </div>
+                    </div>
+                    <div class="fila">
+                        <div>
+                            <label class="camp" for="dataNaixement">Data de naixement</label>
+                            <input class="entrada" type="date" id="dataNaixement" th:field="*{dataNaixement}">
+                        </div>
+                        <div>
+                            <label class="camp" for="nacionalitat">Nacionalitat</label>
+                            <input class="entrada" type="text" id="nacionalitat" th:field="*{nacionalitat}" required>
+                        </div>
+                    </div>
+                    <div class="fila">
+                        <div>
+                            <label class="camp" for="adreca">Adreça completa</label>
+                            <input class="entrada" type="text" id="adreca" th:field="*{adreca}" required>
+                        </div>
+                        <div></div>
+                    </div>
+                </section>
+
+                <!-- Contacte -->
+                <section class="targeta">
+                    <h2>Contacte</h2>
+                    <div class="fila">
+                        <div>
+                            <label class="camp" for="email">Adreça electrònica</label>
+                            <input class="entrada" type="email" id="email" th:field="*{email}" required>
+                        </div>
+                        <div>
+                            <label class="camp" for="telefon">Telèfon</label>
+                            <input class="entrada" type="tel" id="telefon" th:field="*{telefon}"
+                                   pattern="[0-9 +]{9,15}" title="Entre 9 i 15 xifres (es permeten espais i +)"
+                                   placeholder="Ex: 612 345 678">
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Permís de conduir -->
+                <section class="targeta">
+                    <h2>Permís de conduir</h2>
+                    <div class="fila">
+                        <div>
+                            <label class="camp" for="tipusLlicencia">Tipus de llicència</label>
+                            <input class="entrada" type="text" id="tipusLlicencia" th:field="*{tipusLlicencia}" required>
+                        </div>
+                        <div>
+                            <label class="camp" for="dataCaducitatDNI">Data de caducitat del DNI</label>
+                            <input class="entrada" type="date" id="dataCaducitatDNI" th:field="*{dataCaducitatDNI}" required>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Estat del compte -->
+                <section class="targeta">
+                    <h2>Estat del compte</h2>
+                    <div class="fila">
+                        <div>
+                            <label class="camp" for="estatValidacio">Estat de validació</label>
+                            <select class="entrada" id="estatValidacio" name="estatValidacio">
+                                <option value="PENDENT"  th:selected="${client.estatValidacio == 'PENDENT'}">Pendent de validació</option>
+                                <option value="VALIDAT"  th:selected="${client.estatValidacio == 'VALIDAT'}">Actiu (validat)</option>
+                                <option value="REBUTJAT" th:selected="${client.estatValidacio == 'REBUTJAT'}">Inactiu (rebutjat)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="camp">Compte premium</label>
+                            <label class="premium">
+                                <input type="checkbox" name="premium" value="true" th:checked="${client.premium}">
+                                Client premium
+                            </label>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Documents -->
+                <section class="targeta">
+                    <h2>Documents d'identitat</h2>
+                    <p class="nota">Deixa els camps buits per conservar les imatges actuals. PNG o JPG, màxim 5MB.</p>
+                    <div class="docs">
+                        <div class="doc">
+                            <figure>
+                                <img th:src="@{/clients/{d}/imatge/frontal(d=${client.dni})}" alt="DNI frontal" data-previa>
+                                <figcaption>DNI / Passaport (frontal)</figcaption>
+                            </figure>
+                            <input type="file" name="fotoDniFrontal" accept="image/png,image/jpeg">
+                            <div class="avis-fitxer">Fitxer no vàlid (PNG o JPG, màxim 5MB)</div>
+                        </div>
+                        <div class="doc">
+                            <figure>
+                                <img th:src="@{/clients/{d}/imatge/posterior(d=${client.dni})}" alt="DNI posterior" data-previa>
+                                <figcaption>DNI (posterior)</figcaption>
+                            </figure>
+                            <input type="file" name="fotoDniPosterior" accept="image/png,image/jpeg">
+                            <div class="avis-fitxer">Fitxer no vàlid (PNG o JPG, màxim 5MB)</div>
+                        </div>
+                        <div class="doc">
+                            <figure>
+                                <img th:src="@{/clients/{d}/imatge/carnet(d=${client.dni})}" alt="Carnet de conduir" data-previa>
+                                <figcaption>Carnet de conduir (frontal)</figcaption>
+                            </figure>
+                            <input type="file" name="fotoCarnet" accept="image/png,image/jpeg">
+                            <div class="avis-fitxer">Fitxer no vàlid (PNG o JPG, màxim 5MB)</div>
+                        </div>
+                    </div>
+                </section>
+
+                <div class="botons">
+                    <button class="btn btn-primari" type="submit">Desar canvis</button>
+                    <a class="btn" th:href="@{/clients/{d}(d=${client.dni})}">Cancel·lar</a>
+                </div>
+            </form>
+        </main>
+    </div>
+</div>
+
+<!-- Només millores visuals: el formulari funciona igualment sense JavaScript. -->
+<script>
+    try {
+        // Inicials de l'avatar
+        var av = document.getElementById('avatar');
+        var p = (av.getAttribute('data-nom') || '').trim().split(/\s+/);
+        var ini = (p[0] ? p[0].charAt(0) : '') + (p[1] ? p[1].charAt(0) : '');
+        if (ini) { av.textContent = ini.toUpperCase(); }
+    } catch (e) { }
+
+    try {
+        // Vista prèvia de la imatge nova i validació de tipus i mida
+        document.querySelectorAll('.doc').forEach(function (doc) {
+            var input = doc.querySelector('input[type=file]');
+            var img = doc.querySelector('img[data-previa]');
+            var avis = doc.querySelector('.avis-fitxer');
+            input.addEventListener('change', function () {
+                avis.style.display = 'none';
+                var f = input.files[0];
+                if (!f) { return; }
+                if (['image/png', 'image/jpeg'].indexOf(f.type) === -1 || f.size > 5 * 1024 * 1024) {
+                    input.value = '';
+                    avis.style.display = 'block';
+                    return;
+                }
+                img.src = URL.createObjectURL(f);
+            });
+        });
+    } catch (e) { }
+</script>
+</body>
+</html>

@@ -197,7 +197,7 @@
                         <th>Email</th>
                         <th>Telèfon</th>
                         <th>Estat</th>
-                        <th>Data registre</th>
+                        <th>dataNaixement</th>
                         <th class="dreta">Accions</th>
                     </tr>
                     </thead>
@@ -217,12 +217,12 @@
                             <span class="estat" th:classappend="${c.estatValidacio}"
                                   th:text="${c.estatValidacio == 'VALIDAT' ? 'Actiu' : (c.estatValidacio == 'REBUTJAT' ? 'Inactiu' : 'Pendent de validació')}">Estat</span>
                         </td>
-                        <td class="nowrap data" th:attr="data-iso=${c.dataRegistre}"
-                            th:text="${c.dataRegistre != null} ? ${c.dataRegistre} : '—'">—</td>
+                        <td class="nowrap data" th:attr="data-iso=${c.dataNaixement}"
+                            th:text="${c.dataNaixement != null} ? ${c.dataNaixement} : '—'">—</td>
                         <td class="dreta">
-                            <a class="btn btn-veure" th:href="@{/clients/{d}(d=${c.dni})}">
+                            <a class="btn btn-editar" th:href="@{/clients/{d}/editar(d=${c.dni})}">
                                 <svg class="ico" viewBox="0 0 24 24"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>
-                                Veure
+                                editar
                             </a>
                         </td>
                     </tr>

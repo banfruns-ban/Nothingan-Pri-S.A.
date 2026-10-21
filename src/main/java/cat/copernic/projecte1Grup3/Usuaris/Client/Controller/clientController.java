@@ -5,6 +5,9 @@ import cat.copernic.projecte1Grup3.Usuaris.Client.Entity.clientEntity;
 import cat.copernic.projecte1Grup3.Usuaris.Client.Logic.clientLogic;
 import cat.copernic.projecte1Grup3.Usuaris.Client.Repository.clientRepository;
 import cat.copernic.projecte1Grup3.Usuaris.Client.Repository.clientRepositoryMongo;
+import java.time.LocalDate;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -99,17 +102,19 @@ public class clientController {
         return "redirect:/clients/nou";
     }
 
-    // =====================================================
-    // LISTAR, VER Y BUSCAR
-    // =====================================================
 
     @GetMapping("/clients")
     public String llistar(@RequestParam(required = false) String q,
+                          @RequestParam(required = false) String dni,
                           @RequestParam(required = false) String estat,
+                          @RequestParam(required = false)
+                          @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataNaixement,
                           Model model) {
-        model.addAttribute("clients", clientLogic.llistar(q, estat));
+        model.addAttribute("clients", clientLogic.llistar(q, dni, estat, dataNaixement));
         model.addAttribute("q", q);
+        model.addAttribute("dni", dni);
         model.addAttribute("estat", estat);
+        model.addAttribute("dataNaixement", dataNaixement);
         return "llistaClients";
     }
 
@@ -154,9 +159,31 @@ public class clientController {
             return ResponseEntity.ok()
                     .contentType(MediaType.parseMediaType(mime))
                     .body(bytes);
-             }).orElse(ResponseEntity.notFound().build());
+        }).orElse(ResponseEntity.notFound().build());
     }
+
    
+
+    // =====================================================
+    // VALIDACIÓN DEL ADMINISTRADOR
+    // =====================================================
+
+    @PostMapping("/clients/{dni}/validacio")
+    public String validar(@PathVariable String dni,
+                          @RequestParam String estat,
+                          RedirectAttributes ra) {
+        clientLogic.canviarEstat(dni, estat);
+        ra.addFlashAttribute("missatge", "Estat actualitzat a " + estat);
+        return "redirect:/clients/" + dni;
+    }
+
+    @PostMapping("/clients/{dni}/premium")
+    public String premium(@PathVariable String dni,
+                          @RequestParam boolean premium,
+                          RedirectAttributes ra) {
+        clientLogic.canviarPremium(dni, premium);
+        return "redirect:/clients/" + dni;
+    }
 
     // =====================================================
     // AUXILIAR

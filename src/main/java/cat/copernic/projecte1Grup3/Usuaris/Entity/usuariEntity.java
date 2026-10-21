@@ -1,44 +1,34 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package cat.copernic.projecte1Grup3.Usuaris.Entity;
 
 import jakarta.persistence.*;
 
-
-/**
- *
- * @author Usuario
- */
 @Entity
 @Table(name = "usuaris")
 @Inheritance(strategy = InheritanceType.JOINED)
-public abstract class usuariEntity {
+public class usuariEntity {
 
     @Id
-    @Column(nullable = false, length = 9, name = "DNI" )
+    @Column(nullable = false, length = 9, name = "DNI")
     private String dni;
 
-    @Column(nullable = false,name = "nom"  )
+    @Column(nullable = false, name = "nom")
     private String nom;
 
-    @Column(nullable = false, unique = true, name="Correu")
-    private String correu;
+    @Column(nullable = false, unique = true, name = "email")
+    private String email;
 
     // Constructor vacío
     public usuariEntity() {
     }
 
     // Constructor con todos los campos
-    public usuariEntity(String dni, String nom, String correu) {
+    public usuariEntity(String dni, String nom, String email) {
         this.dni = dni;
         this.nom = nom;
-        this.correu = correu;
+        this.email = email;
     }
 
     // Getters y Setters
-
     public String getDni() {
         return dni;
     }
@@ -55,11 +45,11 @@ public abstract class usuariEntity {
         this.nom = nom;
     }
 
-    public String getCorreu() {
-        return correu;
+    public String getEmail() {
+        return email;
     }
 
-    public void setCorreu(String correu) {
-        this.correu = correu;
+    public void setEmail(String email) {
+        this.email = email;
     }
 }

@@ -1,7 +1,7 @@
 package cat.copernic.projecte1Grup3.Reserves.Entity;
 
 import cat.copernic.projecte1Grup3.Usuaris.Client.Entity.clientEntity;
-import cat.copernic.projecte1Grup3.Vehicles.Entity.vehiclesEntity;
+import cat.copernic.projecte1Grup3.Vehicles.Entity.VehiclesEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -34,7 +34,7 @@ public class reservesEntity {
     @ManyToOne
     @JoinColumn(name = "Matricula_vehicle",
                 referencedColumnName = "matricula")
-    private vehiclesEntity vehicle;
+    private VehiclesEntity vehicle;
 
     @Column(name = "data_inici")
     private LocalDate dataInici;
@@ -70,7 +70,7 @@ public class reservesEntity {
     }
      
     
-    public reservesEntity(Long codiReserva, clientEntity client, vehiclesEntity vehicle, LocalDate dataInici, LocalDate dataFi, LocalTime horaInici, LocalTime horaFi, BigDecimal costTotal, BigDecimal fianca, LocalDate dataLliurament, String estat, LocalDate dataRetorn, String observacions) {
+    public reservesEntity(Long codiReserva, clientEntity client, VehiclesEntity vehicle, LocalDate dataInici, LocalDate dataFi, LocalTime horaInici, LocalTime horaFi, BigDecimal costTotal, BigDecimal fianca, LocalDate dataLliurament, String estat, LocalDate dataRetorn, String observacions) {
         this.codiReserva = codiReserva;
         this.client = client;
         this.vehicle = vehicle;
@@ -102,11 +102,11 @@ public class reservesEntity {
         this.client = client;
     }
 
-    public vehiclesEntity getVehicle() {
+    public VehiclesEntity getVehicle() {
         return vehicle;
     }
 
-    public void setVehicle(vehiclesEntity vehicle) {
+    public void setVehicle(VehiclesEntity vehicle) {
         this.vehicle = vehicle;
     }
 

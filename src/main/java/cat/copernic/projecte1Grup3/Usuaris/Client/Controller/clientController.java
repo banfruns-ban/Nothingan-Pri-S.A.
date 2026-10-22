@@ -5,6 +5,7 @@ import cat.copernic.projecte1Grup3.Usuaris.Client.Entity.clientEntity;
 import cat.copernic.projecte1Grup3.Usuaris.Client.Logic.clientLogic;
 import cat.copernic.projecte1Grup3.Usuaris.Client.Repository.clientRepository;
 import cat.copernic.projecte1Grup3.Usuaris.Client.Repository.clientRepositoryMongo;
+import java.io.IOException;
 import java.time.LocalDate;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -122,7 +123,7 @@ public class clientController {
     public String detall(@PathVariable String dni, Model model, RedirectAttributes ra) {
         return clientLogic.obtenir(dni).map(c -> {
             model.addAttribute("client", c);
-            return "detallClient";
+            return "redirect:/clients";
         }).orElseGet(() -> {
             ra.addFlashAttribute("error", "Client no trobat");
             return "redirect:/clients";
@@ -162,6 +163,44 @@ public class clientController {
         }).orElse(ResponseEntity.notFound().build());
     }
 
+        @GetMapping("/clients/{dni}/editar")
+    public String formulariEditar(@PathVariable String dni, Model model, RedirectAttributes ra) {
+        return clientLogic.obtenir(dni).map(c -> {
+            model.addAttribute("client", c);
+            return "editarClient";
+        }).orElseGet(() -> {
+            ra.addFlashAttribute("error", "Client no trobat");
+            return "redirect:/clients";
+        });
+    }
+ 
+    @PostMapping("/clients/{dni}/editar")
+    public String editar(@PathVariable String dni,
+                         @ModelAttribute("client") clientEntity dades,
+                         @RequestParam String estatValidacio,
+                         @RequestParam(defaultValue = "false") boolean premium,
+                         @RequestParam(value = "fotoDniFrontal", required = false) MultipartFile fotoDniFrontal,
+                         @RequestParam(value = "fotoDniPosterior", required = false) MultipartFile fotoDniPosterior,
+                         @RequestParam(value = "fotoCarnet", required = false) MultipartFile fotoCarnet,
+                         RedirectAttributes ra) {
+        try {
+            clientLogic.actualitzar(dni, dades, estatValidacio, premium,
+                    fotoDniFrontal, fotoDniPosterior, fotoCarnet);
+            ra.addFlashAttribute("missatge", "Client actualitzat correctament");
+        } catch (DataIntegrityViolationException e) {
+            ra.addFlashAttribute("error", "Aquest correu ja està en ús per un altre client");
+            return "redirect:/clients/" + dni + "/editar";
+        } catch (IllegalArgumentException e) {
+            ra.addFlashAttribute("error", e.getMessage());
+            return "redirect:/clients/" + dni + "/editar";
+        } catch (IOException e) {
+            ra.addFlashAttribute("error", "No s'han pogut desar les imatges");
+            return "redirect:/clients/" + dni + "/editar";
+        }
+        return "redirect:/clients/" + dni;
+    }
+ 
+    
    
 
     // =====================================================

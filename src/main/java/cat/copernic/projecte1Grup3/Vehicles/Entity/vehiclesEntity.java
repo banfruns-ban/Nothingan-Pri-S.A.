@@ -1,18 +1,19 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package cat.copernic.projecte1Grup3.Vehicles.Entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import java.math.BigDecimal;
-import org.hibernate.annotations.Audited.Table;
 
+/**
+ * Entitat JPA que representa la taula 'vehicle' a la base de dades MySQL.
+ * Configurada per coincidir amb els noms de les columnes de la BDD (incloent 'fiança').
+ */
 @Entity
 @Table(name = "vehicle")
-public class vehiclesEntity {
+public class VehiclesEntity {
+
     @Id
     @Column(name = "matricula", nullable = false, length = 15)
     private String matricula;
@@ -20,37 +21,73 @@ public class vehiclesEntity {
     @Column(name = "marca", nullable = false, length = 50)
     private String marca;
 
-    @Column(name = "model",nullable = false, length = 50)
+    @Column(name = "model", nullable = false, length = 50)
     private String model;
 
-    @Column(name = "descripcio",nullable = false, columnDefinition = "TEXT")
+    @Column(name = "any_vehicle", nullable = false)
+    private Integer anyMatriculacio;
+
+    @Column(name = "descripcio", nullable = false, columnDefinition = "TEXT")
     private String descripcio;
 
-    @Column(name = "preu",nullable = false, precision = 10, scale = 2)
-    private BigDecimal preu;
+    @Column(name = "tipus_vehicle", length = 30)
+    private String tipusVehicle;
 
-    @Column(name = "fiança",nullable = false, precision = 10, scale = 2)
-    private BigDecimal fiança;
+    @Column(name = "limit_quilometratge")
+    private Integer limitQuilometratge;
+
+    @Column(name = "preu", nullable = false, precision = 10, scale = 2)
+    private BigDecimal preuHora;
+
+    // Columna real a la BDD de MySQL: 'fiança' (amb 'ç')
+    @Column(name = "fiança", nullable = false, precision = 10, scale = 2)
+    private BigDecimal fianca;
+
+    @Column(name = "min_dies_lloguer", nullable = false)
+    private Integer minDiesLloguer;
+
+    @Column(name = "max_dies_lloguer", nullable = false)
+    private Integer maxDiesLloguer;
 
     @Column(name = "estat", length = 30)
     private String estat;
 
-    @Column(name = "actiu")
+    @Column(name = "actiu", nullable = false)
     private Boolean actiu;
 
-    public vehiclesEntity() {
+    @Column(name = "comentaris_privats", columnDefinition = "TEXT")
+    private String comentarisPrivats;
+
+    /**
+     * Constructor per defecte requerit per JPA.
+     */
+    public VehiclesEntity() {
     }
 
-    public vehiclesEntity(String matricula, String marca, String model, String descripcio, BigDecimal preu, BigDecimal fianca, String estat, Boolean actiu) {
+    /**
+     * Constructor complet.
+     */
+    public VehiclesEntity(String matricula, String marca, String model, Integer anyMatriculacio, 
+                          String descripcio, String tipusVehicle, Integer limitQuilometratge, 
+                          BigDecimal preuHora, BigDecimal fianca, Integer minDiesLloguer, 
+                          Integer maxDiesLloguer, String estat, Boolean actiu, String comentarisPrivats) {
         this.matricula = matricula;
         this.marca = marca;
         this.model = model;
+        this.anyMatriculacio = anyMatriculacio;
         this.descripcio = descripcio;
-        this.preu = preu;
-        this.fiança = fiança;
+        this.tipusVehicle = tipusVehicle;
+        this.limitQuilometratge = limitQuilometratge;
+        this.preuHora = preuHora;
+        this.fianca = fianca;
+        this.minDiesLloguer = minDiesLloguer;
+        this.maxDiesLloguer = maxDiesLloguer;
         this.estat = estat;
         this.actiu = actiu;
+        this.comentarisPrivats = comentarisPrivats;
     }
+
+    // --- GETTERS I SETTERS ---
 
     public String getMatricula() {
         return matricula;
@@ -76,6 +113,14 @@ public class vehiclesEntity {
         this.model = model;
     }
 
+    public Integer getAnyMatriculacio() {
+        return anyMatriculacio;
+    }
+
+    public void setAnyMatriculacio(Integer anyMatriculacio) {
+        this.anyMatriculacio = anyMatriculacio;
+    }
+
     public String getDescripcio() {
         return descripcio;
     }
@@ -84,20 +129,52 @@ public class vehiclesEntity {
         this.descripcio = descripcio;
     }
 
-    public BigDecimal getPreu() {
-        return preu;
+    public String getTipusVehicle() {
+        return tipusVehicle;
     }
 
-    public void setPreu(BigDecimal preu) {
-        this.preu = preu;
+    public void setTipusVehicle(String tipusVehicle) {
+        this.tipusVehicle = tipusVehicle;
     }
 
-    public BigDecimal getFiança() {
-        return fiança;
+    public Integer getLimitQuilometratge() {
+        return limitQuilometratge;
     }
 
-    public void setFiança(BigDecimal fianca) {
-        this.fiança = fianca;
+    public void setLimitQuilometratge(Integer limitQuilometratge) {
+        this.limitQuilometratge = limitQuilometratge;
+    }
+
+    public BigDecimal getPreuHora() {
+        return preuHora;
+    }
+
+    public void setPreuHora(BigDecimal preuHora) {
+        this.preuHora = preuHora;
+    }
+
+    public BigDecimal getFianca() {
+        return fianca;
+    }
+
+    public void setFianca(BigDecimal fianca) {
+        this.fianca = fianca;
+    }
+
+    public Integer getMinDiesLloguer() {
+        return minDiesLloguer;
+    }
+
+    public void setMinDiesLloguer(Integer minDiesLloguer) {
+        this.minDiesLloguer = minDiesLloguer;
+    }
+
+    public Integer getMaxDiesLloguer() {
+        return maxDiesLloguer;
+    }
+
+    public void setMaxDiesLloguer(Integer maxDiesLloguer) {
+        this.maxDiesLloguer = maxDiesLloguer;
     }
 
     public String getEstat() {
@@ -115,4 +192,12 @@ public class vehiclesEntity {
     public void setActiu(Boolean actiu) {
         this.actiu = actiu;
     }
-};
+
+    public String getComentarisPrivats() {
+        return comentarisPrivats;
+    }
+
+    public void setComentarisPrivats(String comentarisPrivats) {
+        this.comentarisPrivats = comentarisPrivats;
+    }
+}

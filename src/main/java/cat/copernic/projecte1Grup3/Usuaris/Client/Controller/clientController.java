@@ -30,8 +30,8 @@ public class clientController {
     private final clientLogic clientLogic;
 
     public clientController(clientRepository clientRepository,
-            clientRepositoryMongo clientRepositoryMongo,
-            clientLogic clientLogic) {
+                            clientRepositoryMongo clientRepositoryMongo,
+                            clientLogic clientLogic) {
         this.clientRepository = clientRepository;
         this.clientRepositoryMongo = clientRepositoryMongo;
         this.clientLogic = clientLogic;
@@ -40,6 +40,7 @@ public class clientController {
     // =====================================================
     // ALTA
     // =====================================================
+
     @GetMapping("/clients/nou")
     public String mostrarFormulari(Model model) {
         model.addAttribute("client", new clientEntity());
@@ -102,13 +103,14 @@ public class clientController {
         return "redirect:/clients/nou";
     }
 
+
     @GetMapping("/clients")
     public String llistar(@RequestParam(required = false) String q,
-            @RequestParam(required = false) String dni,
-            @RequestParam(required = false) String estat,
-            @RequestParam(required = false)
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataNaixement,
-            Model model) {
+                          @RequestParam(required = false) String dni,
+                          @RequestParam(required = false) String estat,
+                          @RequestParam(required = false)
+                          @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataNaixement,
+                          Model model) {
         model.addAttribute("clients", clientLogic.llistar(q, dni, estat, dataNaixement));
         model.addAttribute("q", q);
         model.addAttribute("dni", dni);
@@ -161,7 +163,7 @@ public class clientController {
         }).orElse(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/clients/{dni}/editar")
+        @GetMapping("/clients/{dni}/editar")
     public String formulariEditar(@PathVariable String dni, Model model, RedirectAttributes ra) {
         return clientLogic.obtenir(dni).map(c -> {
             model.addAttribute("client", c);
@@ -171,16 +173,16 @@ public class clientController {
             return "redirect:/clients";
         });
     }
-
+ 
     @PostMapping("/clients/{dni}/editar")
     public String editar(@PathVariable String dni,
-            @ModelAttribute("client") clientEntity dades,
-            @RequestParam String estatValidacio,
-            @RequestParam(defaultValue = "false") boolean premium,
-            @RequestParam(value = "fotoDniFrontal", required = false) MultipartFile fotoDniFrontal,
-            @RequestParam(value = "fotoDniPosterior", required = false) MultipartFile fotoDniPosterior,
-            @RequestParam(value = "fotoCarnet", required = false) MultipartFile fotoCarnet,
-            RedirectAttributes ra) {
+                         @ModelAttribute("client") clientEntity dades,
+                         @RequestParam String estatValidacio,
+                         @RequestParam(defaultValue = "false") boolean premium,
+                         @RequestParam(value = "fotoDniFrontal", required = false) MultipartFile fotoDniFrontal,
+                         @RequestParam(value = "fotoDniPosterior", required = false) MultipartFile fotoDniPosterior,
+                         @RequestParam(value = "fotoCarnet", required = false) MultipartFile fotoCarnet,
+                         RedirectAttributes ra) {
         try {
             clientLogic.actualitzar(dni, dades, estatValidacio, premium,
                     fotoDniFrontal, fotoDniPosterior, fotoCarnet);
@@ -197,28 +199,18 @@ public class clientController {
         }
         return "redirect:/clients/" + dni;
     }
-
-    @PostMapping("/clients/{dni}/eliminar")
-    public String eliminarClient(@PathVariable("dni") String dni, RedirectAttributes redirectAttributes) {
-        try {
-            // Crides al mètode d'eliminar que em vas mostrar abans
-            clientLogic.eliminar(dni); // o el nom del teu servei
-            redirectAttributes.addFlashAttribute("missatge", "Client eliminat correctament.");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "No s'ha pogut eliminar el client.");
-        }
-
-        // Redirigeix de nou a la llista de clients
-        return "redirect:/clients";
-    }
+ 
+    
+   
 
     // =====================================================
     // VALIDACIÓN DEL ADMINISTRADOR
     // =====================================================
+
     @PostMapping("/clients/{dni}/validacio")
     public String validar(@PathVariable String dni,
-            @RequestParam String estat,
-            RedirectAttributes ra) {
+                          @RequestParam String estat,
+                          RedirectAttributes ra) {
         clientLogic.canviarEstat(dni, estat);
         ra.addFlashAttribute("missatge", "Estat actualitzat a " + estat);
         return "redirect:/clients/" + dni;
@@ -226,8 +218,8 @@ public class clientController {
 
     @PostMapping("/clients/{dni}/premium")
     public String premium(@PathVariable String dni,
-            @RequestParam boolean premium,
-            RedirectAttributes ra) {
+                          @RequestParam boolean premium,
+                          RedirectAttributes ra) {
         clientLogic.canviarPremium(dni, premium);
         return "redirect:/clients/" + dni;
     }
@@ -235,6 +227,7 @@ public class clientController {
     // =====================================================
     // AUXILIAR
     // =====================================================
+
     private boolean valida(MultipartFile f) {
         String tipus = f.getContentType();
         return !f.isEmpty()

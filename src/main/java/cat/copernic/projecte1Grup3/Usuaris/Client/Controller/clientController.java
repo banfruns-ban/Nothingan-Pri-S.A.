@@ -213,12 +213,12 @@ public class clientController {
             ra.addFlashAttribute("missatge", "Client actualitzat correctament");
         } catch (DataIntegrityViolationException e) {
             ra.addFlashAttribute("error", "Aquest correu ja està en ús per un altre client");
-            return "redirect:/clients/" + dni + "/editar";
+            return "redirect:/clients";
         } catch (IllegalArgumentException e) {
             ra.addFlashAttribute("error", e.getMessage());
-            return "redirect:/clients/" + dni + "/editar";
+            return "redirect:/clients";
         }
-        return "redirect:/clients/" + dni;
+       return "redirect:/clients";
     }
 
     // =====================================================
@@ -231,7 +231,7 @@ public class clientController {
                           RedirectAttributes ra) {
         clientLogic.canviarEstat(dni, estat);
         ra.addFlashAttribute("missatge", "Estat actualitzat a " + estat);
-        return "redirect:/clients/" + dni;
+        return "redirect:/clients";
     }
 
     @PostMapping("/clients/{dni}/premium")
@@ -240,7 +240,7 @@ public class clientController {
                           RedirectAttributes ra) {
         clientLogic.canviarPremium(dni, premium);
         ra.addFlashAttribute("missatge", "Estat premium actualitzat");
-        return "redirect:/clients/" + dni;
+       return "redirect:/clients";
     }
 
     // =====================================================

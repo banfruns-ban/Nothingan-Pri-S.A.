@@ -2,11 +2,14 @@ package cat.copernic.projecte1Grup3.Usuaris.Client.Controller;
 
 import cat.copernic.projecte1Grup3.Usuaris.Client.Documents.clientDocuments;
 import cat.copernic.projecte1Grup3.Usuaris.Client.Entity.clientEntity;
-import cat.copernic.projecte1Grup3.Usuaris.Client.Logic.clientLogic;
+import cat.copernic.projecte1Grup3.Usuaris.Client.Service.clientService;
 import cat.copernic.projecte1Grup3.Usuaris.Client.Repository.clientRepository;
 import cat.copernic.projecte1Grup3.Usuaris.Client.Repository.clientRepositoryMongo;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
@@ -25,13 +28,16 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 public class clientController {
 
+    private static final Logger log = LoggerFactory.getLogger(clientController.class);
+    private static final long MAX_IMATGE = 5L * 1024 * 1024;
+
     private final clientRepository clientRepository;
     private final clientRepositoryMongo clientRepositoryMongo;
-    private final clientLogic clientLogic;
+    private final clientService clientLogic;
 
     public clientController(clientRepository clientRepository,
                             clientRepositoryMongo clientRepositoryMongo,
-                            clientLogic clientLogic) {
+                            clientService clientLogic) {
         this.clientRepository = clientRepository;
         this.clientRepositoryMongo = clientRepositoryMongo;
         this.clientLogic = clientLogic;
@@ -43,7 +49,9 @@ public class clientController {
 
     @GetMapping("/clients/nou")
     public String mostrarFormulari(Model model) {
-        model.addAttribute("client", new clientEntity());
+        if (!model.containsAttribute("client")) {
+            model.addAttribute("client", new clientEntity());
+        }
         return "altaUsuari";
     }
 
@@ -55,7 +63,11 @@ public class clientController {
             @RequestParam("fotoCarnet") MultipartFile fotoCarnet,
             RedirectAttributes redirectAttributes) {
 
-        client.setDni(client.getDni().toUpperCase());
+        if (client.getDni() == null || client.getDni().isBlank()) {
+            redirectAttributes.addFlashAttribute("error", "El DNI és obligatori");
+            return "redirect:/clients/nou";
+        }
+        client.setDni(client.getDni().trim().toUpperCase());
 
         if (clientRepository.existsById(client.getDni())) {
             redirectAttributes.addFlashAttribute(
@@ -86,10 +98,10 @@ public class clientController {
             doc.setTipusFotoCarnet(fotoCarnet.getContentType());
             clientRepositoryMongo.save(doc);                        // MongoDB
 
-            System.out.println("Guardado en Mongo: " + doc.getDni());
+            log.info("Client guardat a Mongo: {}", doc.getDni());
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Error en l'alta del client {}", client.getDni(), e);
             if (clientRepository.existsById(client.getDni())) {
                 clientRepository.deleteById(client.getDni());       // deshacer MySQL
             }
@@ -103,6 +115,9 @@ public class clientController {
         return "redirect:/clients/nou";
     }
 
+    // =====================================================
+    // LISTADO Y DETALLE
+    // =====================================================
 
     @GetMapping("/clients")
     public String llistar(@RequestParam(required = false) String q,
@@ -123,7 +138,7 @@ public class clientController {
     public String detall(@PathVariable String dni, Model model, RedirectAttributes ra) {
         return clientLogic.obtenir(dni).map(c -> {
             model.addAttribute("client", c);
-            return "redirect:/clients";
+            return "detallClient";   // vista de detalle (crear plantilla si no existe)
         }).orElseGet(() -> {
             ra.addFlashAttribute("error", "Client no trobat");
             return "redirect:/clients";
@@ -134,36 +149,45 @@ public class clientController {
     @GetMapping("/clients/{dni}/imatge/{tipus}")
     @ResponseBody
     public ResponseEntity<byte[]> imatge(@PathVariable String dni, @PathVariable String tipus) {
-        return (ResponseEntity<byte[]>) clientLogic.obtenirDocuments(dni).map(d -> {
-            byte[] bytes;
-            String mime;
-            switch (tipus) {
-                case "frontal" -> {
-                    bytes = d.getFotoDniFrontal();
-                    mime = d.getTipusFotoDniFrontal();
-                }
-                case "posterior" -> {
-                    bytes = d.getFotoDniPosterior();
-                    mime = d.getTipusFotoDniPosterior();
-                }
-                case "carnet" -> {
-                    bytes = d.getFotoCarnet();
-                    mime = d.getTipusFotoCarnet();
-                }
-                default -> {
-                    return ResponseEntity.<byte[]>notFound().build();
-                }
+        Optional<clientDocuments> docs = clientLogic.obtenirDocuments(dni);
+        if (docs.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        clientDocuments d = docs.get();
+
+        byte[] bytes;
+        String mime;
+        switch (tipus) {
+            case "frontal" -> {
+                bytes = d.getFotoDniFrontal();
+                mime = d.getTipusFotoDniFrontal();
             }
-            if (bytes == null || mime == null) {
-                return ResponseEntity.<byte[]>notFound().build();
+            case "posterior" -> {
+                bytes = d.getFotoDniPosterior();
+                mime = d.getTipusFotoDniPosterior();
             }
-            return ResponseEntity.ok()
-                    .contentType(MediaType.parseMediaType(mime))
-                    .body(bytes);
-        }).orElse(ResponseEntity.notFound().build());
+            case "carnet" -> {
+                bytes = d.getFotoCarnet();
+                mime = d.getTipusFotoCarnet();
+            }
+            default -> {
+                return ResponseEntity.notFound().build();
+            }
+        }
+
+        if (bytes == null || mime == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(mime))
+                .body(bytes);
     }
 
-        @GetMapping("/clients/{dni}/editar")
+    // =====================================================
+    // EDICIÓN
+    // =====================================================
+
+    @GetMapping("/clients/{dni}/editar")
     public String formulariEditar(@PathVariable String dni, Model model, RedirectAttributes ra) {
         return clientLogic.obtenir(dni).map(c -> {
             model.addAttribute("client", c);
@@ -173,7 +197,7 @@ public class clientController {
             return "redirect:/clients";
         });
     }
- 
+
     @PostMapping("/clients/{dni}/editar")
     public String editar(@PathVariable String dni,
                          @ModelAttribute("client") clientEntity dades,
@@ -182,7 +206,7 @@ public class clientController {
                          @RequestParam(value = "fotoDniFrontal", required = false) MultipartFile fotoDniFrontal,
                          @RequestParam(value = "fotoDniPosterior", required = false) MultipartFile fotoDniPosterior,
                          @RequestParam(value = "fotoCarnet", required = false) MultipartFile fotoCarnet,
-                         RedirectAttributes ra) {
+                         RedirectAttributes ra) throws IOException {
         try {
             clientLogic.actualitzar(dni, dades, estatValidacio, premium,
                     fotoDniFrontal, fotoDniPosterior, fotoCarnet);
@@ -193,15 +217,9 @@ public class clientController {
         } catch (IllegalArgumentException e) {
             ra.addFlashAttribute("error", e.getMessage());
             return "redirect:/clients/" + dni + "/editar";
-        } catch (IOException e) {
-            ra.addFlashAttribute("error", "No s'han pogut desar les imatges");
-            return "redirect:/clients/" + dni + "/editar";
         }
         return "redirect:/clients/" + dni;
     }
- 
-    
-   
 
     // =====================================================
     // VALIDACIÓN DEL ADMINISTRADOR
@@ -221,6 +239,7 @@ public class clientController {
                           @RequestParam boolean premium,
                           RedirectAttributes ra) {
         clientLogic.canviarPremium(dni, premium);
+        ra.addFlashAttribute("missatge", "Estat premium actualitzat");
         return "redirect:/clients/" + dni;
     }
 
@@ -229,9 +248,10 @@ public class clientController {
     // =====================================================
 
     private boolean valida(MultipartFile f) {
+        if (f == null || f.isEmpty() || f.getSize() > MAX_IMATGE) {
+            return false;
+        }
         String tipus = f.getContentType();
-        return !f.isEmpty()
-                && f.getSize() <= 5 * 1024 * 1024
-                && ("image/png".equals(tipus) || "image/jpeg".equals(tipus));
+        return "image/png".equals(tipus) || "image/jpeg".equals(tipus);
     }
 }

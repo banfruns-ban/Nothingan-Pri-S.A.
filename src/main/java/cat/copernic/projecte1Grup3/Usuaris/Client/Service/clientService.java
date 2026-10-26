@@ -36,7 +36,7 @@ public class clientService {
     }
 
     // ---------- Listar y buscar ----------
-    public List<clientEntity> llistar(String q, String dni, String estat,
+    public List<clientEntity> llistar(String q, String dni, String estat, String email,
             LocalDate dataNaixement) {
         // 1. Cerca general (nom, DNI/NIE, email o telèfon)
         List<clientEntity> clients = clientRepository.findAll();
@@ -68,6 +68,13 @@ public class clientService {
             clients = clients.stream()
                     .filter(c -> dataNaixement.equals(c.getDataNaixement()))
                     .toList();
+        }
+        
+        if(email != null){
+            clients = clients.stream()
+                       .filter(c -> email.equals(c.getEmail()))
+                        . toList();
+            
         }
         return clients;
     }

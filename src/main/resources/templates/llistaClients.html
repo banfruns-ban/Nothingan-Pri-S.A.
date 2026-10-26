@@ -521,11 +521,14 @@
                                     <svg class="ico" viewBox="0 0 24 24"><path d="M3 5h18l-7 8v6l-4 2v-8z"/></svg>
                                     Filtres
                                     <span class="insignia"
-                                          th:if="${(dni != null and dni != '') or (estat != null and estat != '') or dataNaixement != null}">actius</span>
+                                          th:if="${(dni != null and dni != '')or (email != null and email != '') or (estat != null and estat != '') or dataNaixement != null}">actius</span>
                                 </summary>
                                 <div class="panell">
                                     <label>DNI / NIE
                                         <input type="text" name="dni" th:value="${dni}" placeholder="Ex: 12345678Z" maxlength="9">
+                                    </label>
+                                    <label>Email
+                                    <input type="text" name="email" th:value="${email}" placeholder="Ex: joan@gmail.com">
                                     </label>
                                     <label>Estat
                                         <select name="estat">

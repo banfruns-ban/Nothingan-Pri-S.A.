@@ -220,7 +220,20 @@ public class clientController {
         }
        return "redirect:/clients";
     }
-
+        @PostMapping("/clients/{dni}/eliminar")
+        public String eliminar(@PathVariable String dni, RedirectAttributes ra) {
+                try {
+        clientLogic.eliminar(dni);
+        ra.addFlashAttribute("missatge", "Client eliminat correctament");
+    } catch (IllegalArgumentException e) {
+        ra.addFlashAttribute("error", e.getMessage());
+    } catch (DataIntegrityViolationException e) {
+        ra.addFlashAttribute("error", "No es pot eliminar: el client té reserves associades");
+    }
+    return "redirect:/clients";
+}
+        
+        
     // =====================================================
     // VALIDACIÓN DEL ADMINISTRADOR
     // =====================================================

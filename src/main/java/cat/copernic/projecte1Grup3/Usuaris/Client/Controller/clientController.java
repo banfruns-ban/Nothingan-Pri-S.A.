@@ -123,14 +123,15 @@ public class clientController {
     public String llistar(@RequestParam(required = false) String q,
                           @RequestParam(required = false) String dni,
                           @RequestParam(required = false) String estat,
-                          @RequestParam(required = false)
+                          @RequestParam(required = false) String email,
                           @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataNaixement,
                           Model model) {
-        model.addAttribute("clients", clientLogic.llistar(q, dni, estat, dataNaixement));
+        model.addAttribute("clients", clientLogic.llistar(q, dni, estat, email,dataNaixement));
         model.addAttribute("q", q);
         model.addAttribute("dni", dni);
         model.addAttribute("estat", estat);
         model.addAttribute("dataNaixement", dataNaixement);
+        model.addAttribute("email", email);
         return "llistaClients";
     }
 

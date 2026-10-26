@@ -150,10 +150,16 @@ public class clientService {
    
      @Transactional
     public void eliminar(String dni) {
-        clientRepository.deleteById(dni);
-        clientRepositoryMongo.deleteById(dni);
+    clientEntity c = clientRepository.findById(dni)
+            .orElseThrow(() -> new IllegalArgumentException("Client no trobat"));
+    
+    clientRepository.delete(c);
+    clientRepository.flush();                  // si hay reservas asociadas, el error salta aquí
+
+    clientRepositoryMongo.deleteById(dni);     // solo se llega aquí si MySQL ha ido bien
+}
        
-    }
+    
    
 
     @Transactional

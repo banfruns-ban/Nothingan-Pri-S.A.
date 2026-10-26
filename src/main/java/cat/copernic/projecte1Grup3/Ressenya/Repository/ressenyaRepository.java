@@ -2,12 +2,12 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package cat.copernic.projecte1Grup3.Vehicles.Logic;
+package cat.copernic.projecte1Grup3.Ressenya.Repository;
 
 /**
  *
- * @author Usuario
+ * @author User
  */
-public class vehiclesLogic {
+public class ressenyaRepository {
     
 }

@@ -54,18 +54,11 @@ public class agentEntity extends usuariEntity {
         super();
     }
     
-    
-
     public agentEntity(String hora_entrada, String hora_sortida, Rol rol, String dni, String nom, String email) {
         super(dni, nom, email);
         this.hora_entrada = hora_entrada;
         this.hora_sortida = hora_sortida;
         this.rol = rol;
     }
-
-    
-    
-    
-    
     
 }

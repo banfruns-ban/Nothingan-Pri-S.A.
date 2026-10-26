@@ -3,8 +3,6 @@ package cat.copernic.projecte1Grup3.Usuaris.Client.Controller;
 import cat.copernic.projecte1Grup3.Usuaris.Client.Documents.clientDocuments;
 import cat.copernic.projecte1Grup3.Usuaris.Client.Entity.clientEntity;
 import cat.copernic.projecte1Grup3.Usuaris.Client.Service.clientService;
-import cat.copernic.projecte1Grup3.Usuaris.Client.Repository.clientRepository;
-import cat.copernic.projecte1Grup3.Usuaris.Client.Repository.clientRepositoryMongo;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Optional;
@@ -28,18 +26,11 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 public class clientController {
 
-    private static final Logger log = LoggerFactory.getLogger(clientController.class);
-    private static final long MAX_IMATGE = 5L * 1024 * 1024;
+    private static final Logger log = LoggerFactory.getLogger(clientController.class); //<-- Lo mismo que system.out.println (guarda mensajes)
 
-    private final clientRepository clientRepository;
-    private final clientRepositoryMongo clientRepositoryMongo;
     private final clientService clientLogic;
 
-    public clientController(clientRepository clientRepository,
-                            clientRepositoryMongo clientRepositoryMongo,
-                            clientService clientLogic) {
-        this.clientRepository = clientRepository;
-        this.clientRepositoryMongo = clientRepositoryMongo;
+    public clientController(clientService clientLogic) {
         this.clientLogic = clientLogic;
     }
 
@@ -47,71 +38,30 @@ public class clientController {
     // ALTA
     // =====================================================
 
-    @GetMapping("/clients/nou")
+    @GetMapping("/clients/nou") //<-- Muestra formulario no rellenado
     public String mostrarFormulari(Model model) {
-        if (!model.containsAttribute("client")) {
+        if (!model.containsAttribute("client")) { //<--Si no hay cliente entonces prepara para crear uno
             model.addAttribute("client", new clientEntity());
         }
         return "altaUsuari";
     }
 
-    @PostMapping("/clients/alta")
+    @PostMapping("/clients/alta") //<--Regresa formulario rellenado
     public String altaClient(
             @ModelAttribute("client") clientEntity client,
             @RequestParam("fotoDniFrontal") MultipartFile fotoDniFrontal,
             @RequestParam("fotoDniPosterior") MultipartFile fotoDniPosterior,
             @RequestParam("fotoCarnet") MultipartFile fotoCarnet,
-            RedirectAttributes redirectAttributes) {
-
-        if (client.getDni() == null || client.getDni().isBlank()) {
-            redirectAttributes.addFlashAttribute("error", "El DNI és obligatori");
-            return "redirect:/clients/nou";
-        }
-        client.setDni(client.getDni().trim().toUpperCase());
-
-        if (clientRepository.existsById(client.getDni())) {
-            redirectAttributes.addFlashAttribute(
-                    "error", "Ja existeix un client amb aquest DNI");
-            return "redirect:/clients/nou";
-        }
-
-        if (!valida(fotoDniFrontal) || !valida(fotoDniPosterior) || !valida(fotoCarnet)) {
-            redirectAttributes.addFlashAttribute(
-                    "error", "Cal pujar les 3 imatges (PNG o JPG, màxim 5MB)");
-            return "redirect:/clients/nou";
-        }
-
-        // Valores que decide el servidor, no el formulario
-        client.setPremium(false);
-        client.setEstatValidacio("PENDENT");
-
+            RedirectAttributes ra) {
         try {
-            clientRepository.save(client);                          // MySQL
-
-            clientDocuments doc = new clientDocuments();
-            doc.setDni(client.getDni());
-            doc.setFotoDniFrontal(fotoDniFrontal.getBytes());
-            doc.setTipusFotoDniFrontal(fotoDniFrontal.getContentType());
-            doc.setFotoDniPosterior(fotoDniPosterior.getBytes());
-            doc.setTipusFotoDniPosterior(fotoDniPosterior.getContentType());
-            doc.setFotoCarnet(fotoCarnet.getBytes());
-            doc.setTipusFotoCarnet(fotoCarnet.getContentType());
-            clientRepositoryMongo.save(doc);                        // MongoDB
-
-            log.info("Client guardat a Mongo: {}", doc.getDni());
-
-        } catch (Exception e) {
-            log.error("Error en l'alta del client {}", client.getDni(), e);
-            if (clientRepository.existsById(client.getDni())) {
-                clientRepository.deleteById(client.getDni());       // deshacer MySQL
-            }
-            redirectAttributes.addFlashAttribute(
-                    "error", "No s'ha pogut completar el registre");
-            return "redirect:/clients/nou";
+            clientLogic.alta(client, fotoDniFrontal, fotoDniPosterior, fotoCarnet);  // 1. Intenta el alta
+            ra.addFlashAttribute("missatge", "Client donat d'alta correctament!");  //<-- Envia missatge
+        } catch (IllegalArgumentException e) {  // 3. Dato mal puesto: muestra el motivo
+            ra.addFlashAttribute("error", e.getMessage());
+        } catch (Exception e) { //Fallo inesperado
+            log.error("Error en l'alta del client", e);
+            ra.addFlashAttribute("error", "No s'ha pogut completar el registre");
         }
-
-        redirectAttributes.addFlashAttribute(
-                "missatge", "Client donat d'alta correctament!");
         return "redirect:/clients/nou";
     }
 
@@ -119,15 +69,15 @@ public class clientController {
     // LISTADO Y DETALLE
     // =====================================================
 
-    @GetMapping("/clients")
-    public String llistar(@RequestParam(required = false) String q,
+    @GetMapping("/clients") //<-- pide ver datos
+    public String llistar(@RequestParam(required = false) String q, //devuelve q que que en este caso es query, busca el nombre
                           @RequestParam(required = false) String dni,
                           @RequestParam(required = false) String estat,
                           @RequestParam(required = false)
                           @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataNaixement,
                           Model model) {
         model.addAttribute("clients", clientLogic.llistar(q, dni, estat, dataNaixement));
-        model.addAttribute("q", q);
+        model.addAttribute("q", q); //<--puente entre tu código Java y la plantilla Thymeleaf.
         model.addAttribute("dni", dni);
         model.addAttribute("estat", estat);
         model.addAttribute("dataNaixement", dataNaixement);
@@ -138,14 +88,14 @@ public class clientController {
     public String detall(@PathVariable String dni, Model model, RedirectAttributes ra) {
         return clientLogic.obtenir(dni).map(c -> {
             model.addAttribute("client", c);
-            return "detallClient";   // vista de detalle (crear plantilla si no existe)
+            return "detallClient";
         }).orElseGet(() -> {
             ra.addFlashAttribute("error", "Client no trobat");
             return "redirect:/clients";
         });
     }
 
-    // Devuelve los bytes de la imagen guardada en Mongo: tipus = frontal | posterior | carnet
+    // tipus = frontal | posterior | carnet
     @GetMapping("/clients/{dni}/imatge/{tipus}")
     @ResponseBody
     public ResponseEntity<byte[]> imatge(@PathVariable String dni, @PathVariable String tipus) {
@@ -206,19 +156,23 @@ public class clientController {
                          @RequestParam(value = "fotoDniFrontal", required = false) MultipartFile fotoDniFrontal,
                          @RequestParam(value = "fotoDniPosterior", required = false) MultipartFile fotoDniPosterior,
                          @RequestParam(value = "fotoCarnet", required = false) MultipartFile fotoCarnet,
-                         RedirectAttributes ra) throws IOException {
+                         RedirectAttributes ra) {
         try {
             clientLogic.actualitzar(dni, dades, estatValidacio, premium,
                     fotoDniFrontal, fotoDniPosterior, fotoCarnet);
             ra.addFlashAttribute("missatge", "Client actualitzat correctament");
         } catch (DataIntegrityViolationException e) {
             ra.addFlashAttribute("error", "Aquest correu ja està en ús per un altre client");
-            return "redirect:/clients";
+            return "redirect:/clients/" + dni + "/editar";
         } catch (IllegalArgumentException e) {
             ra.addFlashAttribute("error", e.getMessage());
-            return "redirect:/clients";
+            return "redirect:/clients/" + dni + "/editar";
+        } catch (IOException e) {
+            log.error("Error guardant les imatges de {}", dni, e);
+            ra.addFlashAttribute("error", "No s'han pogut guardar les imatges");
+            return "redirect:/clients/" + dni + "/editar";
         }
-       return "redirect:/clients";
+        return "redirect:/clients";
     }
 
     // =====================================================
@@ -240,18 +194,6 @@ public class clientController {
                           RedirectAttributes ra) {
         clientLogic.canviarPremium(dni, premium);
         ra.addFlashAttribute("missatge", "Estat premium actualitzat");
-       return "redirect:/clients";
-    }
-
-    // =====================================================
-    // AUXILIAR
-    // =====================================================
-
-    private boolean valida(MultipartFile f) {
-        if (f == null || f.isEmpty() || f.getSize() > MAX_IMATGE) {
-            return false;
-        }
-        String tipus = f.getContentType();
-        return "image/png".equals(tipus) || "image/jpeg".equals(tipus);
+        return "redirect:/clients";
     }
 }

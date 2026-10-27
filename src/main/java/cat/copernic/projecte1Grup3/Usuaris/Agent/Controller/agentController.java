@@ -16,6 +16,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
  * Controlador Spring MVC per a la gestió d'agents.
@@ -121,5 +122,18 @@ public class agentController {
             return "agents/alta_agent";
         }
         return "redirect:/agents/llista";
+    }
+    
+    @PostMapping("/eliminar/{dni}")
+    public String eliminarVehicle(@PathVariable String dni, RedirectAttributes redirect) {
+        try {
+            agentService.eliminarAgent(dni);
+            redirect.addFlashAttribute("succes", "Agent donat de baixa amb èxit.");
+        } catch (IllegalStateException e) {
+            redirect.addFlashAttribute("error", e.getMessage());
+        } catch (Exception e) {
+            redirect.addFlashAttribute("error", "Error en intentar donar de baixa.");
+        }
+        return "redirect:/agents";
     }
 }

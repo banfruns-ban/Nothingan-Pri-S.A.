@@ -4,22 +4,30 @@ import cat.copernic.projecte1Grup3.Usuaris.Agent.Entity.agentEntity;
 import cat.copernic.projecte1Grup3.Usuaris.Agent.Repository.agentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import java.util.List;
+import java.util.Optional;
 
-/**
- * Servei de negoci per als Agents.
- */
 @Service
 public class agentService {
 
-    @Autowired // Le endica a Spring que utilice la instancia
+    @Autowired
     private agentRepository agentRepository;
 
-    /**
-     * Desar o actualitzar un agent a la base de dades.
-     */
     public void guardarAgent(agentEntity agent) {
         agentRepository.save(agent);
     }
-}
 
-// crear validaciones del alta de los agentes
+    // RF13: Llistar agents
+    public List<agentEntity> llistarAgents() {
+        return agentRepository.findAll();
+    }
+
+    // RF14 / RF15: Buscar per DNI / Consultar detall
+    public Optional<agentEntity> obtenirPerDni(String dni) {
+        return agentRepository.findById(dni);
+    }
+
+    public void eliminarAgent(String dni) {
+        agentRepository.deleteById(dni);
+    }
+}

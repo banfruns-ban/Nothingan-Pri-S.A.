@@ -30,4 +30,14 @@ public class agentService {
     public void eliminarAgent(String dni) {
         agentRepository.deleteById(dni);
     }
+    
+    /**
+     * Llista tots els agents o els filtra si s'ha introduït un text de cerca.
+     */
+    public List<agentEntity> llistarOFiltrarAgents(String cerca) {
+        if (cerca == null || cerca.trim().isEmpty()) {
+            return agentRepository.findAll();
+        }
+        return agentRepository.cercarPerDniNomEmail(cerca.trim());
+    }
 }

@@ -37,7 +37,10 @@
         </div>
 
         <div class="form-card shadow-sm">
-            <form th:action="@{/vehicles/guardar}" th:object="${vehicle}" method="post">
+            <form th:action="@{/vehicles/guardar}" th:object="${vehicle}" method="post" novalidate>
+                <!-- Camp ocult per mantenir l'estat actiu actual -->
+                <input type="hidden" th:field="*{actiu}" />
+
                 <div class="row g-3">
                     <div class="col-md-4">
                         <label class="form-label fw-semibold">Matrícula (No modificable)</label>
@@ -45,55 +48,66 @@
                     </div>
                     <div class="col-md-4">
                         <label class="form-label fw-semibold">Marca</label>
-                        <input type="text" th:field="*{marca}" class="form-control" required />
+                        <input type="text" th:field="*{marca}" class="form-control" th:errorclass="'is-invalid'" />
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('marca')}" th:errors="*{marca}"></div>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label fw-semibold">Model</label>
-                        <input type="text" th:field="*{model}" class="form-control" required />
+                        <input type="text" th:field="*{model}" class="form-control" th:errorclass="'is-invalid'" />
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('model')}" th:errors="*{model}"></div>
                     </div>
 
                     <div class="col-md-3">
                         <label class="form-label fw-semibold">Any Matriculació</label>
-                        <input type="number" th:field="*{anyMatriculacio}" class="form-control" required />
+                        <input type="number" th:field="*{anyMatriculacio}" class="form-control" th:errorclass="'is-invalid'" />
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('anyMatriculacio')}" th:errors="*{anyMatriculacio}"></div>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label fw-semibold">Categoria / Tipus</label>
-                        <select th:field="*{tipusVehicle}" class="form-select" required>
+                        <select th:field="*{tipusVehicle}" class="form-select" th:errorclass="'is-invalid'">
                             <option value="Econòmic">Econòmic</option>
                             <option value="SUV">SUV</option>
                             <option value="Furgoneta">Furgoneta</option>
                             <option value="Urbà">Urbà</option>
                         </select>
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('tipusVehicle')}" th:errors="*{tipusVehicle}"></div>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label fw-semibold">Preu / Dia (€)</label>
-                        <input type="number" step="0.01" th:field="*{preuHora}" class="form-control" required />
+                        <input type="number" step="0.01" th:field="*{preuHora}" class="form-control" th:errorclass="'is-invalid'" />
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('preuHora')}" th:errors="*{preuHora}"></div>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label fw-semibold">Fiança (€)</label>
-                        <input type="number" step="0.01" th:field="*{fianca}" class="form-control" required />
+                        <input type="number" step="0.01" th:field="*{fianca}" class="form-control" th:errorclass="'is-invalid'" />
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('fianca')}" th:errors="*{fianca}"></div>
                     </div>
 
                     <div class="col-md-3">
                         <label class="form-label fw-semibold">Límit Quilometratge</label>
-                        <input type="number" th:field="*{limitQuilometratge}" class="form-control" />
+                        <input type="number" th:field="*{limitQuilometratge}" class="form-control" th:errorclass="'is-invalid'" />
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('limitQuilometratge')}" th:errors="*{limitQuilometratge}"></div>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label fw-semibold">Mín. Dies Lloguer</label>
-                        <input type="number" th:field="*{minDiesLloguer}" class="form-control" required />
+                        <input type="number" th:field="*{minDiesLloguer}" class="form-control" th:errorclass="'is-invalid'" />
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('minDiesLloguer')}" th:errors="*{minDiesLloguer}"></div>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label fw-semibold">Màx. Dies Lloguer</label>
-                        <input type="number" th:field="*{maxDiesLloguer}" class="form-control" required />
+                        <input type="number" th:field="*{maxDiesLloguer}" class="form-control" th:errorclass="'is-invalid'" />
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('maxDiesLloguer')}" th:errors="*{maxDiesLloguer}"></div>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label fw-semibold">Estat Operatiu</label>
-                        <input type="text" th:field="*{estat}" class="form-control" required />
+                        <input type="text" th:field="*{estat}" class="form-control" th:errorclass="'is-invalid'" />
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('estat')}" th:errors="*{estat}"></div>
                     </div>
 
                     <div class="col-12">
                         <label class="form-label fw-semibold">Descripció Pública</label>
-                        <textarea th:field="*{descripcio}" class="form-control" rows="2" required></textarea>
+                        <textarea th:field="*{descripcio}" class="form-control" rows="2" th:errorclass="'is-invalid'"></textarea>
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('descripcio')}" th:errors="*{descripcio}"></div>
                     </div>
 
                     <div class="col-12">

@@ -2,9 +2,11 @@ package cat.copernic.projecte1Grup3.Vehicles.Controller;
 
 import cat.copernic.projecte1Grup3.Vehicles.Entity.VehiclesEntity;
 import cat.copernic.projecte1Grup3.Vehicles.Service.VehiclesService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -26,7 +28,6 @@ public class VehiclesController {
 
     /**
      * RF43: Llistar tots els vehicles.
-     * Retorna: templates/vehicles/llistat.html
      */
     @GetMapping
     public String llistarVehicles(Model model) {
@@ -36,7 +37,6 @@ public class VehiclesController {
 
     /**
      * RF44: Visualitzar detalls d'un vehicle.
-     * Retorna: templates/vehicles/detall.html
      */
     @GetMapping("/detall/{matricula}")
     public String mostrarDetall(@PathVariable String matricula, Model model, RedirectAttributes redirect) {
@@ -51,7 +51,6 @@ public class VehiclesController {
 
     /**
      * RF40: Formulari exclusiu per a l'Alta d'un vehicle.
-     * Retorna: templates/vehicles/altaVehicle.html
      */
     @GetMapping("/nou")
     public String formulariNouVehicle(Model model) {
@@ -61,7 +60,6 @@ public class VehiclesController {
 
     /**
      * RF42: Formulari exclusiu per a la Modificació d'un vehicle.
-     * Retorna: templates/vehicles/editarVehicle.html
      */
     @GetMapping("/editar/{matricula}")
     public String formulariEditarVehicle(@PathVariable String matricula, Model model, RedirectAttributes redirect) {
@@ -75,10 +73,39 @@ public class VehiclesController {
     }
 
     /**
-     * Processa el desament (creació o modificació) d'un vehicle.
+     * Processa el desament (creació o modificació) d'un vehicle amb validacions.
      */
     @PostMapping("/guardar")
-    public String guardarVehicle(@ModelAttribute("vehicle") VehiclesEntity vehicle, RedirectAttributes redirect) {
+    public String guardarVehicle(
+            @Valid @ModelAttribute("vehicle") VehiclesEntity vehicle,
+            BindingResult result,
+            Model model,
+            RedirectAttributes redirect) {
+
+        // 1. Comprovar si el vehicle ja existeix a la BDD per distingir entre Alta i Edició
+        boolean existeixBDD = vehicle.getMatricula() != null && 
+                              vehiclesService.buscarPerMatricula(vehicle.getMatricula()).isPresent();
+
+        // 2. Si és un ALTA (el registre NO existia) però la matrícula ja s'utilitza
+        if (!existeixBDD && vehicle.getMatricula() != null && !vehicle.getMatricula().isBlank()) {
+            if (vehiclesService.buscarPerMatricula(vehicle.getMatricula()).isPresent()) {
+                result.rejectValue("matricula", "error.vehicle", "Aquesta matrícula ja està registrada.");
+            }
+        }
+
+        // 3. Validació lògica: dies mínims no podent superar els màxims
+        if (vehicle.getMinDiesLloguer() != null && vehicle.getMaxDiesLloguer() != null) {
+            if (vehicle.getMinDiesLloguer() > vehicle.getMaxDiesLloguer()) {
+                result.rejectValue("maxDiesLloguer", "error.vehicle", "El màxim de dies ha de ser major o igual al mínim.");
+            }
+        }
+
+        // 4. Si hi ha errors de validació, es manté a la mateixa pantalla
+        if (result.hasErrors()) {
+            return existeixBDD ? "vehicles/editarVehicle" : "vehicles/altaVehicle";
+        }
+
+        // 5. Desament correcte i redirecció
         vehiclesService.guardarVehicle(vehicle);
         redirect.addFlashAttribute("succes", "Vehicle desat correctament.");
         return "redirect:/vehicles";

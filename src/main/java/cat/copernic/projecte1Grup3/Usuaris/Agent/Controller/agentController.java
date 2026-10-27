@@ -45,7 +45,7 @@ public class agentController {
     }
 
     /**
-     * Processa el formulari d'alta gestionant validacions, la pujada de la foto
+     * Processa el formulari d'alta i edició gestionant validacions, la pujada de la foto
      * i el control de duplicats a la base de dades.
      */
     @PostMapping("/alta")

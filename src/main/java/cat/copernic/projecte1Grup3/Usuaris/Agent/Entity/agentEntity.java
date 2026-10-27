@@ -7,10 +7,6 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
 
-/**
- *
- * @author Usuario
- */
 @Entity
 @Table(name = "agents")
 public class agentEntity extends usuariEntity {
@@ -25,47 +21,30 @@ public class agentEntity extends usuariEntity {
     @Column(nullable = false)
     private Rol rol;
 
-    // Getters y Setters
-    public String getHora_entrada() {
-        return hora_entrada;
-    }
+    @Column(nullable = true)
+    private String foto; // Guarda el nom o ruta del fitxer de la imatge
 
-    public void setHora_entrada(String hora_entrada) {
-        this.hora_entrada = hora_entrada;
-    }
+    // Getters i Setters
+    public String getHora_entrada() { return hora_entrada; }
+    public void setHora_entrada(String hora_entrada) { this.hora_entrada = hora_entrada; }
 
-    public String getHora_sortida() {
-        return hora_sortida;
-    }
+    public String getHora_sortida() { return hora_sortida; }
+    public void setHora_sortida(String hora_sortida) { this.hora_sortida = hora_sortida; }
 
-    public void setHora_sortida(String hora_sortida) {
-        this.hora_sortida = hora_sortida;
-    }
+    public Rol getRol() { return rol; }
+    public void setRol(Rol rol) { this.rol = rol; }
 
-    public Rol getRol() {
-        return rol;
-    }
-
-    public void setRol(Rol rol) {
-        this.rol = rol;
-    }
+    public String getFoto() { return foto; }
+    public void setFoto(String foto) { this.foto = foto; }
 
     public agentEntity() {
         super();
     }
     
-    
-
-    public agentEntity(String hora_entrada, String hora_sortida, Rol rol, String dni, String nom, String email) {
-        super(dni, nom, email);
-        this.hora_entrada = hora_entrada;
-        this.hora_sortida = hora_sortida;
-        this.rol = rol;
-    }
-
-    
-    
-    
-    
-    
+    public agentEntity(String hora_entrada, String hora_sortida, Rol rol, String dni, String nom, String email, String password) {
+    super(dni, nom, email, password);
+    this.hora_entrada = hora_entrada;
+    this.hora_sortida = hora_sortida;
+    this.rol = rol;
+}
 }

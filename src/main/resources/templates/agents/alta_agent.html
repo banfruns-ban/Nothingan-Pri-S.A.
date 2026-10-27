@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ca" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Alta de nou agent</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: Inter, Arial, sans-serif; background: #f8fafc; color: #1e293b; font-size: 12px; }
+        header { background: #fff; border-top: 2px solid #0f172a; display: flex; align-items: center; justify-content: space-between; padding: 12px 40px; }
+        header .titol { font-size: 13px; }
+        header .titol strong { font-weight: 700; }
+        .btn-inici { border: 1px solid #e2e8f0; background: #fff; border-radius: 4px; padding: 6px 12px; font-size: 11px; text-decoration: none; color: #1e293b; }
+        main { max-width: 640px; margin: 40px auto; padding: 0 16px; }
+        h1 { font-size: 22px; margin: 0 0 6px; }
+        .subtitol { color: #64748b; font-size: 11px; margin-bottom: 20px; }
+        .targeta { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 24px; }
+        h2 { font-size: 12px; color: #2563eb; margin: 24px 0 12px; }
+        h2:first-child { margin-top: 0; }
+        .fila { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+        .fila.una { grid-template-columns: 1fr; }
+        label { display: block; font-size: 10px; color: #475569; margin-bottom: 4px; }
+        input[type=text], input[type=email], input[type=password], input[type=time], select, input[type=file] {
+            width: 100%; padding: 9px 10px; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 11px; background: #fff; }
+        input:focus, select:focus { outline: 2px solid #bfdbfe; border-color: #3b82f6; }
+        .pujada { border: 1px dashed #cbd5e1; background: #f8fafc; border-radius: 6px; padding: 16px; text-align: center; }
+        .avis { background: #fef9c3; border: 1px solid #fde68a; color: #92400e; border-radius: 4px; padding: 10px 12px; font-size: 10px; margin: 18px 0 14px; }
+        .error { background: #fee2e2; border: 1px solid #fecaca; color: #991b1b; border-radius: 4px; padding: 10px 12px; font-size: 11px; margin-bottom: 14px; }
+        .error-text { color: #dc2626; font-size: 10px; margin-top: 3px; display: block; }
+        .ok { background: #dcfce7; border: 1px solid #bbf7d0; color: #166534; border-radius: 4px; padding: 10px 12px; font-size: 11px; margin-bottom: 14px; }
+        button[type=submit] { background: #2563eb; color: #fff; border: 0; border-radius: 4px; padding: 10px 16px; font-size: 11px; font-weight: 600; cursor: pointer; }
+        button[type=submit]:hover { background: #1d4ed8; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div></div>
+    <div class="titol"><strong>NOTHINGAN PRI S.A.</strong> | Portal Corporatiu</div>
+    <a class="btn-inici" th:href="@{/}">Tornar a l'inici</a>
+</header>
+
+<main>
+    <h1>Registre de nou empleat</h1>
+    <p class="subtitol">Ompli el següent formulari per donar d'alta un nou agent o administrador al sistema.</p>
+
+    <div class="targeta">
+
+        <div class="ok" th:if="${param.exit}">L'agent s'ha donat d'alta correctament.</div>
+        <div class="error" th:if="${error}" th:text="${error}"></div>
+
+        <form th:action="@{/agents/alta}" th:object="${agent}" method="post" enctype="multipart/form-data">
+
+            <!-- 1. Dades personals i d'accés -->
+            <h2>1. Dades personals i d'accés</h2>
+            <div class="fila">
+                <div>
+                    <label for="nom">Nom complet</label>
+                    <input type="text" id="nom" th:field="*{nom}" placeholder="Ex: Joan Garcia i Soler">
+                    <span class="error-text" th:if="${#fields.hasErrors('nom')}" th:errors="*{nom}"></span>
+                </div>
+                <div>
+                    <label for="dni">Número d'identificació (DNI / NIE)</label>
+                    <input type="text" id="dni" th:field="*{dni}" placeholder="Ex: 12345678Z" maxlength="9">
+                    <span class="error-text" th:if="${#fields.hasErrors('dni')}" th:errors="*{dni}"></span>
+                </div>
+            </div>
+            
+            <div class="fila">
+                <div>
+                    <label for="email">Adreça electrònica corporativa</label>
+                    <input type="email" id="email" th:field="*{email}" placeholder="Ex: empleat@nothingan.com">
+                    <span class="error-text" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></span>
+                </div>
+                <div>
+                    <label for="password">Contrasenya d'accés</label>
+                    <input type="password" id="password" th:field="*{password}" placeholder="Mínim 8 caràcters">
+                    <span class="error-text" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></span>
+                </div>
+            </div>
+
+            <!-- 2. Fotografia de perfil -->
+            <h2>2. Fotografia de perfil</h2>
+            <div class="fila una">
+                <div class="pujada">
+                    <label for="fitxerFoto">Selecciona la foto de l'agent (PNG o JPG)</label>
+                    <input type="file" id="fitxerFoto" name="fitxerFoto" accept="image/png, image/jpeg">
+                </div>
+            </div>
+
+            <!-- 3. Dades laborals i permisos -->
+            <h2>3. Dades laborals i permisos</h2>
+            <div class="fila">
+                <div>
+                    <label for="hora_entrada">Hora d'entrada prevista</label>
+                    <input type="time" id="hora_entrada" th:field="*{hora_entrada}">
+                    <span class="error-text" th:if="${#fields.hasErrors('hora_entrada')}" th:errors="*{hora_entrada}"></span>
+                </div>
+                <div>
+                    <label for="hora_sortida">Hora de sortida prevista</label>
+                    <input type="time" id="hora_sortida" th:field="*{hora_sortida}">
+                    <span class="error-text" th:if="${#fields.hasErrors('hora_sortida')}" th:errors="*{hora_sortida}"></span>
+                </div>
+            </div>
+
+            <div class="fila una">
+                <div>
+                    <label for="rol">Rol al sistema</label>
+                    <select id="rol" th:field="*{rol}">
+                        <option value="">-- Selecciona un rol --</option>
+                        <option value="AGENT">Agent (Gestió de clients i vehicles)</option>
+                        <option value="ADMIN">Administrador (Accés total)</option>
+                    </select>
+                    <span class="error-text" th:if="${#fields.hasErrors('rol')}" th:errors="*{rol}"></span>
+                </div>
+            </div>
+
+            <div class="avis">
+                ⓘ Assegureu-vos de proporcionar credencials segures a l'empleat i assignar el rol correcte.
+            </div>
+
+            <button type="submit">Donar d'alta l'empleat</button>
+        </form>
+    </div>
+</main>
+
+</body>
+</html>

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="ca" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Nova reserva</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: Inter, "Segoe UI", Arial, sans-serif; background: #f1f5f9; color: #0f172a; font-size: 12px; }
+        .app { display: grid; grid-template-columns: 220px 1fr; min-height: 100vh; }
+
+        /* ---------- Barra lateral ---------- */
+        .lateral { background: #0f172a; color: #cbd5e1; padding: 18px 14px; }
+        .marca { display: flex; align-items: center; gap: 10px; padding: 4px 6px 18px; }
+        .marca .logo { width: 36px; height: 36px; border-radius: 50%; background: #1e3a8a; color: #fff;
+                       display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; }
+        .marca strong { display: block; color: #fff; font-size: 12px; letter-spacing: .3px; }
+        .marca small { font-size: 8px; letter-spacing: .6px; color: #94a3b8; }
+        .menu { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 4px; }
+        .menu a { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 6px;
+                  color: #cbd5e1; text-decoration: none; font-size: 12px; }
+        .menu a:hover { background: #1e293b; }
+        .menu a.actiu { background: #fff; color: #0f172a; font-weight: 600; }
+        .menu .punt { width: 12px; height: 12px; border-radius: 3px; background: #475569; flex: none; }
+        .menu a.actiu .punt { background: #2563eb; }
+
+        /* ---------- Contingut ---------- */
+        .contingut { display: flex; flex-direction: column; min-width: 0; }
+        .barra { background: #0f172a; color: #fff; padding: 12px 24px; display: flex; align-items: center; gap: 12px; font-size: 11px; }
+        .barra .etiqueta { background: #2563eb; border-radius: 4px; padding: 3px 8px; font-size: 9px; font-weight: 700; letter-spacing: .4px; }
+        main { padding: 28px 28px 40px; max-width: 760px; }
+        h1 { font-size: 20px; margin: 0 0 6px; }
+        .subtitol { color: #64748b; font-size: 11px; margin-bottom: 18px; }
+
+        .tornar { display: inline-flex; align-items: center; gap: 6px; color: #475569; text-decoration: none;
+                  font-size: 11px; margin-bottom: 14px; }
+        .tornar:hover { color: #0f172a; }
+        svg.ico { width: 14px; height: 14px; flex: none; stroke: currentColor; fill: none; stroke-width: 2;
+                  stroke-linecap: round; stroke-linejoin: round; }
+
+        .missatge { padding: 10px 12px; border-radius: 6px; margin-bottom: 14px; font-size: 12px; }
+        .missatge.error { background: #fee2e2; color: #991b1b; }
+
+        .targeta { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 22px; }
+        h2 { font-size: 12px; color: #2563eb; margin: 22px 0 12px; }
+        h2:first-child { margin-top: 0; }
+        .fila { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+        .fila.una { grid-template-columns: 1fr; }
+        label { display: block; font-size: 10px; color: #475569; margin-bottom: 4px; font-weight: 600; }
+        input[type=date], input[type=time], select, textarea {
+            width: 100%; padding: 9px 10px; border: 1px solid #e2e8f0; border-radius: 6px;
+            font-size: 12px; background: #fff; font-family: inherit; }
+        textarea { min-height: 80px; resize: vertical; }
+        input:focus, select:focus, textarea:focus { outline: 2px solid #bfdbfe; border-color: #3b82f6; }
+
+        .client-fix { display: flex; align-items: center; gap: 12px; background: #f8fafc; border: 1px solid #e2e8f0;
+                      border-radius: 8px; padding: 12px 14px; }
+        .avatar { width: 36px; height: 36px; border-radius: 50%; background: #2563eb; color: #fff; font-size: 12px;
+                  font-weight: 700; display: flex; align-items: center; justify-content: center; flex: none; }
+        .client-fix strong { display: block; font-size: 13px; }
+        .client-fix small { color: #64748b; }
+
+        .resum { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 12px 14px;
+                 display: none; margin-top: 4px; }
+        .resum.visible { display: block; }
+        .resum .linia { display: flex; justify-content: space-between; padding: 2px 0; }
+        .resum .linia strong { color: #1d4ed8; }
+        .resum small { display: block; color: #64748b; margin-top: 6px; font-size: 10px; }
+
+        .botons { display: flex; gap: 8px; justify-content: flex-end; margin-top: 22px; }
+        .btn { border-radius: 6px; padding: 9px 14px; font-size: 12px; font-weight: 600; cursor: pointer;
+               text-decoration: none; display: inline-flex; align-items: center; gap: 8px; border: 1px solid #e2e8f0;
+               background: #fff; color: #0f172a; font-family: inherit; }
+        .btn:hover { background: #f8fafc; }
+        .btn-primari { background: #2563eb; border-color: #2563eb; color: #fff; }
+        .btn-primari:hover { background: #1d4ed8; }
+
+        @media (max-width: 800px) { .app { grid-template-columns: 1fr; } .lateral { display: none; } .fila { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+<div class="app">
+
+    <aside class="lateral">
+        <div class="marca">
+            <div class="logo">N</div>
+            <div>
+                <strong>NOTHINGAN PRI S.A</strong>
+                <small>PANEL DE CONTROL AGENT</small>
+            </div>
+        </div>
+        <ul class="menu">
+            <li><a href="#"><span class="punt"></span>Dashboard</a></li>
+            <li><a href="#"><span class="punt"></span>Flota de Vehicles</a></li>
+            <li><a th:href="@{/clients}"><span class="punt"></span>Gestió de Clients</a></li>
+            <li><a class="actiu" href="#"><span class="punt"></span>Reserves Actives</a></li>
+        </ul>
+    </aside>
+
+    <div class="contingut">
+        <div class="barra">
+            <span class="etiqueta">RESERVES</span>
+            <span>Panell d'Agent - Alta de reserva</span>
+        </div>
+
+        <main>
+            <a class="tornar" th:href="@{/clients}">
+                <svg class="ico" viewBox="0 0 24 24"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+                Tornar als clients
+            </a>
+
+            <h1>Nova reserva</h1>
+            <p class="subtitol">Tria el vehicle i el període. El cost i la fiança els calcula el sistema.</p>
+
+            <div class="missatge error" th:if="${error}" th:text="${error}"></div>
+
+            <div class="targeta">
+                <form th:action="@{/reserves/alta}" method="post">
+
+                    <!-- 1. Client -->
+                    <h2>1. Client</h2>
+                    <div class="fila una">
+                        <!-- Client ja triat (ve del detall del client) -->
+                        <div th:if="${client != null}" class="client-fix">
+                            <div class="avatar" th:attr="data-nom=${client.nom}">?</div>
+                            <div>
+                                <strong th:text="${client.nom}">Nom del client</strong>
+                                <small th:text="${client.dni} + ' · ' + ${client.email}">DNI · email</small>
+                            </div>
+                            <input type="hidden" name="dni" th:value="${client.dni}">
+                        </div>
+
+                        <!-- Sense client triat: desplegable amb els clients validats -->
+                        <div th:if="${client == null}">
+                            <label for="dni">Client (només clients validats)</label>
+                            <select id="dni" name="dni" required>
+                                <option value="">Selecciona un client...</option>
+                                <option th:each="c : ${clients}" th:value="${c.dni}"
+                                        th:text="${c.nom} + ' — ' + ${c.dni}"></option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- 2. Vehicle -->
+                    <h2>2. Vehicle</h2>
+                    <div class="fila una">
+                        <div>
+                            <label for="matricula">Vehicle</label>
+                            <select id="matricula" name="matricula" required>
+                                <option value="">Selecciona un vehicle...</option>
+                                <option th:each="v : ${vehicles}" th:value="${v.matricula}"
+                                        th:attr="data-preu=${v.preuHora}, data-fianca=${v.fianca}, data-min=${v.minDiesLloguer}, data-max=${v.maxDiesLloguer}"
+                                        th:text="${v.matricula} + ' — ' + ${v.marca} + ' ' + ${v.model} + ' (' + ${v.preuHora} + ' €/h)'"></option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- 3. Període -->
+                    <h2>3. Període de lloguer</h2>
+                    <div class="fila">
+                        <div>
+                            <label for="dataInici">Data d'inici</label>
+                            <input type="date" id="dataInici" name="dataInici" required>
+                        </div>
+                        <div>
+                            <label for="horaInici">Hora d'inici</label>
+                            <input type="time" id="horaInici" name="horaInici" required>
+                        </div>
+                    </div>
+                    <div class="fila">
+                        <div>
+                            <label for="dataFi">Data de fi</label>
+                            <input type="date" id="dataFi" name="dataFi" required>
+                        </div>
+                        <div>
+                            <label for="horaFi">Hora de fi</label>
+                            <input type="time" id="horaFi" name="horaFi" required>
+                        </div>
+                    </div>
+
+                    <div class="resum" id="resum">
+                        <div class="linia"><span>Durada</span><strong id="rDurada">—</strong></div>
+                        <div class="linia"><span>Cost estimat</span><strong id="rCost">—</strong></div>
+                        <div class="linia"><span>Fiança</span><strong id="rFianca">—</strong></div>
+                        <small>Estimació orientativa. El cost definitiu el calcula el servidor en desar la reserva.</small>
+                    </div>
+
+                    <!-- 4. Observacions -->
+                    <h2>4. Observacions</h2>
+                    <div class="fila una">
+                        <div>
+                            <label for="observacions">Observacions (opcional)</label>
+                            <textarea id="observacions" name="observacions" placeholder="Ex: El client recollirà el vehicle a l'oficina"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="botons">
+                        <a class="btn" th:href="@{/clients}">Cancel·lar</a>
+                        <button type="submit" class="btn btn-primari">Crear reserva</button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- Només millores visuals: si el JavaScript falla, el formulari funciona igualment. -->
+<script>
+    // Inicials de l'avatar
+    try {
+        var a = document.querySelector('.avatar[data-nom]');
+        if (a) {
+            var p = (a.getAttribute('data-nom') || '').trim().split(/\s+/);
+            var ini = (p[0] ? p[0].charAt(0) : '') + (p[1] ? p[1].charAt(0) : '');
+            if (ini) { a.textContent = ini.toUpperCase(); }
+        }
+    } catch (e) { }
+
+    // Data mínima = avui i resum orientatiu del cost
+    try {
+        var avui = new Date();
+        var iso = avui.getFullYear() + '-' + String(avui.getMonth() + 1).padStart(2, '0') + '-' + String(avui.getDate()).padStart(2, '0');
+        document.getElementById('dataInici').min = iso;
+        document.getElementById('dataFi').min = iso;
+
+        var camps = ['matricula', 'dataInici', 'horaInici', 'dataFi', 'horaFi'];
+        function calcula() {
+            var sel = document.getElementById('matricula');
+            var opt = sel.options[sel.selectedIndex];
+            var di = document.getElementById('dataInici').value, hi = document.getElementById('horaInici').value;
+            var df = document.getElementById('dataFi').value, hf = document.getElementById('horaFi').value;
+            var resum = document.getElementById('resum');
+            if (!opt || !opt.value || !di || !hi || !df || !hf) { resum.classList.remove('visible'); return; }
+            var ms = new Date(df + 'T' + hf) - new Date(di + 'T' + hi);
+            if (isNaN(ms) || ms <= 0) { resum.classList.remove('visible'); return; }
+            var hores = Math.ceil(ms / 3600000);
+            var dies = Math.ceil(hores / 24);
+            var preu = parseFloat(opt.getAttribute('data-preu'));
+            var fianca = parseFloat(opt.getAttribute('data-fianca'));
+            document.getElementById('rDurada').textContent = hores + ' h (' + dies + ' dia' + (dies === 1 ? '' : 's') + ')';
+            document.getElementById('rCost').textContent = (hores * preu).toFixed(2) + ' €';
+            document.getElementById('rFianca').textContent = fianca.toFixed(2) + ' €';
+            resum.classList.add('visible');
+        }
+        camps.forEach(function (id) { document.getElementById(id).addEventListener('change', calcula); });
+    } catch (e) { }
+</script>
+</body>
+</html>

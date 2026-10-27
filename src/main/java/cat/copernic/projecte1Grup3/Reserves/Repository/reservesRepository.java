@@ -3,11 +3,14 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package cat.copernic.projecte1Grup3.Reserves.Repository;
-
-/**
- *
- * @author Usuario
- */
-public class reservesRepository {
-    
+ 
+import cat.copernic.projecte1Grup3.Reserves.Entity.reservesEntity;
+import java.util.List;
+import org.springframework.data.jpa.repository.JpaRepository;
+ 
+public interface reservesRepository extends JpaRepository<reservesEntity, Long> {
+ 
+    // Reserves d'un vehicle que no tenen l'estat indicat (s'usa per ignorar les CANCELADA)
+    List<reservesEntity> findByVehicleMatriculaAndEstatNot(String matricula, String estat); //Spring lee el nombre del método y construye la consulta solo:
 }
+ 

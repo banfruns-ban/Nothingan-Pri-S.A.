@@ -10,8 +10,12 @@ import org.springframework.boot.persistence.autoconfigure.EntityScan;
 // Le decimos a Spring dónde están los repositorios JPA i MongoDB
 @EnableJpaRepositories(basePackages = {
     "cat.copernic.projecte1Grup3.Vehicles.Repository",
+
+    "cat.copernic.projecte1Grup3.Usuaris.Client.Repository",
+    "cat.copernic.projecte1Grup3.Reserves.Repository",// Si clientRepository és JPA
     "cat.copernic.projecte1Grup3.Usuaris.Client.Repository", // Si clientRepository és JPA
     "cat.copernic.projecte1Grup3.Usuaris.Agent.Repository"
+
 })
 @EnableMongoRepositories(basePackages = {
     "cat.copernic.projecte1Grup3.Usuaris.Client.Repository" // O on tinguis el repositori Mongo

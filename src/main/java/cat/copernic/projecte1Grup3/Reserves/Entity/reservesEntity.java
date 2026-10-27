@@ -12,7 +12,7 @@ import jakarta.persistence.ManyToOne;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import org.hibernate.annotations.Audited.Table;
+import jakarta.persistence.Table;
 
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
@@ -51,7 +51,7 @@ public class reservesEntity {
     @Column(name = "cost_total", precision = 10, scale = 2)
     private BigDecimal costTotal;
 
-    @Column(name = "fiança", precision = 10, scale = 2)
+    @Column(name = "fianca", precision = 10, scale = 2)
     private BigDecimal fianca;
 
     @Column(name = "data_lliurament")

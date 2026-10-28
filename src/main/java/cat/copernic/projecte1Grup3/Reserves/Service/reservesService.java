@@ -50,9 +50,11 @@ public class reservesService {
                 .toList(); 
     }
     
-     public List<reservesEntity> llistar(String q, String estat, String dni) {
+       public List<reservesEntity> llistar(String q, String dni, String email,
+                                        LocalDate dataReserva, String matricula,
+                                        String codi, String estat) {
         List<reservesEntity> reserves = reservesRepository.findAll();
- 
+        
         // 1. Cerca general: codi, nom/DNI del client, matrícula/marca/model del vehicle
         if (q != null && !q.isBlank()) {
             String text = q.trim().toLowerCase();
@@ -67,9 +69,49 @@ public class reservesService {
                     .toList();
         }
  
-        // 2. Filtre per estat
-         if (dni != null && !dni.isBlank()) {
-            String d = dni.trim().toUpperCase();
+        // 2. Filtre per DNI
+        if (dni != null && !dni.isBlank()) {
+            String d = dni.trim().toLowerCase();
+            reserves = reserves.stream()
+                    .filter(r -> r.getClient() != null && conte(r.getClient().getDni(), d))
+                    .toList();
+        }
+ 
+        // 3. Email del client
+        if (email != null && !email.isBlank()) {
+            String e = email.trim().toLowerCase();
+            reserves = reserves.stream()
+                    .filter(r -> r.getClient() != null && conte(r.getClient().getEmail(), e))
+                    .toList();
+        }
+ 
+        // 4. Data de reserva: reserves actives aquell dia (dataInici <= dia <= dataFi)
+        if (dataReserva != null) {
+            reserves = reserves.stream()
+                    .filter(r -> r.getDataInici() != null && r.getDataFi() != null
+                            && !dataReserva.isBefore(r.getDataInici())
+                            && !dataReserva.isAfter(r.getDataFi()))
+                    .toList();
+        }
+ 
+        // 5. Matrícula del vehicle
+        if (matricula != null && !matricula.isBlank()) {
+            String m = matricula.trim().toLowerCase();
+            reserves = reserves.stream()
+                    .filter(r -> r.getVehicle() != null && conte(r.getVehicle().getMatricula(), m))
+                    .toList();
+        }
+ 
+        // 6. Codi de reserva (exacte)
+        if (codi != null && !codi.isBlank()) {
+            String c = codi.trim();
+            reserves = reserves.stream()
+                    .filter(r -> String.valueOf(r.getCodiReserva()).equals(c))
+                    .toList();
+        }
+ 
+        // 7. Estat
+        if (estat != null && !estat.isBlank()) {
             reserves = reserves.stream()
                     .filter(r -> r.getClient() != null
                             && r.getClient().getDni() != null
@@ -77,11 +119,12 @@ public class reservesService {
                     .toList();
         }
  
-        // 3. Les més noves primer
+        // 8. Les més noves primer
         return reserves.stream()
                 .sorted(Comparator.comparing(reservesEntity::getCodiReserva).reversed())
                 .toList();
     }
+    
  
     private boolean conte(String valor, String text) {
         return valor != null && valor.toLowerCase().contains(text);

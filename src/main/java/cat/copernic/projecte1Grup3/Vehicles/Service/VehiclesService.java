@@ -32,15 +32,27 @@ public class VehiclesService {
     @Transactional
     public VehiclesEntity guardarVehicle(VehiclesEntity vehicle) {
         if (vehicle.getActiu() == null) {
-            // Busquem si ja existia per mantenir el seu estat actiu anterior
             Optional<VehiclesEntity> existent = vehiclesRepository.findById(vehicle.getMatricula());
             if (existent.isPresent()) {
                 vehicle.setActiu(existent.get().getActiu());
             } else {
-                vehicle.setActiu(true); // Actiu per defecte en alta nova
+                vehicle.setActiu(true);
             }
         }
         return vehiclesRepository.save(vehicle);
+    }
+
+    /**
+     * Modifica l'estat d'activació (Actiu / Inactiu) del vehicle.
+     */
+    @Transactional
+    public void canviarEstatActiu(String matricula, Boolean nouEstat) {
+        Optional<VehiclesEntity> vehicleOpt = vehiclesRepository.findById(matricula);
+        if (vehicleOpt.isPresent()) {
+            VehiclesEntity vehicle = vehicleOpt.get();
+            vehicle.setActiu(nouEstat);
+            vehiclesRepository.save(vehicle);
+        }
     }
 
     @Transactional

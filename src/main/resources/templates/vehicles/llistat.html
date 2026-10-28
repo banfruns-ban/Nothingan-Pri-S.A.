@@ -23,7 +23,6 @@
             min-height: 100vh;
         }
 
-        /* Sidebar estil idèntic al panell */
         .sidebar {
             width: 260px;
             background-color: var(--sidebar-bg);
@@ -74,13 +73,11 @@
             font-weight: 500;
         }
 
-        /* Contingut Principal */
         .main-content {
             margin-left: 260px;
             padding: 40px;
         }
 
-        /* Targeta de Filtres */
         .filter-card {
             background: #ffffff;
             border: 1px solid var(--card-border);
@@ -96,12 +93,11 @@
             margin-bottom: 6px;
         }
 
-        /* Taula de vehicles */
         .custom-table-card {
             background: #ffffff;
             border: 1px solid var(--card-border);
             border-radius: 12px;
-            overflow: hidden;
+            overflow: visible; /* Permet que el desplegable es vegi fora de la taula */
         }
 
         .table {
@@ -176,26 +172,69 @@
         }
 
         .btn-desactivar:hover {
-            background-color: #e5e7eb;
-            color: #374151;
+            background-color: #fee2e2;
+            color: #991b1b;
         }
 
+        /* Estils de les insígnees interactives */
         .badge-actiu {
             background-color: #dcfce7;
             color: #166534;
             font-weight: 600;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.75rem;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .badge-actiu:hover {
+            background-color: #bbf7d0;
         }
 
         .badge-inactiu {
             background-color: #fee2e2;
             color: #991b1b;
             font-weight: 600;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.75rem;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .badge-inactiu:hover {
+            background-color: #fca5a5;
+        }
+
+        /* Treure la fletxa per defecte del desplegable de Bootstrap */
+        .dropdown-toggle::after {
+            display: none;
+        }
+
+        .dropdown-menu {
+            min-width: 120px;
+            padding: 4px;
+            border-radius: 8px;
+        }
+
+        .dropdown-item {
+            border-radius: 6px;
+            padding: 6px 10px;
+        }
+
+        .dropdown-item button {
+            background: none;
+            border: none;
+            width: 100%;
+            text-align: left;
+            padding: 0;
         }
     </style>
 </head>
@@ -311,25 +350,51 @@
                             <span class="vehicle-sub" th:text="'ID: ' + ${v.matricula}">ID: VEH-001</span>
                         </td>
                         <td>
-                            <strong th:text="${v.matricula}">4823-LKF</strong>
+                            <strong th:text="${v.matricula}">4823KLP</strong>
                         </td>
-                        <td th:text="${v.tipusVehicle}">Econòmic</td>
-                        <td th:text="${v.anyMatriculacio}">2023</td>
+                        <td th:text="${v.tipusVehicle}">Furgoneta</td>
+                        <td th:text="${v.anyMatriculacio}">2024</td>
                         <td>
-                            <strong th:text="${v.preuHora + ' €'}">45 €</strong>
+                            <strong th:text="${v.preuHora + ' €'}">45.00 €</strong>
                         </td>
-                        <td th:text="${v.fianca + ' €'}">300 €</td>
-                        <td>
-                            <span th:if="${v.actiu}" class="badge-actiu">Actiu</span>
-                            <span th:if="${!v.actiu}" class="badge-inactiu">Inactiu</span>
+                        <td th:text="${v.fianca + ' €'}">300.00 €</td>
+                        
+                        <!-- COLUMNA ESTAT: INSÍGNIA DESPLEGABLE -->
+                        <td class="dropdown">
+                            <div class="dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" role="button">
+                                <span th:if="${v.actiu}" class="badge-actiu">
+                                    Actiu <i class="fa-solid fa-chevron-down ms-1" style="font-size: 0.65rem;"></i>
+                                </span>
+                                <span th:if="${!v.actiu}" class="badge-inactiu">
+                                    Inactiu <i class="fa-solid fa-chevron-down ms-1" style="font-size: 0.65rem;"></i>
+                                </span>
+                            </div>
+                            <ul class="dropdown-menu shadow-sm">
+                                <li>
+                                    <form th:action="@{/vehicles/canviar-estat/{m}(m=${v.matricula})}" method="post">
+                                        <input type="hidden" name="actiu" value="true" />
+                                        <button type="submit" class="dropdown-item">
+                                            <span class="badge-actiu w-100 justify-content-center">Actiu</span>
+                                        </button>
+                                    </form>
+                                </li>
+                                <li>
+                                    <form th:action="@{/vehicles/canviar-estat/{m}(m=${v.matricula})}" method="post" class="mt-1">
+                                        <input type="hidden" name="actiu" value="false" />
+                                        <button type="submit" class="dropdown-item">
+                                            <span class="badge-inactiu w-100 justify-content-center">Inactiu</span>
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
                         </td>
+
+                        <!-- COLUMNA ACCIONS (Manté el teu botó de Desactivar/Eliminar original) -->
                         <td class="text-end">
-                            <!-- Enllaç a Editar (RF42) -->
                             <a th:href="@{/vehicles/editar/{m}(m=${v.matricula})}" class="btn-editar me-1">Editar</a>
                             
-                            <!-- Formuari per Desactivar / Eliminar (RF41) -->
                             <form th:action="@{/vehicles/eliminar/{m}(m=${v.matricula})}" method="post" class="d-inline"
-                                  onsubmit="return confirm('Estàs segur de desactivar aquest vehicle?');">
+                                  onsubmit="return confirm('Estàs segur d\'eliminar definitivament aquest vehicle?');">
                                 <button type="submit" class="btn-desactivar">Desactivar</button>
                             </form>
                         </td>
@@ -346,6 +411,7 @@
 
     </main>
 
+    <!-- JS de Bootstrap (Imprescindible per al funcionament dels desplegables) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

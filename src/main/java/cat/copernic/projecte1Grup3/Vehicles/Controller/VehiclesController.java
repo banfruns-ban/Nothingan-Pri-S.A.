@@ -82,37 +82,49 @@ public class VehiclesController {
             Model model,
             RedirectAttributes redirect) {
 
-        // 1. Comprovar si el vehicle ja existeix a la BDD per distingir entre Alta i Edició
         boolean existeixBDD = vehicle.getMatricula() != null && 
                               vehiclesService.buscarPerMatricula(vehicle.getMatricula()).isPresent();
 
-        // 2. Si és un ALTA (el registre NO existia) però la matrícula ja s'utilitza
         if (!existeixBDD && vehicle.getMatricula() != null && !vehicle.getMatricula().isBlank()) {
             if (vehiclesService.buscarPerMatricula(vehicle.getMatricula()).isPresent()) {
                 result.rejectValue("matricula", "error.vehicle", "Aquesta matrícula ja està registrada.");
             }
         }
 
-        // 3. Validació lògica: dies mínims no podent superar els màxims
         if (vehicle.getMinDiesLloguer() != null && vehicle.getMaxDiesLloguer() != null) {
             if (vehicle.getMinDiesLloguer() > vehicle.getMaxDiesLloguer()) {
                 result.rejectValue("maxDiesLloguer", "error.vehicle", "El màxim de dies ha de ser major o igual al mínim.");
             }
         }
 
-        // 4. Si hi ha errors de validació, es manté a la mateixa pantalla
         if (result.hasErrors()) {
             return existeixBDD ? "vehicles/editarVehicle" : "vehicles/altaVehicle";
         }
 
-        // 5. Desament correcte i redirecció
         vehiclesService.guardarVehicle(vehicle);
         redirect.addFlashAttribute("succes", "Vehicle desat correctament.");
         return "redirect:/vehicles";
     }
 
     /**
-     * RF41: Baixa / Desactivació d'un vehicle.
+     * Canvia l'estat d'activació (Actiu / Inactiu) des del menú desplegable de la taula.
+     */
+    @PostMapping("/canviar-estat/{matricula}")
+    public String canviarEstatVehicle(
+            @PathVariable String matricula, 
+            @RequestParam("actiu") Boolean actiu, 
+            RedirectAttributes redirect) {
+        try {
+            vehiclesService.canviarEstatActiu(matricula, actiu);
+            redirect.addFlashAttribute("succes", "L'estat del vehicle s'ha actualitzat correctament.");
+        } catch (Exception e) {
+            redirect.addFlashAttribute("error", "Error en canviar l'estat del vehicle.");
+        }
+        return "redirect:/vehicles";
+    }
+
+    /**
+     * RF41: Baixa / Eliminar vehicle de la BDD.
      */
     @PostMapping("/eliminar/{matricula}")
     public String eliminarVehicle(@PathVariable String matricula, RedirectAttributes redirect) {

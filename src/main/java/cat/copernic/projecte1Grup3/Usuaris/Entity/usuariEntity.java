@@ -19,26 +19,28 @@ import jakarta.validation.constraints.Size;
 @Inheritance(strategy = InheritanceType.JOINED)
 public class usuariEntity {
     
-    @Id
-    @Column(nullable = false, unique = true)
-    @NotBlank(message = "El DNI no pot estar buit")
-    @Pattern(regexp = "^[0-9]{8}[A-Za-z]$", message = "El DNI ha de tenir 8 xifres i una lletra al final (Ex: 12345678Z)")
-    private String dni;
-    
-    @Column(nullable = false)
-    @NotBlank(message = "El nom no pot estar buit")
-    @Size(min = 2, max = 50, message = "El nom ha de tenir entre 2 i 50 caràcters")
-    private String nom;
-    
-    @Column(nullable = false, unique = true)
-    @NotBlank(message = "El correu no pot estar buit")
-    @Email(message = "El format del correu electrònic no és vàlid")
-    private String email;
+   @Id
+@Column(name = "dni", nullable = false, unique = true, length = 9)
+@NotBlank(message = "El DNI no pot estar buit")
+@Pattern(
+    regexp = "^[0-9]{8}[A-Za-z]$",
+    message = "El DNI ha de tenir 8 xifres i una lletra al final"
+)
+private String dni;
 
-    @Column(nullable = true)
-    @NotBlank(message = "La contrasenya no pot estar buida")
-    @Size(min = 8, message = "La contrasenya ha de tenir com a mínim 8 caràcters")
-    private String password;
+@Column(nullable = false, length = 50)
+@NotBlank(message = "El nom no pot estar buit")
+@Size(min = 2, max = 50, message = "El nom ha de tenir entre 2 i 50 caràcters")
+private String nom;
+
+@Column(nullable = false, unique = true, length = 254)
+@NotBlank(message = "El correu no pot estar buit")
+@Email(message = "El format del correu electrònic no és vàlid")
+private String email;
+
+@Column(nullable = true, length = 255)
+@Size(min = 8, message = "La contrasenya ha de tenir com a mínim 8 caràcters")
+private String password;
 
     // Getters y Setters
     public String getDni() { return dni; }

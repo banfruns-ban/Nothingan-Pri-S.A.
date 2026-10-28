@@ -10,7 +10,10 @@ import java.time.LocalDate;
 
 @Entity
 @Table(name = "Clients")
-@PrimaryKeyJoinColumn(name = "DNI")
+@PrimaryKeyJoinColumn(
+    name = "DNI",
+    referencedColumnName = "dni"
+)
 public class clientEntity extends usuariEntity {
 
     @Column(name = "data_caducitat_DNI", nullable = false)

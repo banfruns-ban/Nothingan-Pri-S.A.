@@ -48,7 +48,13 @@
         .cerca:focus-within { border-color: #3b82f6; box-shadow: 0 0 0 2px #bfdbfe; }
         .cerca button { border: 0; background: transparent; cursor: pointer; color: #64748b; padding: 6px; display: flex; }
         .cerca input { border: 0; outline: 0; padding: 10px 0; width: 100%; font-size: 12px; background: transparent; font-family: inherit; }
-        .eines select { padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 12px; font-family: inherit; background: #fff; }
+        .eines select, .eines .filtre-dni { padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 12px; font-family: inherit; background: #fff; }
+        .eines .filtre-dni { width: 150px; }
+        .eines.filtres { margin-top: 10px; }
+        .eines .filtre { padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 12px; font-family: inherit; background: #fff; width: 170px; }
+        .eines .filtre:focus { outline: 2px solid #bfdbfe; border-color: #3b82f6; }
+        .filtre-data { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #64748b; }
+        .eines .filtre-dni:focus { outline: 2px solid #bfdbfe; border-color: #3b82f6; }
         .btn { border-radius: 6px; padding: 9px 14px; font-size: 12px; font-weight: 600; cursor: pointer;
                text-decoration: none; display: inline-flex; align-items: center; gap: 8px; border: 1px solid #e2e8f0;
                background: #fff; color: #0f172a; font-family: inherit; }
@@ -148,12 +154,25 @@
                         <option value="CANCELADA"   th:selected="${estat == 'CANCELADA'}">Cancel·lada</option>
                     </select>
 
-                    <a class="btn" th:href="@{/reserves}" th:if="${(q != null and q != '') or (estat != null and estat != '')}">Netejar</a>
+                    <a class="btn" th:href="@{/reserves}"
+                       th:if="${(q != null and q != '') or (dni != null and dni != '') or (email != null and email != '') or dataReserva != null or (matricula != null and matricula != '') or (codi != null and codi != '') or (estat != null and estat != '')}">Netejar</a>
 
                     <a class="btn btn-primari" th:href="@{/reserves/nova}">
                         <svg class="ico" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
                         Nova reserva
                     </a>
+                </div>
+
+                <!-- Filtres combinables: tots els omplerts s'apliquen alhora -->
+                <div class="eines filtres">
+                    <input class="filtre" type="text" name="codi" th:value="${codi}" placeholder="Codi de reserva" inputmode="numeric">
+                    <input class="filtre" type="text" name="dni" th:value="${dni}" placeholder="DNI del client" maxlength="9">
+                    <input class="filtre" type="text" name="email" th:value="${email}" placeholder="Email del client">
+                    <input class="filtre" type="text" name="matricula" th:value="${matricula}" placeholder="Matrícula" maxlength="10">
+                    <label class="filtre-data">Data de reserva
+                        <input class="filtre" type="date" name="dataReserva" th:value="${dataReserva}">
+                    </label>
+                    <button class="btn btn-primari" type="submit">Filtrar</button>
                 </div>
             </form>
 

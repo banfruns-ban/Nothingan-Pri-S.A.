@@ -113,7 +113,9 @@ public class reservesService {
         // 7. Estat
         if (estat != null && !estat.isBlank()) {
             reserves = reserves.stream()
-                    .filter(r -> estat.equals(r.getEstat()))
+                    .filter(r -> r.getClient() != null
+                            && r.getClient().getDni() != null
+                            && r.getClient().getDni().toUpperCase().contains(d))
                     .toList();
         }
  

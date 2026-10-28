@@ -115,7 +115,7 @@ public class reservesService {
             reserves = reserves.stream()
                     .filter(r -> r.getClient() != null
                             && r.getClient().getDni() != null
-                            && r.getClient().getDni().toUpperCase().contains(d))
+                            && r.getClient().getDni().toUpperCase().contains(q))
                     .toList();
         }
  

@@ -52,7 +52,7 @@ public class clientController {
         if (!model.containsAttribute("client")) {
             model.addAttribute("client", new clientEntity());
         }
-        return "altaUsuari";
+        return "client/altaUsuari";
     }
 
     @PostMapping("/clients/alta")
@@ -132,14 +132,14 @@ public class clientController {
         model.addAttribute("estat", estat);
         model.addAttribute("dataNaixement", dataNaixement);
         model.addAttribute("email", email);
-        return "llistaClients";
+        return "client/llistaClients";
     }
 
     @GetMapping("/clients/{dni}")
     public String detall(@PathVariable String dni, Model model, RedirectAttributes ra) {
         return clientLogic.obtenir(dni).map(c -> {
             model.addAttribute("client", c);
-            return "detallClient";   // vista de detalle (crear plantilla si no existe)
+            return "client/detallClient";   // vista de detalle (crear plantilla si no existe)
         }).orElseGet(() -> {
             ra.addFlashAttribute("error", "Client no trobat");
             return "redirect:/clients";
@@ -192,7 +192,7 @@ public class clientController {
     public String formulariEditar(@PathVariable String dni, Model model, RedirectAttributes ra) {
         return clientLogic.obtenir(dni).map(c -> {
             model.addAttribute("client", c);
-            return "editarClient";
+            return "client/editarClient";
         }).orElseGet(() -> {
             ra.addFlashAttribute("error", "Client no trobat");
             return "redirect:/clients";

@@ -24,6 +24,19 @@ public class VehiclesService {
         return vehiclesRepository.findAll();
     }
 
+    /**
+     * Filtra els vehicles segons el text de cerca, categoria (tipus) i estat d'activació.
+     */
+    @Transactional(readOnly = true)
+    public List<VehiclesEntity> filtrarVehicles(String cerca, String tipus, Boolean actiu) {
+        if ((cerca == null || cerca.isBlank()) && 
+            (tipus == null || tipus.isBlank()) && 
+            actiu == null) {
+            return vehiclesRepository.findAll();
+        }
+        return vehiclesRepository.filtrarVehicles(cerca, tipus, actiu);
+    }
+
     @Transactional(readOnly = true)
     public Optional<VehiclesEntity> buscarPerMatricula(String matricula) {
         return vehiclesRepository.findById(matricula);

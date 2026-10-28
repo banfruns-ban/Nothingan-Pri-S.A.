@@ -23,6 +23,7 @@
             min-height: 100vh;
         }
 
+        /* Sidebar Lateral */
         .sidebar {
             width: 260px;
             background-color: var(--sidebar-bg);
@@ -73,11 +74,13 @@
             font-weight: 500;
         }
 
+        /* Contingut Principal */
         .main-content {
             margin-left: 260px;
             padding: 40px;
         }
 
+        /* Targeta de Filtres */
         .filter-card {
             background: #ffffff;
             border: 1px solid var(--card-border);
@@ -93,11 +96,12 @@
             margin-bottom: 6px;
         }
 
+        /* Taula de Vehicles */
         .custom-table-card {
             background: #ffffff;
             border: 1px solid var(--card-border);
             border-radius: 12px;
-            overflow: visible; /* Permet que el desplegable es vegi fora de la taula */
+            overflow: hidden;
         }
 
         .table {
@@ -127,11 +131,16 @@
             color: #111827;
         }
 
-        .vehicle-img {
-            width: 70px;
-            height: 48px;
-            object-fit: cover;
+        .vehicle-img-placeholder {
+            width: 60px;
+            height: 40px;
+            background-color: #e5e7eb;
             border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            color: #9ca3af;
         }
 
         .vehicle-title {
@@ -175,67 +184,6 @@
             background-color: #fee2e2;
             color: #991b1b;
         }
-
-        /* Estils de les insígnees interactives */
-        .badge-actiu {
-            background-color: #dcfce7;
-            color: #166534;
-            font-weight: 600;
-            padding: 6px 10px;
-            border-radius: 6px;
-            font-size: 0.8rem;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            transition: background-color 0.2s;
-        }
-
-        .badge-actiu:hover {
-            background-color: #bbf7d0;
-        }
-
-        .badge-inactiu {
-            background-color: #fee2e2;
-            color: #991b1b;
-            font-weight: 600;
-            padding: 6px 10px;
-            border-radius: 6px;
-            font-size: 0.8rem;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            transition: background-color 0.2s;
-        }
-
-        .badge-inactiu:hover {
-            background-color: #fca5a5;
-        }
-
-        /* Treure la fletxa per defecte del desplegable de Bootstrap */
-        .dropdown-toggle::after {
-            display: none;
-        }
-
-        .dropdown-menu {
-            min-width: 120px;
-            padding: 4px;
-            border-radius: 8px;
-        }
-
-        .dropdown-item {
-            border-radius: 6px;
-            padding: 6px 10px;
-        }
-
-        .dropdown-item button {
-            background: none;
-            border: none;
-            width: 100%;
-            text-align: left;
-            padding: 0;
-        }
     </style>
 </head>
 <body>
@@ -253,6 +201,9 @@
             <a th:href="@{/vehicles}" class="nav-link active">
                 <i class="fa-solid fa-car"></i> Flota de Vehicles
             </a>
+            <a th:href="@{/agents/llista}" class="nav-link">
+                <i class="fa-solid fa-user-gear"></i> Gestió d'Agents
+            </a>
             <a href="#" class="nav-link">
                 <i class="fa-solid fa-users"></i> Gestió de Clients
             </a>
@@ -265,7 +216,7 @@
     <!-- Main Content -->
     <main class="main-content">
         
-        <!-- Header amb botó d'Alta (RF40) -->
+        <!-- Header -->
         <div class="d-flex justify-content-between align-items-start mb-4">
             <div>
                 <h2 class="fw-bold text-dark m-0">Flota de Vehicles</h2>
@@ -276,7 +227,7 @@
             </a>
         </div>
 
-        <!-- Alertes de flash attributes -->
+        <!-- Alertes Flash -->
         <div th:if="${succes}" class="alert alert-success alert-dismissible fade show mb-4" role="alert">
             <span th:text="${succes}"></span>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -288,38 +239,55 @@
 
         <!-- Targeta de Filtres -->
         <div class="filter-card shadow-sm">
-            <form th:action="@{/vehicles}" method="get" class="row g-3">
+            <form th:action="@{/vehicles}" method="get" class="row g-3 align-items-end">
+                
+                <!-- Cerca per model o matrícula -->
                 <div class="col-md-5">
-                    <label>Cerca per model o matrícula</label>
-                    <input type="text" name="cerca" class="form-control" placeholder="Ex. Toyota Yaris..." th:value="${param.cerca}">
+                    <label for="cerca">Cerca per model o matrícula</label>
+                    <input type="text" id="cerca" name="cerca" class="form-control" 
+                           placeholder="Ex. Toyota Yaris..." 
+                           th:value="${cerca}">
                 </div>
+
+                <!-- Categoria -->
                 <div class="col-md-3">
-                    <label>Categoria</label>
-                    <select name="tipus" class="form-select">
-                        <option value="">Tots els tipus</option>
-                        <option value="Econòmic" th:selected="${param.tipus == 'Econòmic'}">Econòmic</option>
-                        <option value="SUV" th:selected="${param.tipus == 'SUV'}">SUV</option>
-                        <option value="Furgoneta" th:selected="${param.tipus == 'Furgoneta'}">Furgoneta</option>
-                        <option value="Urbà" th:selected="${param.tipus == 'Urbà'}">Urbà</option>
+                    <label for="tipus">Categoria</label>
+                    <select id="tipus" name="tipus" class="form-select">
+                        <option value="" th:selected="${tipus == null or tipus.isBlank()}">Tots els tipus</option>
+                        <option value="Turisme" th:selected="${tipus == 'Turisme'}">Turisme</option>
+                        <option value="Furgoneta" th:selected="${tipus == 'Furgoneta'}">Furgoneta</option>
+                        <option value="SUV" th:selected="${tipus == 'SUV'}">SUV</option>
+                        <option value="Motocicleta" th:selected="${tipus == 'Motocicleta'}">Motocicleta</option>
                     </select>
                 </div>
+
+                <!-- Estat -->
                 <div class="col-md-3">
-                    <label>Estat</label>
-                    <select name="estat" class="form-select">
-                        <option value="">Actius i Inactius</option>
-                        <option value="true" th:selected="${param.estat == 'true'}">Només Actius</option>
-                        <option value="false" th:selected="${param.estat == 'false'}">Només Inactius</option>
+                    <label for="estat">Estat</label>
+                    <select id="estat" name="estat" class="form-select">
+                        <option value="" th:selected="${estat == null}">Actius i Inactius</option>
+                        <option value="true" th:selected="${estat == true}">Actius</option>
+                        <option value="false" th:selected="${estat == false}">Inactius</option>
                     </select>
                 </div>
-                <div class="col-md-1 d-flex align-items-end">
-                    <button type="submit" class="btn btn-outline-secondary w-100">
+
+                <!-- Botons de Filtrar / Netejar -->
+                <div class="col-md-1 d-flex gap-1">
+                    <button type="submit" class="btn btn-outline-secondary w-100" title="Filtrar">
                         <i class="fa-solid fa-filter"></i>
                     </button>
+                    <a th:if="${(cerca != null and !#strings.isEmpty(cerca)) or (tipus != null and !#strings.isEmpty(tipus)) or estat != null}" 
+                       th:href="@{/vehicles}" 
+                       class="btn btn-outline-danger" 
+                       title="Netejar filtre">
+                        <i class="fa-solid fa-xmark"></i>
+                    </a>
                 </div>
+
             </form>
         </div>
 
-        <!-- Taula de Llistat de Vehicles (RF43) -->
+        <!-- Taula de Llistat de Vehicles -->
         <div class="custom-table-card shadow-sm">
             <table class="table">
                 <thead>
@@ -338,63 +306,37 @@
                 <tbody>
                     <tr th:each="v : ${vehicles}">
                         <td>
-                            <img th:src="@{${'/images/vehicles/' + v.matricula + '.jpg'}}" 
-                                 src="https://via.placeholder.com/70x48?text=Vehicle" 
-                                 alt="Foto Vehicle" class="vehicle-img"
-                                 onerror="this.src='https://via.placeholder.com/70x48?text=Vehicle';">
+                            <div class="vehicle-img-placeholder">Vehicle</div>
                         </td>
                         <td>
-                            <a th:href="@{/vehicles/detall/{m}(m=${v.matricula})}" class="text-decoration-none">
+                            <a th:href="@{/vehicles/detall/{matricula}(matricula=${v.matricula})}" class="text-decoration-none">
                                 <p class="vehicle-title" th:text="${v.marca + ' ' + v.model}">Toyota Yaris Hybrid</p>
                             </a>
-                            <span class="vehicle-sub" th:text="'ID: ' + ${v.matricula}">ID: VEH-001</span>
+                            <span class="vehicle-sub" th:text="'ID: ' + ${v.matricula}">ID: 4823KLP</span>
                         </td>
                         <td>
                             <strong th:text="${v.matricula}">4823KLP</strong>
                         </td>
                         <td th:text="${v.tipusVehicle}">Furgoneta</td>
                         <td th:text="${v.anyMatriculacio}">2024</td>
+                        <td th:text="${#numbers.formatDecimal(v.preuHora, 1, 2) + ' €'}">45.00 €</td>
+                        <td th:text="${#numbers.formatDecimal(v.fianca, 1, 2) + ' €'}">300.00 €</td>
                         <td>
-                            <strong th:text="${v.preuHora + ' €'}">45.00 €</strong>
+                            <!-- Desplegable per canviar estat operatiu / activació -->
+                            <form th:action="@{/vehicles/canviar-estat/{matricula}(matricula=${v.matricula})}" method="post" class="d-inline">
+                                <select name="actiu" onchange="this.form.submit()" 
+                                        class="form-select form-select-sm border-0 fw-semibold"
+                                        th:classappend="${v.actiu ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger'}"
+                                        style="width: auto; cursor: pointer;">
+                                    <option value="true" th:selected="${v.actiu}">Actiu</option>
+                                    <option value="false" th:selected="${!v.actiu}">Inactiu</option>
+                                </select>
+                            </form>
                         </td>
-                        <td th:text="${v.fianca + ' €'}">300.00 €</td>
-                        
-                        <!-- COLUMNA ESTAT: INSÍGNIA DESPLEGABLE -->
-                        <td class="dropdown">
-                            <div class="dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" role="button">
-                                <span th:if="${v.actiu}" class="badge-actiu">
-                                    Actiu <i class="fa-solid fa-chevron-down ms-1" style="font-size: 0.65rem;"></i>
-                                </span>
-                                <span th:if="${!v.actiu}" class="badge-inactiu">
-                                    Inactiu <i class="fa-solid fa-chevron-down ms-1" style="font-size: 0.65rem;"></i>
-                                </span>
-                            </div>
-                            <ul class="dropdown-menu shadow-sm">
-                                <li>
-                                    <form th:action="@{/vehicles/canviar-estat/{m}(m=${v.matricula})}" method="post">
-                                        <input type="hidden" name="actiu" value="true" />
-                                        <button type="submit" class="dropdown-item">
-                                            <span class="badge-actiu w-100 justify-content-center">Actiu</span>
-                                        </button>
-                                    </form>
-                                </li>
-                                <li>
-                                    <form th:action="@{/vehicles/canviar-estat/{m}(m=${v.matricula})}" method="post" class="mt-1">
-                                        <input type="hidden" name="actiu" value="false" />
-                                        <button type="submit" class="dropdown-item">
-                                            <span class="badge-inactiu w-100 justify-content-center">Inactiu</span>
-                                        </button>
-                                    </form>
-                                </li>
-                            </ul>
-                        </td>
-
-                        <!-- COLUMNA ACCIONS (Manté el teu botó de Desactivar/Eliminar original) -->
                         <td class="text-end">
-                            <a th:href="@{/vehicles/editar/{m}(m=${v.matricula})}" class="btn-editar me-1">Editar</a>
-                            
-                            <form th:action="@{/vehicles/eliminar/{m}(m=${v.matricula})}" method="post" class="d-inline"
-                                  onsubmit="return confirm('Estàs segur d\'eliminar definitivament aquest vehicle?');">
+                            <a th:href="@{/vehicles/editar/{matricula}(matricula=${v.matricula})}" class="btn-editar me-1">Editar</a>
+                            <form th:action="@{/vehicles/eliminar/{matricula}(matricula=${v.matricula})}" method="post" class="d-inline"
+                                  onsubmit="return confirm('Estàs segur de voler eliminar aquest vehicle?');">
                                 <button type="submit" class="btn-desactivar">Desactivar</button>
                             </form>
                         </td>
@@ -402,7 +344,7 @@
                     
                     <tr th:if="${#lists.isEmpty(vehicles)}">
                         <td colspan="9" class="text-center py-4 text-muted">
-                            No s'han trobat vehicles registrats a la base de dades.
+                            No s'han trobat vehicles que coincideixin amb el filtre seleccionat.
                         </td>
                     </tr>
                 </tbody>
@@ -411,7 +353,6 @@
 
     </main>
 
-    <!-- JS de Bootstrap (Imprescindible per al funcionament dels desplegables) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -10,10 +10,10 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
- * hola
  * Controladors per a les visites i accions del CRUD de Vehicles (RF40 - RF44).
  */
 @Controller
@@ -28,11 +28,21 @@ public class VehiclesController {
     }
 
     /**
-     * RF43: Llistar tots els vehicles.
+     * RF43: Llistar tots els vehicles amb opció de filtre (cerca, tipus, estat).
      */
     @GetMapping
-    public String llistarVehicles(Model model) {
-        model.addAttribute("vehicles", vehiclesService.llistarTots());
+    public String llistarVehicles(
+            @RequestParam(name = "cerca", required = false) String cerca,
+            @RequestParam(name = "tipus", required = false) String tipus,
+            @RequestParam(name = "estat", required = false) Boolean estat,
+            Model model) {
+        
+        List<VehiclesEntity> vehicles = vehiclesService.filtrarVehicles(cerca, tipus, estat);
+        model.addAttribute("vehicles", vehicles);
+        model.addAttribute("cerca", cerca);
+        model.addAttribute("tipus", tipus);
+        model.addAttribute("estat", estat);
+        
         return "vehicles/llistat";
     }
 

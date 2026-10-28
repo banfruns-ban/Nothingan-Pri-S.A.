@@ -36,10 +36,12 @@ public class reservesController {
     }
     
     @GetMapping("/reserves")
-    public String llistar(@RequestParam(required = false) String q,
+    public String llistar(
+                          @RequestParam(required = false) String dni,
+                          @RequestParam(required = false) String q,
                           @RequestParam(required = false) String estat,
                           Model model) {
-        model.addAttribute("reserves", reservesLogic.llistar(q, estat));
+        model.addAttribute("reserves", reservesLogic.llistar(q, estat,dni));
         model.addAttribute("q", q);
         model.addAttribute("estat", estat);
         return "llistaReserves"; }

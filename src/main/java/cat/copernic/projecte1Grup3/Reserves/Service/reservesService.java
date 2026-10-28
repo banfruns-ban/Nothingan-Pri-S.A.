@@ -50,7 +50,7 @@ public class reservesService {
                 .toList(); 
     }
     
-     public List<reservesEntity> llistar(String q, String estat) {
+     public List<reservesEntity> llistar(String q, String estat, String dni) {
         List<reservesEntity> reserves = reservesRepository.findAll();
  
         // 1. Cerca general: codi, nom/DNI del client, matrícula/marca/model del vehicle
@@ -68,9 +68,12 @@ public class reservesService {
         }
  
         // 2. Filtre per estat
-        if (estat != null && !estat.isBlank()) {
+         if (dni != null && !dni.isBlank()) {
+            String d = dni.trim().toUpperCase();
             reserves = reserves.stream()
-                    .filter(r -> estat.equals(r.getEstat()))
+                    .filter(r -> r.getClient() != null
+                            && r.getClient().getDni() != null
+                            && r.getClient().getDni().toUpperCase().contains(d))
                     .toList();
         }
  

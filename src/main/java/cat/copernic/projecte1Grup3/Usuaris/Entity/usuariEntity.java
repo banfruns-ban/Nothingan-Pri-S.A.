@@ -20,7 +20,7 @@ import jakarta.validation.constraints.Size;
 public class usuariEntity {
     
     @Id
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length= 9)
     @NotBlank(message = "El DNI no pot estar buit")
     @Pattern(regexp = "^[0-9]{8}[A-Za-z]$", message = "El DNI ha de tenir 8 xifres i una lletra al final (Ex: 12345678Z)")
     private String dni;

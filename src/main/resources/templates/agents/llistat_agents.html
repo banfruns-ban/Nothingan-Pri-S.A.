@@ -257,30 +257,35 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
 
-        <!-- Targeta de Filtres -->
+        <!-- Targeta de Filtres per DNI, Nom o Email (RF14) -->
         <div class="filter-card shadow-sm">
             <form th:action="@{/agents/llista}" method="get" class="row g-3">
-                <div class="col-md-6">
-                    <label>Cerca per nom, DNI o email</label>
-                    <input type="text" name="cerca" class="form-control" placeholder="Ex. Joan, 12345678Z..." th:value="${param.cerca}">
+                <div class="col-md-9">
+                    <label for="cerca">Cerca per DNI, nom o correu electrònic</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0">
+                            <i class="fa-solid fa-magnifying-glass text-muted"></i>
+                        </span>
+                        <input type="text" id="cerca" name="cerca" class="form-control border-start-0" 
+                               placeholder="Introdueix un DNI (Ex: 12345678Z), nom o email..." 
+                               th:value="${param.cerca}">
+                    </div>
                 </div>
-                <div class="col-md-5">
-                    <label>Rol al sistema</label>
-                    <select name="rol" class="form-select">
-                        <option value="">Tots els rols</option>
-                        <option value="AGENT" th:selected="${param.rol == 'AGENT'}">Agent</option>
-                        <option value="ADMIN" th:selected="${param.rol == 'ADMIN'}">Administrador</option>
-                    </select>
-                </div>
-                <div class="col-md-1 d-flex align-items-end">
-                    <button type="submit" class="btn btn-outline-secondary w-100">
-                        <i class="fa-solid fa-filter"></i>
+                <div class="col-md-3 d-flex align-items-end gap-2">
+                    <button type="submit" class="btn btn-primary w-100 fw-semibold">
+                        <i class="fa-solid fa-filter me-1"></i> Filtrar
                     </button>
+                    <a th:if="${param.cerca != null and !#strings.isEmpty(param.cerca)}" 
+                       th:href="@{/agents/llista}" 
+                       class="btn btn-outline-secondary" 
+                       title="Netejar filtre">
+                        <i class="fa-solid fa-xmark"></i>
+                    </a>
                 </div>
             </form>
         </div>
 
-        <!-- Taula de Llistat d'Agents (RF13) -->
+        <!-- Taula de Llistat d'Agents (RF13 / RF14) -->
         <div class="custom-table-card shadow-sm">
             <table class="table">
                 <thead>
@@ -339,7 +344,7 @@
                     
                     <tr th:if="${#lists.isEmpty(agents)}">
                         <td colspan="7" class="text-center py-4 text-muted">
-                            No s'han trobat agents registrats a la base de dades.
+                            No s'han trobat agents registrats que coincideixin amb la cerca.
                         </td>
                     </tr>
                 </tbody>

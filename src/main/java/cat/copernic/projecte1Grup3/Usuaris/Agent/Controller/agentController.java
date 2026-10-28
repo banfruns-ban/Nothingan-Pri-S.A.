@@ -85,16 +85,15 @@ public class agentController {
     }
 
     /**
-     * RF13: Mostra la llista completa d'agents registrats al sistema.
-     * Mapeja /agents, /agents/ i /agents/llista per evitar errors 404.
+     * RF13 & RF14: Mostra la llista d'agents, aplicant el filtre de cerca per
+     * DNI, Nom o Email si existeix.
      */
     @GetMapping({"", "/", "/llista"})
-    public String llistarAgents(Model model) {
-        // Obtenim la llista de la BD i la passem al model
-        List<agentEntity> llista = agentService.llistarAgents();
+    public String llistarAgents(@RequestParam(name = "cerca", required = false) String cerca, Model model) {
+        // Obtenim la llista filtrada o completa
+        List<agentEntity> llista = agentService.llistarOFiltrarAgents(cerca);
         model.addAttribute("agents", llista);
-        
-        // Retorna exactament "agents/llistat_agents" coincidint amb el fitxer llistat_agents.html
+
         return "agents/llistat_agents";
     }
 
@@ -125,7 +124,7 @@ public class agentController {
     }
     
     @PostMapping("/eliminar/{dni}")
-    public String eliminarVehicle(@PathVariable String dni, RedirectAttributes redirect) {
+    public String eliminarAgent(@PathVariable String dni, RedirectAttributes redirect) {
         try {
             agentService.eliminarAgent(dni);
             redirect.addFlashAttribute("succes", "Agent donat de baixa amb èxit.");
@@ -136,4 +135,6 @@ public class agentController {
         }
         return "redirect:/agents";
     }
+    
+    //Filtro por dni, nombre y mail
 }

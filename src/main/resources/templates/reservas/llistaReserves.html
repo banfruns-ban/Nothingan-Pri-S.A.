@@ -86,6 +86,10 @@
         .estat.CANCELADA { background: #fee2e2; color: #991b1b; }
         .btn-veure { padding: 5px 10px; font-size: 10px; font-weight: 600; gap: 5px; }
         .btn-veure svg.ico { width: 12px; height: 12px; }
+        .accions { display: flex; gap: 8px; justify-content: flex-end; align-items: center; }
+        .accions form { margin: 0; }
+        .btn-eliminar { color: #b91c1c; }
+        .btn-eliminar:hover { background: #fef2f2; border-color: #fecaca; }
         .buit { text-align: center; color: #94a3b8; padding: 28px; }
 
         .peu { display: flex; justify-content: space-between; align-items: center; padding-top: 14px;
@@ -219,10 +223,14 @@
                                   th:text="${r.estat == 'PENDENT' ? 'Pendent' : (r.estat == 'CONFIRMADA' ? 'Confirmada' : (r.estat == 'EN_CURS' ? 'En curs' : (r.estat == 'FINALITZADA' ? 'Finalitzada' : 'Cancel·lada')))}">Estat</span>
                         </td>
                         <td class="dreta">
-                            <a class="btn btn-veure" th:href="@{/clients/{d}(d=${r.client.dni})}">
-                                <svg class="ico" viewBox="0 0 24 24"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>
-                                Client
-                            </a>
+                            <div class="accions">
+                                <a class="btn btn-veure" th:href="@{/clients/{d}(d=${r.client.dni})}">Client</a>
+                                <form th:if="${r.estat != 'EN_CURS' and r.estat != 'FINALITZADA'}"
+                                      th:action="@{/reserves/{c}/eliminar(c=${r.codiReserva})}" method="post"
+                                      onsubmit="return confirm('Segur que vols eliminar aquesta reserva?');">
+                                    <button type="submit" class="btn btn-veure btn-eliminar">Eliminar</button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                     <tr th:if="${#lists.isEmpty(reserves)}">

@@ -35,40 +35,39 @@ public class reservesService {
     private final VehiclesRepository vehiclesRepository;
 
     public reservesService(reservesRepository reservesRepository,
-                           clientRepository clientRepository,
-                           VehiclesRepository vehiclesRepository) {
+            clientRepository clientRepository,
+            VehiclesRepository vehiclesRepository) {
         this.reservesRepository = reservesRepository;
         this.clientRepository = clientRepository;
         this.vehiclesRepository = vehiclesRepository;
     }
 
-  
     // Recoge los vehiculos activos para saber cuales vehiculos se pueden reservar
     public List<VehiclesEntity> vehiclesActius() {
         return vehiclesRepository.findAll().stream()
                 .filter(v -> Boolean.TRUE.equals(v.getActiu()))
-                .toList(); 
+                .toList();
     }
-    
-       public List<reservesEntity> llistar(String q, String dni, String email,
-                                        LocalDate dataReserva, String matricula,
-                                        String codi, String estat) {
+
+    public List<reservesEntity> llistar(String q, String dni, String email,
+            LocalDate dataReserva, String matricula,
+            String codi, String estat) {
         List<reservesEntity> reserves = reservesRepository.findAll();
-        
+
         // 1. Cerca general: codi, nom/DNI del client, matrícula/marca/model del vehicle
         if (q != null && !q.isBlank()) {
             String text = q.trim().toLowerCase();
             reserves = reserves.stream()
                     .filter(r -> conte(String.valueOf(r.getCodiReserva()), text)
                             || (r.getClient() != null
-                                && (conte(r.getClient().getNom(), text) || conte(r.getClient().getDni(), text)))
+                            && (conte(r.getClient().getNom(), text) || conte(r.getClient().getDni(), text)))
                             || (r.getVehicle() != null
-                                && (conte(r.getVehicle().getMatricula(), text)
-                                    || conte(r.getVehicle().getMarca(), text)
-                                    || conte(r.getVehicle().getModel(), text))))
+                            && (conte(r.getVehicle().getMatricula(), text)
+                            || conte(r.getVehicle().getMarca(), text)
+                            || conte(r.getVehicle().getModel(), text))))
                     .toList();
         }
- 
+
         // 2. Filtre per DNI
         if (dni != null && !dni.isBlank()) {
             String d = dni.trim().toLowerCase();
@@ -76,7 +75,7 @@ public class reservesService {
                     .filter(r -> r.getClient() != null && conte(r.getClient().getDni(), d))
                     .toList();
         }
- 
+
         // 3. Email del client
         if (email != null && !email.isBlank()) {
             String e = email.trim().toLowerCase();
@@ -84,7 +83,7 @@ public class reservesService {
                     .filter(r -> r.getClient() != null && conte(r.getClient().getEmail(), e))
                     .toList();
         }
- 
+
         // 4. Data de reserva: reserves actives aquell dia (dataInici <= dia <= dataFi)
         if (dataReserva != null) {
             reserves = reserves.stream()
@@ -93,7 +92,7 @@ public class reservesService {
                             && !dataReserva.isAfter(r.getDataFi()))
                     .toList();
         }
- 
+
         // 5. Matrícula del vehicle
         if (matricula != null && !matricula.isBlank()) {
             String m = matricula.trim().toLowerCase();
@@ -101,7 +100,7 @@ public class reservesService {
                     .filter(r -> r.getVehicle() != null && conte(r.getVehicle().getMatricula(), m))
                     .toList();
         }
- 
+
         // 6. Codi de reserva (exacte)
         if (codi != null && !codi.isBlank()) {
             String c = codi.trim();
@@ -109,7 +108,7 @@ public class reservesService {
                     .filter(r -> String.valueOf(r.getCodiReserva()).equals(c))
                     .toList();
         }
- 
+
         // 7. Estat
         if (estat != null && !estat.isBlank()) {
             reserves = reserves.stream()
@@ -118,26 +117,23 @@ public class reservesService {
                             && r.getClient().getDni().toUpperCase().contains(q))
                     .toList();
         }
- 
+
         // 8. Les més noves primer
         return reserves.stream()
                 .sorted(Comparator.comparing(reservesEntity::getCodiReserva).reversed())
                 .toList();
     }
-    
- 
+
     private boolean conte(String valor, String text) {
         return valor != null && valor.toLowerCase().contains(text);
     }
 
-    
     @Transactional //<--si algo falla, no se guarda nada.
     public reservesEntity crear(String dni, String matricula,
-                                LocalDate dataInici, LocalTime horaInici,
-                                LocalDate dataFi, LocalTime horaFi,
-                                String observacions) {
+            LocalDate dataInici, LocalTime horaInici,
+            LocalDate dataFi, LocalTime horaFi,
+            String observacions) {
 
-        
         if (dni == null || dni.isBlank()) {
             throw new IllegalArgumentException("Cal indicar el client");
         }
@@ -187,8 +183,8 @@ public class reservesService {
         }
 
         // 6. El vehicle no pot estar ja reservat en aquest interval
-        List<reservesEntity> existents =
-                reservesRepository.findByVehicleMatriculaAndEstatNot(matricula, CANCELADA);
+        List<reservesEntity> existents
+                = reservesRepository.findByVehicleMatriculaAndEstatNot(matricula, CANCELADA);
         for (reservesEntity r : existents) {
             LocalDateTime iniciR = LocalDateTime.of(r.getDataInici(), r.getHoraInici());
             LocalDateTime fiR = LocalDateTime.of(r.getDataFi(), r.getHoraFi());
@@ -198,8 +194,6 @@ public class reservesService {
                         "El vehicle ja està reservat en aquest període");
             }
         }
-        
-        
 
         // 7. Valors que decideix el servidor, no el formulari
         reservesEntity reserva = new reservesEntity();
@@ -218,5 +212,17 @@ public class reservesService {
                 ? null : observacions.trim());
 
         return reservesRepository.save(reserva);
+    }
+    
+     @Transactional
+    public void eliminar(Long codi) {
+        reservesEntity r = reservesRepository.findById(codi)
+                .orElseThrow(() -> new IllegalArgumentException("Reserva no trobada"));
+ 
+        if (EN_CURS.equals(r.getEstat()) || FINALITZADA.equals(r.getEstat())) {
+            throw new IllegalArgumentException(
+                    "No es pot eliminar una reserva en curs o finalitzada");
+        }
+        reservesRepository.delete(r);
     }
 }

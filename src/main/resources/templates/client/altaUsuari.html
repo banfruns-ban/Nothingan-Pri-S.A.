@@ -1,386 +1,163 @@
 <!DOCTYPE html>
-<html lang="ca" xmlns:th="http://www.thymeleaf.org">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Registre de nou client</title>
-        <style>
-            * {
-                box-sizing: border-box;
-            }
-            body {
-                margin: 0;
-                font-family: Inter, Arial, sans-serif;
-                background: #f8fafc;
-                color: #1e293b;
-                font-size: 12px;
-            }
-            header {
-                background: #fff;
-                border-top: 2px solid  #0f172a;
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                padding: 12px 40px;
-            }
-            header .titol {
-                font-size: 13px;
-            }
-            header .titol strong {
-                font-weight: 700;
-            }
-            .btn-inici {
-                border: 1px solid #e2e8f0;
-                background: #fff;
-                border-radius: 4px;
-                padding: 6px 12px;
-                font-size: 11px;
-                text-decoration: none;
-                color: #1e293b;
-            }
-            main {
-                max-width: 640px;
-                margin: 40px auto;
-                padding: 0 16px;
-            }
-            h1 {
-                font-size: 22px;
-                margin: 0 0 6px;
-            }
-            .subtitol {
-                color: #64748b;
-                font-size: 11px;
-                margin-bottom: 20px;
-            }
-            .targeta {
-                background: #fff;
-                border: 1px solid #e2e8f0;
-                border-radius: 10px;
-                padding: 24px;
-            }
-            h2 {
-                font-size: 12px;
-                color: #2563eb;
-                margin: 24px 0 12px;
-            }
-            h2:first-child {
-                margin-top: 0;
-            }
-            .fila {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 14px;
-                margin-bottom: 14px;
-            }
-            .fila.tres {
-                grid-template-columns: 2fr 1fr 1fr;
-            }
-            .fila.una {
-                grid-template-columns: 1fr;
-            }
-            label {
-                display: block;
-                font-size: 10px;
-                color: #475569;
-                margin-bottom: 4px;
-            }
-            input[type=text], input[type=email], input[type=password], input[type=date], input[type=tel] {
-                width: 100%;
-                padding: 9px 10px;
-                border: 1px solid #e2e8f0;
-                border-radius: 4px;
-                font-size: 11px;
-                background: #fff;
-            }
-            input:focus {
-                outline: 2px solid #bfdbfe;
-                border-color: #3b82f6;
-            }
-            .pujada {
-                border: 1px dashed #cbd5e1;
-                background: #f8fafc;
-                border-radius: 6px;
-                padding: 22px 10px;
-                text-align: center;
-                cursor: pointer;
-                display: block;
-            }
-            .pujada .enllac {
-                color: #2563eb;
-                font-weight: 600;
-                font-size: 10px;
-            }
-            .pujada .ajuda {
-                color: #94a3b8;
-                font-size: 9px;
-                margin-top: 4px;
-            }
-            .pujada {
-                position: relative;
-            }
-            .pujada input {
-                position: absolute;
-                opacity: 0;
-                width: 1px;
-                height: 1px;
-            }
-            .pujada .previa {
-                display: none;
-                max-width: 100%;
-                max-height: 140px;
-                margin: 0 auto 8px;
-                border-radius: 4px;
-            }
-            .pujada .nomfitxer {
-                display: none;
-                font-size: 10px;
-                color: #475569;
-                word-break: break-all;
-            }
-            .pujada.te-fitxer {
-                border-style: solid;
-                border-color: #3b82f6;
-                background: #eff6ff;
-            }
-            .pujada.te-fitxer .previa, .pujada.te-fitxer .nomfitxer {
-                display: block;
-            }
-            .pujada.arrossegant {
-                border-color: #3b82f6;
-                background: #dbeafe;
-            }
-            .pujada.error-fitxer {
-                border-color: #dc2626;
-                background: #fef2f2;
-            }
-            .avis {
-                background: #fef9c3;
-                border: 1px solid #fde68a;
-                color: #92400e;
-                border-radius: 4px;
-                padding: 10px 12px;
-                font-size: 10px;
-                margin: 18px 0 14px;
-            }
-            .error {
-                background: #fee2e2;
-                border: 1px solid #fecaca;
-                color: #991b1b;
-                border-radius: 4px;
-                padding: 10px 12px;
-                font-size: 11px;
-                margin-bottom: 14px;
-            }
-            .ok {
-                background: #dcfce7;
-                border: 1px solid #bbf7d0;
-                color: #166534;
-                border-radius: 4px;
-                padding: 10px 12px;
-                font-size: 11px;
-                margin-bottom: 14px;
-            }
-            button[type=submit] {
-                background: #2563eb;
-                color: #fff;
-                border: 0;
-                border-radius: 4px;
-                padding: 10px 16px;
-                font-size: 11px;
-                font-weight: 600;
-                cursor: pointer;
-            }
-            button[type=submit]:hover {
-                background: #1d4ed8;
-            }
-        </style>
-    </head>
-    <body>
+<html xmlns:th="http://www.thymeleaf.org" lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Donar d'Alta Client - NOTHINGAN PRI S.A</title>
+    <!-- Bootstrap 5 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <!-- FontAwesome per les icones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Mateix CSS de Agents -->
+    <link rel="stylesheet" th:href="@{/agents.css}">
+</head>
+<body>
 
-        <header>
-            <div></div>
-            <div class="titol"><strong>NOTHINGAN PRI S.A.</strong> | Portal Client</div>
-            <a class="btn-inici" th:href="@{/}">Tornar a l'inici</a>
-        </header>
+    <!-- Sidebar Lateral -->
+    <aside class="sidebar">
+        <div class="brand">
+            NOTHINGAN PRI S.A
+            <span>PANEL DE CONTROL AGENT</span>
+        </div>
+        <nav class="mt-3">
+            <a th:href="@{/dashboard}" class="nav-link">
+                <i class="fa-solid fa-border-all"></i> Dashboard
+            </a>
+            <a th:href="@{/vehicles}" class="nav-link">
+                <i class="fa-solid fa-car"></i> Flota de Vehicles
+            </a>
+            <a th:href="@{/agents/llista}" class="nav-link">
+                <i class="fa-solid fa-user-gear"></i> Gestió d'Agents
+            </a>
+            <a th:href="@{/clients}" class="nav-link active">
+                <i class="fa-solid fa-users"></i> Gestió de Clients
+            </a>
+            <a th:href="@{/reserves}" class="nav-link">
+                <i class="fa-regular fa-calendar-check"></i> Reserves Actives
+            </a>
+        </nav>
+    </aside>
 
-        <main>
-            <h1>Registre de nou client</h1>
-            <p class="subtitol">Ompli el següent formulari per sol·licitar l'alta en el nostre sistema de lloguer de vehicles.</p>
-
-            <div class="targeta">
-
-                <div class="ok" th:if="${missatge}" th:text="${missatge}"></div>
-                <div class="error" th:if="${error}" th:text="${error}"></div>
-
-                <form th:action="@{/clients/alta}" th:object="${client}" method="post" enctype="multipart/form-data">
-
-                    <!-- 1. Dades personals -->
-                    <h2>1. Dades personals i d'accés</h2>
-                    <div class="fila">
-                        <div>
-                            <label for="nom">Nom complet (com figura al DNI)</label>
-                            <input type="text" id="nom" th:field="*{nom}" placeholder="Ex: Joan Garcia i Soler" required>
-                        </div>
-                        <div>
-                            <label for="dni">Número d'identificació (DNI / NIE / Passaport)</label>
-                            <input type="text" id="dni" th:field="*{dni}" placeholder="Ex: 12345678Z" maxlength="9" required>
-                        </div>
-                    </div>
-                    <div class="fila">
-                        <div>
-                            <label for="nacionalitat">Nacionalitat</label>
-                            <input type="text" id="nacionalitat" th:field="*{nacionalitat}" placeholder="Ex: Espanyola" required>
-                        </div>
-                        <div>
-                            <label for="adreca">Adreça completa</label>
-                            <input type="text" id="adreca" th:field="*{adreca}" placeholder="Ex: Carrer Major 12, Terrassa" required>
-                        </div>
-                    </div>
-                    <div class="fila">
-                        <div>
-                            <label for="email">Adreça electrònica</label>
-                            <input type="email" id="email" th:field="*{email}" placeholder="Ex: joan@gmail.com" required>
-                        </div>
-                        <div>
-                            <label for="password">Contrasenya per al portal</label>
-                            <input type="password" id="password" th:field="*{password}"
-                                   placeholder="Mínim 8 caràcters"
-                                   minlength="8" required>
-                        </div>
-                    </div>
-
-                    <div class="fila">
-                        <div>
-                            <label for="dataNaixement">Data de naixement</label>
-                            <input type="date" id="dataNaixement" th:field="*{dataNaixement}" required>
-                        </div>
-                        <div>
-                            <label for="telefon">Telèfon de contacte</label>
-                            <input type="tel" id="telefon" th:field="*{telefon}" placeholder="Ex: 612 345 678"
-                                   pattern="[0-9 +]{9,15}" title="Entre 9 i 15 xifres (es permeten espais i +)" required>
-                        </div>
-                    </div>
-
-                    <!-- 2. Verificació d'identitat -->
-                    <h2>2. Verificació d'identitat (DNI / Passaport)</h2>
-                    <div class="fila">
-                        <div>
-                            <label>Foto frontal del DNI/Passaport</label>
-                            <label class="pujada">
-                                <div class="enllac">Puja el fitxer o arrossega'l</div>
-                                <div class="ajuda">PNG o JPG d'alta resolució, màxim 5MB</div>
-                                <img class="previa" alt="Vista prèvia">
-                                <div class="nomfitxer"></div>
-                                <input type="file" name="fotoDniFrontal" accept="image/png,image/jpeg">
-                            </label>
-                        </div>
-                        <div>
-                            <label>Foto posterior del DNI</label>
-                            <label class="pujada">
-                                <div class="enllac">Puja el fitxer o arrossega'l</div>
-                                <div class="ajuda">PNG o JPG d'alta resolució, màxim 5MB</div>
-                                <img class="previa" alt="Vista prèvia">
-                                <div class="nomfitxer"></div>
-                                <input type="file" name="fotoDniPosterior" accept="image/png,image/jpeg">
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- 3. Permís de conduir -->
-                    <h2>3. Permís de conduir actiu</h2>
-                    <div class="fila">
-                        <div>
-                            <label for="tipusLlicencia">Tipus de llicència (Ex: B, C, etc.)</label>
-                            <input type="text" id="tipusLlicencia" th:field="*{tipusLlicencia}" placeholder="Ex: B" required>
-                        </div>
-                        <div>
-                            <label for="dataCaducitatDNI">Data de caducitat</label>
-                            <input type="date" id="dataCaducitatDNI" th:field="*{dataCaducitatDNI}" required>
-                        </div>
-                    </div>
-                    <div class="fila una">
-                        <div>
-                            <label>Imatge del carnet de conduir (Frontal)</label>
-                            <label class="pujada">
-                                <div class="enllac">Puja el fitxer o arrossega'l</div>
-                                <div class="ajuda">Ha de veure's clarament el número i la data d'expedició</div>
-                                <img class="previa" alt="Vista prèvia">
-                                <div class="nomfitxer"></div>
-                                <input type="file" name="fotoCarnet" accept="image/png,image/jpeg">
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- 4. Facturació -->
-                    <h2>4. Informació de facturació i pagament (Targeta)</h2>
-                    <div class="fila tres">
-                        <div>
-                            <label for="numTargeta">Número de targeta de crèdit</label>
-                            <input type="text" id="numTargeta" name="numTargeta" placeholder="0000 0000 0000 0000"
-                                   inputmode="numeric" autocomplete="cc-number" maxlength="19">
-                        </div>
-                        <div>
-                            <label for="venciment">Venciment</label>
-                            <input type="text" id="venciment" name="venciment" placeholder="MM/AA"
-                                   autocomplete="cc-exp" maxlength="5">
-                        </div>
-                        <div>
-                            <label for="cvc">CVC</label>
-                            <input type="text" id="cvc" name="cvc" placeholder="123"
-                                   inputmode="numeric" autocomplete="cc-csc" maxlength="4">
-                        </div>
-                    </div>
-
-                    <div class="avis">
-                        ⓘ El registre serà revisat per l'administrador de Nothingan Pri S.A. abans de poder fer reserves actives.
-                    </div>
-
-                    <button type="submit">Enviar sol·licitud de registre</button>
-                </form>
+    <!-- Main Content -->
+    <main class="main-content">
+        
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold text-dark m-0">Alta de Nou Client</h2>
+                <p class="text-muted small mb-0 mt-1">Introduïu les dades del nou client i la seva documentació.</p>
             </div>
-        </main>
+            <div>
+                <a th:href="@{/clients}" class="btn btn-secondary fw-semibold px-3 py-2" style="border-radius: 8px;">
+                    <i class="fa-solid fa-arrow-left me-1"></i> Tornar al llistat
+                </a>
+            </div>
+        </div>
 
+        <!-- Missatges Flash -->
+        <div class="alert alert-success alert-dismissible fade show shadow-sm mb-4" role="alert" th:if="${missatge}">
+            <i class="fa-solid fa-circle-check me-2"></i>
+            <span th:text="${missatge}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm mb-4" role="alert" th:if="${error}">
+            <i class="fa-solid fa-triangle-exclamation me-2"></i>
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
 
-        <script>
-            document.querySelectorAll('.pujada').forEach(function (zona) {
-            var input = zona.querySelector('input[type=file]');
-            var img = zona.querySelector('.previa');
-            var nom = zona.querySelector('.nomfitxer');
-            var enllac = zona.querySelector('.enllac');
-            var textOriginal = enllac.textContent;
-            var MAX = 5 * 1024 * 1024;
+        <div class="form-card shadow-sm">
+            <form th:action="@{/clients/alta}" th:object="${client}" method="post" enctype="multipart/form-data">
+                
+                <!-- 1. Dades Personals -->
+                <h5 class="fw-bold text-primary mb-3 border-bottom pb-2">1. Dades personals i d'accés</h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label">Nom complet (com figura al DNI)</label>
+                        <input type="text" th:field="*{nom}" class="form-control" placeholder="Ex: Joan Garcia i Soler" required>
+                    </div>
 
-            function mostra() {
-            var f = input.files[0];
-            zona.classList.remove('te-fitxer', 'error-fitxer');
-            if (img.dataset.url) { URL.revokeObjectURL(img.dataset.url); img.dataset.url = ''; }
-            if (!f) { enllac.textContent = textOriginal; return; }
-            if (['image/png', 'image/jpeg'].indexOf(f.type) === -1 || f.size > MAX) {
-            input.value = '';
-            zona.classList.add('error-fitxer');
-            enllac.textContent = 'Fitxer no vàlid (PNG o JPG, màxim 5MB)';
-            return;
-            }
-            var url = URL.createObjectURL(f);
-            img.src = url;
-            img.dataset.url = url;
-            nom.textContent = f.name + ' (' + Math.round(f.size / 1024) + ' KB)';
-            enllac.textContent = 'Canvia el fitxer';
-            zona.classList.add('te-fitxer');
-            }
+                    <div class="col-md-6">
+                        <label class="form-label">DNI / NIE / Passaport</label>
+                        <input type="text" th:field="*{dni}" class="form-control" placeholder="Ex: 12345678Z" maxlength="9" required>
+                    </div>
 
-            input.addEventListener('change', mostra);
-            ['dragenter', 'dragover'].forEach(function (ev) {
-            zona.addEventListener(ev, function (e) { e.preventDefault(); zona.classList.add('arrossegant'); });
-            });
-            ['dragleave', 'drop'].forEach(function (ev) {
-            zona.addEventListener(ev, function (e) { e.preventDefault(); zona.classList.remove('arrossegant'); });
-            });
-            zona.addEventListener('drop', function (e) {
-            if (e.dataTransfer.files.length) { input.files = e.dataTransfer.files; mostra(); }
-            });
-            });
-        </script>
+                    <div class="col-md-6">
+                        <label class="form-label">Adreça electrònica</label>
+                        <input type="email" th:field="*{email}" class="form-control" placeholder="Ex: joan@gmail.com" required>
+                    </div>
 
-    </body>
+                    <div class="col-md-6">
+                        <label class="form-label">Contrasenya per al portal</label>
+                        <input type="password" th:field="*{password}" class="form-control" placeholder="Mínim 8 caràcters" minlength="8" required>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Telèfon de contacte</label>
+                        <input type="tel" th:field="*{telefon}" class="form-control" placeholder="Ex: 612 345 678" required>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Data de naixement</label>
+                        <input type="date" th:field="*{dataNaixement}" class="form-control" required>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Nacionalitat</label>
+                        <input type="text" th:field="*{nacionalitat}" class="form-control" placeholder="Ex: Espanyola" required>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Adreça completa</label>
+                        <input type="text" th:field="*{adreca}" class="form-control" placeholder="Ex: Carrer Major 12, Terrassa" required>
+                    </div>
+                </div>
+
+                <!-- 2. Permís de Conduir -->
+                <h5 class="fw-bold text-primary mb-3 border-bottom pb-2">2. Permís de conduir</h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label">Tipus de llicència</label>
+                        <input type="text" th:field="*{tipusLlicencia}" class="form-control" placeholder="Ex: B" required>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Data de caducitat DNI</label>
+                        <input type="date" th:field="*{dataCaducitatDNI}" class="form-control" required>
+                    </div>
+                </div>
+
+                <!-- 3. Documentació i Fotos -->
+                <h5 class="fw-bold text-primary mb-3 border-bottom pb-2">3. Verificació d'identitat (Imatges)</h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <label class="form-label">Foto DNI Frontal</label>
+                        <input type="file" name="fotoDniFrontal" accept="image/png,image/jpeg" class="form-control" required>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Foto DNI Posterior</label>
+                        <input type="file" name="fotoDniPosterior" accept="image/png,image/jpeg" class="form-control" required>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Foto Carnet de Conduir</label>
+                        <input type="file" name="fotoCarnet" accept="image/png,image/jpeg" class="form-control" required>
+                    </div>
+                </div>
+
+                <!-- Botons -->
+                <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+                    <a th:href="@{/clients}" class="btn btn-light border px-4 fw-semibold" style="border-radius: 8px;">Cancel·lar</a>
+                    <button type="submit" class="btn btn-primary px-4 fw-semibold" style="border-radius: 8px;">
+                        <i class="fa-solid fa-user-plus me-1"></i> Donar d'alta client
+                    </button>
+                </div>
+
+            </form>
+        </div>
+
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
 </html>

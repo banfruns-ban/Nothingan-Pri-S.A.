@@ -1,4 +1,3 @@
-
 package cat.copernic.projecte1Grup3.Reserves.Controller;
 
 import cat.copernic.projecte1Grup3.Reserves.Entity.reservesEntity;
@@ -67,39 +66,37 @@ public String llistar(
     model.addAttribute("codi", codi);
     model.addAttribute("estat", estat);
 
-    return "llistaReserves";
+    return "reservas/llistaReserves";
 }
 
 
     @GetMapping("/reserves/nova")
-    public String mostrarFormulari(
-            @RequestParam(required = false) String dni,
-            Model model,
-            RedirectAttributes ra) {
+public String mostrarFormulari(
+        @RequestParam(required = false) String dni,
+        Model model,
+        RedirectAttributes ra) {
 
-        if (dni != null && !dni.isBlank()) {
-            var client = clientLogic.obtenir(
-                    dni.trim().toUpperCase());
+    if (dni != null && !dni.isBlank()) {
+        var client = clientLogic.obtenir(dni.trim().toUpperCase());
 
-            if (client.isEmpty()) {
-                ra.addFlashAttribute("error", "Client no trobat");
-                return "redirect:/clients";
-            }
-
-            model.addAttribute("client", client.get());
-
-        } else {
-            // Sense client prefixat: desplegable amb els clients validats
-            model.addAttribute(
-                    "clients",
-                    clientLogic.llistar(
-                            null, null, "VALIDAT", null, null));
+        if (client.isEmpty()) {
+            ra.addFlashAttribute("error", "Client no trobat");
+            return "redirect:/reserves";          // vuelve a la lista
         }
 
-        model.addAttribute("vehicles", reservesLogic.vehiclesActius());
+        model.addAttribute("client", client.get());
 
-        return "altaReserva";
+    } else {
+        // Sense client prefixat: desplegable amb els clients validats
+        model.addAttribute("clients",
+                clientLogic.llistar(null, null, "VALIDAT", null, null));
     }
+
+    model.addAttribute("vehicles", reservesLogic.vehiclesActius());
+
+    return "reservas/altaReserva";               // el formulario, en su carpeta
+}
+    
 
     @PostMapping("/reserves/alta")
     public String altaReserva(
@@ -137,7 +134,7 @@ public String llistar(
                     + reserva.getCodiReserva() + ")"
             );
 
-            return "redirect:/clients";
+            return "redirect:/reserves";
 
         } catch (IllegalArgumentException e) {
             ra.addFlashAttribute("error", e.getMessage());

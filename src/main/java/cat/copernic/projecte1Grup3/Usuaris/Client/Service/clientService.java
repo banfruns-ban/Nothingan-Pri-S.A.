@@ -3,6 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package cat.copernic.projecte1Grup3.Usuaris.Client.Service;
+
 import cat.copernic.projecte1Grup3.Usuaris.Client.Documents.clientDocuments;
 import cat.copernic.projecte1Grup3.Usuaris.Client.Entity.clientEntity;
 import cat.copernic.projecte1Grup3.Usuaris.Client.Repository.clientRepository;
@@ -21,8 +22,8 @@ import org.springframework.web.multipart.MultipartFile;
  */
 @Service
 public class clientService {
-    
- public static final String PENDENT = "PENDENT";
+
+    public static final String PENDENT = "PENDENT";
     public static final String VALIDAT = "VALIDAT";
     public static final String REBUTJAT = "REBUTJAT";
 
@@ -69,7 +70,7 @@ public class clientService {
                     .filter(c -> dataNaixement.equals(c.getDataNaixement()))
                     .toList();
         }
-        
+
         // 5. Filtre per email (parcial, sense distingir majúscules)
         if (email != null && !email.isBlank()) {
             String e = email.trim().toLowerCase();
@@ -164,7 +165,7 @@ public class clientService {
         c.setDataCaducitatDNI(dades.getDataCaducitatDNI());
         c.setEstatValidacio(estat);
         c.setPremium(premium);
-        
+
         clientRepository.saveAndFlush(c);
 
         if (hiHa(fotoDniFrontal) || hiHa(fotoDniPosterior) || hiHa(fotoCarnet)) {
@@ -186,7 +187,7 @@ public class clientService {
                 doc.setTipusFotoCarnet(fotoCarnet.getContentType());
             }
             clientRepositoryMongo.save(doc);
-            
+
         }
     }
 
@@ -204,20 +205,17 @@ public class clientService {
             throw new IllegalArgumentException("Les imatges han de ser PNG o JPG de màxim 5MB");
         }
     }
-   
-     @Transactional
-    public void eliminar(String dni) {
-    clientEntity c = clientRepository.findById(dni)
-            .orElseThrow(() -> new IllegalArgumentException("Client no trobat"));
-    
-    clientRepository.delete(c);
-    clientRepository.flush();                  // si hay reservas asociadas, el error salta aquí
 
-    clientRepositoryMongo.deleteById(dni);     // solo se llega aquí si MySQL ha ido bien
-}
-       
-    
-   
+    @Transactional
+    public void eliminar(String dni) {
+        clientEntity c = clientRepository.findById(dni)
+                .orElseThrow(() -> new IllegalArgumentException("Client no trobat"));
+
+        clientRepository.delete(c);
+        clientRepository.flush();                  // si hay reservas asociadas, el error salta aquí
+
+        clientRepositoryMongo.deleteById(dni);     // solo se llega aquí si MySQL ha ido bien
+    }
 
     @Transactional
     public void canviarEstat(String dni, String estat) {

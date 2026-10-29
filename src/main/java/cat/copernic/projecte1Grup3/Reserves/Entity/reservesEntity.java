@@ -18,11 +18,11 @@ import jakarta.persistence.Table;
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-
 @Entity
 @Table(name = "Reserves")
 public class reservesEntity {
-  @Id
+
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "codi_reserva")
     private Long codiReserva;
@@ -33,7 +33,7 @@ public class reservesEntity {
 
     @ManyToOne
     @JoinColumn(name = "Matricula_vehicle",
-                referencedColumnName = "matricula")
+            referencedColumnName = "matricula")
     private VehiclesEntity vehicle;
 
     @Column(name = "data_inici")
@@ -68,8 +68,7 @@ public class reservesEntity {
 
     public reservesEntity() {
     }
-     
-    
+
     public reservesEntity(Long codiReserva, clientEntity client, VehiclesEntity vehicle, LocalDate dataInici, LocalDate dataFi, LocalTime horaInici, LocalTime horaFi, BigDecimal costTotal, BigDecimal fianca, LocalDate dataLliurament, String estat, LocalDate dataRetorn, String observacions) {
         this.codiReserva = codiReserva;
         this.client = client;
@@ -85,7 +84,7 @@ public class reservesEntity {
         this.dataRetorn = dataRetorn;
         this.observacions = observacions;
     }
-    
+
     public Long getCodiReserva() {
         return codiReserva;
     }
@@ -188,5 +187,5 @@ public class reservesEntity {
 
     public void setObservacions(String observacions) {
         this.observacions = observacions;
-    }  
+    }
 }

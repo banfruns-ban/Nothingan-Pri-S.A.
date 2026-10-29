@@ -40,23 +40,43 @@ public class usuariEntity {
     // El regex accepta null i cadena buida; només falla si hi ha 1-7 caràcters.
     @Column(nullable = true, length = 255)
     @Pattern(
-        regexp = "^$|^.{8,}$",
-        message = "La contrasenya ha de tenir com a mínim 8 caràcters"
+            regexp = "^$|^.{8,}$",
+            message = "La contrasenya ha de tenir com a mínim 8 caràcters"
     )
     private String password;
 
     // Getters y Setters
-    public String getDni() { return dni; }
-    public void setDni(String dni) { this.dni = dni; }
+    public String getDni() {
+        return dni;
+    }
 
-    public String getNom() { return nom; }
-    public void setNom(String nom) { this.nom = nom; }
+    public void setDni(String dni) {
+        this.dni = dni;
+    }
 
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
+    public String getNom() {
+        return nom;
+    }
 
-    public String getPassword() { return password; }
-    public void setPassword(String password) { this.password = password; }
+    public void setNom(String nom) {
+        this.nom = nom;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
     public usuariEntity() {
     }

@@ -1,250 +1,122 @@
 <!DOCTYPE html>
-<html lang="ca" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="ca">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Detall del client</title>
-    <style>
-        * { box-sizing: border-box; }
-        body { margin: 0; font-family: Inter, "Segoe UI", Arial, sans-serif; background: #f1f5f9; color: #0f172a; font-size: 12px; }
-        .app { display: grid; grid-template-columns: 220px 1fr; min-height: 100vh; }
-
-        /* ---------- Barra lateral ---------- */
-        .lateral { background: #0f172a; color: #cbd5e1; padding: 18px 14px; }
-        .marca { display: flex; align-items: center; gap: 10px; padding: 4px 6px 18px; }
-        .marca .logo { width: 36px; height: 36px; border-radius: 50%; background: #1e3a8a; color: #fff;
-                       display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; }
-        .marca strong { display: block; color: #fff; font-size: 12px; letter-spacing: .3px; }
-        .marca small { font-size: 8px; letter-spacing: .6px; color: #94a3b8; }
-        .menu { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 4px; }
-        .menu a { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 6px;
-                  color: #cbd5e1; text-decoration: none; font-size: 12px; }
-        .menu a:hover { background: #1e293b; }
-        .menu a.actiu { background: #fff; color: #0f172a; font-weight: 600; }
-        .menu .punt { width: 12px; height: 12px; border-radius: 3px; background: #475569; flex: none; }
-        .menu a.actiu .punt { background: #2563eb; }
-
-        /* ---------- Contingut ---------- */
-        .contingut { display: flex; flex-direction: column; min-width: 0; }
-        .barra { background: #0f172a; color: #fff; padding: 12px 24px; display: flex; align-items: center; gap: 12px; font-size: 11px; }
-        .barra .etiqueta { background: #2563eb; border-radius: 4px; padding: 3px 8px; font-size: 9px; font-weight: 700; letter-spacing: .4px; }
-        main { padding: 28px 28px 40px; max-width: 1100px; }
-
-        .tornar { display: inline-flex; align-items: center; gap: 6px; color: #475569; text-decoration: none;
-                  font-size: 11px; margin-bottom: 14px; }
-        .tornar:hover { color: #0f172a; }
-
-        .missatge { padding: 10px 12px; border-radius: 6px; margin-bottom: 14px; font-size: 12px; }
-        .missatge.ok { background: #dcfce7; color: #166534; }
-        .missatge.error { background: #fee2e2; color: #991b1b; }
-
-        svg.ico { width: 14px; height: 14px; flex: none; stroke: currentColor; fill: none; stroke-width: 2;
-                  stroke-linecap: round; stroke-linejoin: round; }
-
-        /* ---------- Capçalera del client ---------- */
-        .capcalera { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 18px 20px;
-                     display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
-        .avatar { width: 52px; height: 52px; border-radius: 50%; background: #2563eb; color: #fff; font-size: 17px;
-                  font-weight: 700; display: flex; align-items: center; justify-content: center; flex: none; }
-        .capcalera .info { flex: 1; min-width: 200px; }
-        .capcalera h1 { font-size: 20px; margin: 0 0 6px; }
-        .capcalera .subinfo { color: #64748b; font-size: 11px; }
-        .etiquetes { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
-
-        .estat { display: inline-block; padding: 2px 8px; border-radius: 5px; font-size: 9px; font-weight: 600; white-space: nowrap; }
-        .estat.VALIDAT { background: #dcfce7; color: #166534; }
-        .estat.PENDENT { background: #fef3c7; color: #92400e; }
-        .estat.REBUTJAT { background: #fee2e2; color: #991b1b; }
-        .estat.premium { background: #ede9fe; color: #5b21b6; }
-
-        /* ---------- Targetes ---------- */
-        .graella { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
-        .targeta { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px 20px 18px; }
-        .targeta.ampla { grid-column: 1 / -1; }
-        .targeta h2 { font-size: 11px; letter-spacing: .5px; text-transform: uppercase; color: #64748b; margin: 0 0 12px; }
-        dl { margin: 0; display: grid; grid-template-columns: 150px 1fr; gap: 10px 12px; }
-        dt { color: #64748b; font-size: 11px; }
-        dd { margin: 0; font-weight: 600; color: #0f172a; word-break: break-word; }
-
-        /* ---------- Documents ---------- */
-        .documents { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
-        .document { border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; background: #f8fafc; text-align: center; }
-        .document .marc { height: 150px; display: flex; align-items: center; justify-content: center; }
-        .document img { max-width: 100%; max-height: 150px; border-radius: 4px; cursor: zoom-in; }
-        .document .peu { margin-top: 8px; font-size: 10px; font-weight: 600; color: #475569; }
-        .document .sense { color: #94a3b8; font-size: 11px; display: none; }
-
-        /* ---------- Botons ---------- */
-        .btn { border-radius: 6px; padding: 9px 14px; font-size: 12px; font-weight: 600; cursor: pointer;
-               text-decoration: none; display: inline-flex; align-items: center; gap: 8px; border: 1px solid #e2e8f0;
-               background: #fff; color: #0f172a; font-family: inherit; }
-        .btn:hover { background: #f8fafc; }
-        .btn-primari { background: #2563eb; border-color: #2563eb; color: #fff; }
-        .btn-primari:hover { background: #1d4ed8; }
-        .btn-eliminar { color: #b91c1c; }
-        .btn-eliminar:hover { background: #fef2f2; border-color: #fecaca; }
-        .accions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-        .accions form { margin: 0; }
-        .separador { width: 1px; height: 24px; background: #e2e8f0; margin: 0 4px; }
-
-        @media (max-width: 900px) { .graella { grid-template-columns: 1fr; } .documents { grid-template-columns: 1fr; } }
-        @media (max-width: 800px) { .app { grid-template-columns: 1fr; } .lateral { display: none; } }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detall del Client - NOTHINGAN PRI S.A</title>
+    <!-- Bootstrap 5 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <!-- FontAwesome per les icones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Mateix CSS de Agents -->
+    <link rel="stylesheet" th:href="@{/agents.css}">
 </head>
 <body>
-<div class="app">
 
-    <aside class="lateral">
-        <div class="marca">
-            <div class="logo">N</div>
-            <div>
-                <strong>NOTHINGAN PRI S.A</strong>
-                <small>PANEL DE CONTROL AGENT</small>
-            </div>
+    <!-- Sidebar Lateral -->
+    <aside class="sidebar">
+        <div class="brand">
+            NOTHINGAN PRI S.A
+            <span>PANEL DE CONTROL AGENT</span>
         </div>
-        <ul class="menu">
-            <li><a href="#"><span class="punt"></span>Dashboard</a></li>
-            <li><a href="#"><span class="punt"></span>Flota de Vehicles</a></li>
-            <li><a class="actiu" th:href="@{/clients}"><span class="punt"></span>Gestió de Clients</a></li>
-            <li><a href="#"><span class="punt"></span>Reserves Actives</a></li>
-        </ul>
+        <nav class="mt-3">
+            <a href="#" class="nav-link">
+                <i class="fa-solid fa-border-all"></i> Dashboard
+            </a>
+            <a th:href="@{/vehicles}" class="nav-link">
+                <i class="fa-solid fa-car"></i> Flota de Vehicles
+            </a>
+            <a th:href="@{/agents/llista}" class="nav-link">
+                <i class="fa-solid fa-user-gear"></i> Gestió d'Agents
+            </a>
+            <a th:href="@{/clients}" class="nav-link active">
+                <i class="fa-solid fa-users"></i> Gestió de Clients
+            </a>
+            <a href="#" class="nav-link">
+                <i class="fa-regular fa-calendar-check"></i> Reserves Actives
+            </a>
+        </nav>
     </aside>
 
-    <div class="contingut">
-        <div class="barra">
-            <span class="etiqueta">CRM CLIENTS</span>
-            <span>Panell d'Agent - Detall del client</span>
+    <!-- Main Content -->
+    <main class="main-content">
+        
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold text-dark m-0">Fitxa del Client</h2>
+                <p class="text-muted small mb-0 mt-1">Informació detallada del perfil del client i documentació.</p>
+            </div>
+            <div>
+                <a th:href="@{'/clients/' + ${client.dni} + '/editar'}" class="btn btn-outline-primary me-2 fw-semibold px-3 py-2" style="border-radius: 8px;">
+                    <i class="fa-solid fa-pen-to-square me-1"></i> Editar
+                </a>
+                <a th:href="@{/clients}" class="btn btn-secondary fw-semibold px-3 py-2" style="border-radius: 8px;">
+                    <i class="fa-solid fa-arrow-left me-1"></i> Tornar al llistat
+                </a>
+            </div>
         </div>
 
-        <main>
-            <a class="tornar" th:href="@{/clients}">
-                <svg class="ico" viewBox="0 0 24 24"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
-                Tornar al llistat
-            </a>
-
-            <div class="missatge ok" th:if="${missatge}" th:text="${missatge}"></div>
-            <div class="missatge error" th:if="${error}" th:text="${error}"></div>
-
-            <!-- Capçalera -->
-            <section class="capcalera">
-                <div class="avatar" th:attr="data-nom=${client.nom}"
-                     th:text="${client.nom != null and !#strings.isEmpty(client.nom)} ? ${#strings.toUpperCase(#strings.substring(client.nom,0,1))} : '?'">?</div>
-                <div class="info">
-                    <h1 th:text="${client.nom}">Nom del client</h1>
-                    <div class="subinfo" th:text="${client.dni} + ' · ' + ${client.email}">DNI · correu</div>
-                    <div class="etiquetes">
-                        <span class="estat" th:classappend="${client.estatValidacio}"
-                              th:text="${client.estatValidacio == 'VALIDAT' ? 'Actiu' : (client.estatValidacio == 'REBUTJAT' ? 'Inactiu' : 'Pendent de validació')}">Estat</span>
-                        <span class="estat premium" th:if="${client.premium}">Premium</span>
-                    </div>
+        <div class="detail-card shadow-sm">
+            <div class="row align-items-center pb-4 mb-4 border-bottom">
+                <div class="col-auto">
+                    <img th:src="@{'/clients/' + ${client.dni} + '/imatge/carnet'}"
+                         alt="Foto Client" class="profile-img-large"
+                         onerror="this.src='https://via.placeholder.com/110?text=User';">
                 </div>
-
-                <div class="accions">
-                    <a class="btn btn-primari" th:href="@{/clients/{d}/editar(d=${client.dni})}">
-                        <svg class="ico" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg>
-                        Editar
-                    </a>
-                    <form th:action="@{/clients/{d}/eliminar(d=${client.dni})}" method="post"
-                          onsubmit="return confirm('Segur que vols eliminar aquest client?');">
-                        <button type="submit" class="btn btn-eliminar">
-                            <svg class="ico" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
-                            Eliminar
-                        </button>
-                    </form>
+                <div class="col">
+                    <h3 class="fw-bold text-dark m-0" th:text="${client.nom}">Joan Garcia i Soler</h3>
+                    <p class="text-muted mb-2" th:text="'DNI: ' + ${client.dni}">12345678Z</p>
+                    <span th:class="${client.estatValidacio == 'VALIDAT' ? 'badge-agent' : (client.estatValidacio == 'REBUTJAT' ? 'badge-admin' : 'badge-agent text-dark bg-warning')}" 
+                          th:text="${client.estatValidacio}">VALIDAT</span>
+                    <span class="badge bg-primary text-white ms-1" th:if="${client.premium}">PREMIUM</span>
                 </div>
-            </section>
-
-            <div class="graella">
-                <!-- Dades personals -->
-                <section class="targeta">
-                    <h2>Dades personals</h2>
-                    <dl>
-                        <dt>Nom complet</dt>        <dd th:text="${client.nom}">—</dd>
-                        <dt>DNI / NIE</dt>          <dd th:text="${client.dni}">—</dd>
-                        <dt>Email</dt>              <dd th:text="${client.email}">—</dd>
-                        <dt>Telèfon</dt>            <dd th:text="${client.telefon != null and !#strings.isEmpty(client.telefon)} ? ${client.telefon} : '—'">—</dd>
-                        <dt>Data de naixement</dt>  <dd th:text="${client.dataNaixement != null} ? ${#temporals.format(client.dataNaixement, 'dd/MM/yyyy')} : '—'">—</dd>
-                        <dt>Nacionalitat</dt>       <dd th:text="${client.nacionalitat}">—</dd>
-                        <dt>Adreça</dt>             <dd th:text="${client.adreca}">—</dd>
-                        <dt>Data de registre</dt>   <dd th:text="${client.dataRegistre != null} ? ${#temporals.format(client.dataRegistre, 'dd/MM/yyyy')} : '—'">—</dd>
-                    </dl>
-                </section>
-
-                <!-- Permís de conduir + validació -->
-                <section class="targeta">
-                    <h2>Permís de conduir</h2>
-                    <dl>
-                        <dt>Tipus de llicència</dt>  <dd th:text="${client.tipusLlicencia}">—</dd>
-                        <dt>Caducitat</dt>           <dd th:text="${client.dataCaducitatDNI}">—</dd>
-                    </dl>
-
-                    <h2 style="margin-top:22px;">Gestió del compte</h2>
-                    <div class="accions">
-                        <form th:action="@{/clients/{d}/validacio(d=${client.dni})}" method="post">
-                            <input type="hidden" name="estat" value="VALIDAT">
-                            <button type="submit" class="btn" th:disabled="${client.estatValidacio == 'VALIDAT'}">Validar</button>
-                        </form>
-                        <form th:action="@{/clients/{d}/validacio(d=${client.dni})}" method="post">
-                            <input type="hidden" name="estat" value="REBUTJAT">
-                            <button type="submit" class="btn" th:disabled="${client.estatValidacio == 'REBUTJAT'}">Rebutjar</button>
-                        </form>
-                        <span class="separador"></span>
-                        <form th:action="@{/clients/{d}/premium(d=${client.dni})}" method="post">
-                            <input type="hidden" name="premium" th:value="${!client.premium}">
-                            <button type="submit" class="btn" th:text="${client.premium} ? 'Treure premium' : 'Fer premium'">Fer premium</button>
-                        </form>
-                    </div>
-                </section>
-
-                <!-- Documents -->
-                <section class="targeta ampla">
-                    <h2>Documents d'identitat</h2>
-                    <div class="documents">
-                        <div class="document">
-                            <div class="marc">
-                                <a th:href="@{/clients/{d}/imatge/frontal(d=${client.dni})}" target="_blank">
-                                    <img th:src="@{/clients/{d}/imatge/frontal(d=${client.dni})}" alt="DNI frontal"
-                                         onerror="this.style.display='none'; this.parentNode.nextElementSibling.style.display='block';">
-                                </a>
-                                <span class="sense">Sense imatge</span>
-                            </div>
-                            <div class="peu">DNI frontal</div>
-                        </div>
-                        <div class="document">
-                            <div class="marc">
-                                <a th:href="@{/clients/{d}/imatge/posterior(d=${client.dni})}" target="_blank">
-                                    <img th:src="@{/clients/{d}/imatge/posterior(d=${client.dni})}" alt="DNI posterior"
-                                         onerror="this.style.display='none'; this.parentNode.nextElementSibling.style.display='block';">
-                                </a>
-                                <span class="sense">Sense imatge</span>
-                            </div>
-                            <div class="peu">DNI posterior</div>
-                        </div>
-                        <div class="document">
-                            <div class="marc">
-                                <a th:href="@{/clients/{d}/imatge/carnet(d=${client.dni})}" target="_blank">
-                                    <img th:src="@{/clients/{d}/imatge/carnet(d=${client.dni})}" alt="Carnet de conduir"
-                                         onerror="this.style.display='none'; this.parentNode.nextElementSibling.style.display='block';">
-                                </a>
-                                <span class="sense">Sense imatge</span>
-                            </div>
-                            <div class="peu">Carnet de conduir</div>
-                        </div>
-                    </div>
-                </section>
             </div>
-        </main>
-    </div>
-</div>
 
-<!-- Només millora visual: inicials de l'avatar (ex: Marta Rius i Torres -> MR) -->
-<script>
-    try {
-        var a = document.querySelector('.avatar[data-nom]');
-        var p = (a.getAttribute('data-nom') || '').trim().split(/\s+/);
-        var ini = (p[0] ? p[0].charAt(0) : '') + (p[1] ? p[1].charAt(0) : '');
-        if (ini) { a.textContent = ini.toUpperCase(); }
-    } catch (e) { }
-</script>
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="label-title">Número d'identificació (DNI / NIE)</div>
+                    <div class="value-text" th:text="${client.dni}">12345678Z</div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="label-title">Nom complet</div>
+                    <div class="value-text" th:text="${client.nom}">Joan Garcia i Soler</div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="label-title">Adreça electrònica</div>
+                    <div class="value-text" th:text="${client.email}">client@gmail.com</div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="label-title">Telèfon de contacte</div>
+                    <div class="value-text" th:text="${client.telefon}">612345678</div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="label-title">Adreça</div>
+                    <div class="value-text" th:text="${client.adreca}">Carrer Major 12</div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="label-title">Nacionalitat</div>
+                    <div class="value-text" th:text="${client.nacionalitat}">Espanyola</div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="label-title">Tipus de llicència</div>
+                    <div class="value-text" th:text="${client.tipusLlicencia}">B</div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="label-title">Data de caducitat DNI</div>
+                    <div class="value-text" th:text="${client.dataCaducitatDNI}">2028-12-31</div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -1,6 +1,5 @@
 package cat.copernic.projecte1Grup3.Usuaris.Client.Controller;
 
-
 import cat.copernic.projecte1Grup3.Usuaris.Client.Documents.clientDocuments;
 import cat.copernic.projecte1Grup3.Usuaris.Client.Entity.clientEntity;
 import cat.copernic.projecte1Grup3.Usuaris.Client.Service.clientService;
@@ -15,12 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -28,7 +22,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class clientController {
 
     private static final Logger log = LoggerFactory.getLogger(clientController.class);
-
     private final clientService clientLogic;
 
     public clientController(clientService clientLogic) {
@@ -67,7 +60,7 @@ public class clientController {
     }
 
     // =====================================================
-    // LISTADO Y DETALLE
+    // LLISTAT I DETALL
     // =====================================================
 
     @GetMapping("/clients")
@@ -91,14 +84,13 @@ public class clientController {
     public String detall(@PathVariable String dni, Model model, RedirectAttributes ra) {
         return clientLogic.obtenir(dni).map(c -> {
             model.addAttribute("client", c);
-            return "client/detallClient";   // vista de detalle (crear plantilla si no existe)
+            return "client/detallClient";
         }).orElseGet(() -> {
             ra.addFlashAttribute("error", "Client no trobat");
             return "redirect:/clients";
         });
     }
 
-    // Devuelve los bytes de la imagen guardada en Mongo: tipus = frontal | posterior | carnet
     @GetMapping("/clients/{dni}/imatge/{tipus}")
     @ResponseBody
     public ResponseEntity<byte[]> imatge(@PathVariable String dni, @PathVariable String tipus) {
@@ -137,7 +129,7 @@ public class clientController {
     }
 
     // =====================================================
-    // EDICIÓN
+    // EDICIÓ I ELIMINACIÓ
     // =====================================================
 
     @GetMapping("/clients/{dni}/editar")
@@ -161,8 +153,7 @@ public class clientController {
                          @RequestParam(value = "fotoCarnet", required = false) MultipartFile fotoCarnet,
                          RedirectAttributes ra) {
         try {
-            clientLogic.actualitzar(dni, dades, estatValidacio, premium,
-                    fotoDniFrontal, fotoDniPosterior, fotoCarnet);
+            clientLogic.actualitzar(dni, dades, estatValidacio, premium, fotoDniFrontal, fotoDniPosterior, fotoCarnet);
             ra.addFlashAttribute("missatge", "Client actualitzat correctament");
         } catch (DataIntegrityViolationException e) {
             ra.addFlashAttribute("error", "Aquest correu ja està en ús per un altre client");
@@ -174,6 +165,7 @@ public class clientController {
         }
         return "redirect:/clients";
     }
+
     @PostMapping("/clients/{dni}/eliminar")
     public String eliminar(@PathVariable String dni, RedirectAttributes ra) {
         try {
@@ -188,24 +180,20 @@ public class clientController {
     }
 
     // =====================================================
-    // VALIDACIÓN DEL ADMINISTRADOR
+    // VALIDACIÓ
     // =====================================================
 
     @PostMapping("/clients/{dni}/validacio")
-    public String validar(@PathVariable String dni,
-                          @RequestParam String estat,
-                          RedirectAttributes ra) {
+    public String validar(@PathVariable String dni, @RequestParam String estat, RedirectAttributes ra) {
         clientLogic.canviarEstat(dni, estat);
         ra.addFlashAttribute("missatge", "Estat actualitzat a " + estat);
         return "redirect:/clients";
     }
 
     @PostMapping("/clients/{dni}/premium")
-    public String premium(@PathVariable String dni,
-                          @RequestParam boolean premium,
-                          RedirectAttributes ra) {
+    public String premium(@PathVariable String dni, @RequestParam boolean premium, RedirectAttributes ra) {
         clientLogic.canviarPremium(dni, premium);
         ra.addFlashAttribute("missatge", "Estat premium actualitzat");
-       return "redirect:/clients";
+        return "redirect:/clients";
     }
 }

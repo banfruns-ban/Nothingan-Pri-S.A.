@@ -1,10 +1,9 @@
 package cat.copernic.projecte1Grup3.Usuaris.Client.Controller;
 
+
 import cat.copernic.projecte1Grup3.Usuaris.Client.Documents.clientDocuments;
 import cat.copernic.projecte1Grup3.Usuaris.Client.Entity.clientEntity;
 import cat.copernic.projecte1Grup3.Usuaris.Client.Service.clientService;
-import cat.copernic.projecte1Grup3.Usuaris.Client.Repository.clientRepository;
-import cat.copernic.projecte1Grup3.Usuaris.Client.Repository.clientRepositoryMongo;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Optional;
@@ -29,17 +28,10 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class clientController {
 
     private static final Logger log = LoggerFactory.getLogger(clientController.class);
-    private static final long MAX_IMATGE = 5L * 1024 * 1024;
 
-    private final clientRepository clientRepository;
-    private final clientRepositoryMongo clientRepositoryMongo;
     private final clientService clientLogic;
 
-    public clientController(clientRepository clientRepository,
-                            clientRepositoryMongo clientRepositoryMongo,
-                            clientService clientLogic) {
-        this.clientRepository = clientRepository;
-        this.clientRepositoryMongo = clientRepositoryMongo;
+    public clientController(clientService clientLogic) {
         this.clientLogic = clientLogic;
     }
 
@@ -61,57 +53,16 @@ public class clientController {
             @RequestParam("fotoDniFrontal") MultipartFile fotoDniFrontal,
             @RequestParam("fotoDniPosterior") MultipartFile fotoDniPosterior,
             @RequestParam("fotoCarnet") MultipartFile fotoCarnet,
-            RedirectAttributes redirectAttributes) {
-
-        if (client.getDni() == null || client.getDni().isBlank()) {
-            redirectAttributes.addFlashAttribute("error", "El DNI és obligatori");
-            return "redirect:/clients/nou";
-        }
-        client.setDni(client.getDni().trim().toUpperCase());
-
-        if (clientRepository.existsById(client.getDni())) {
-            redirectAttributes.addFlashAttribute(
-                    "error", "Ja existeix un client amb aquest DNI");
-            return "redirect:/clients/nou";
-        }
-
-        if (!valida(fotoDniFrontal) || !valida(fotoDniPosterior) || !valida(fotoCarnet)) {
-            redirectAttributes.addFlashAttribute(
-                    "error", "Cal pujar les 3 imatges (PNG o JPG, màxim 5MB)");
-            return "redirect:/clients/nou";
-        }
-
-        // Valores que decide el servidor, no el formulario
-        client.setPremium(false);
-        client.setEstatValidacio("PENDENT");
-
+            RedirectAttributes ra) {
         try {
-            clientRepository.save(client);                          // MySQL
-
-            clientDocuments doc = new clientDocuments();
-            doc.setDni(client.getDni());
-            doc.setFotoDniFrontal(fotoDniFrontal.getBytes());
-            doc.setTipusFotoDniFrontal(fotoDniFrontal.getContentType());
-            doc.setFotoDniPosterior(fotoDniPosterior.getBytes());
-            doc.setTipusFotoDniPosterior(fotoDniPosterior.getContentType());
-            doc.setFotoCarnet(fotoCarnet.getBytes());
-            doc.setTipusFotoCarnet(fotoCarnet.getContentType());
-            clientRepositoryMongo.save(doc);                        // MongoDB
-
-            log.info("Client guardat a Mongo: {}", doc.getDni());
-
+            clientLogic.alta(client, fotoDniFrontal, fotoDniPosterior, fotoCarnet);
+            ra.addFlashAttribute("missatge", "Client donat d'alta correctament!");
+        } catch (IllegalArgumentException e) {
+            ra.addFlashAttribute("error", e.getMessage());
         } catch (Exception e) {
-            log.error("Error en l'alta del client {}", client.getDni(), e);
-            if (clientRepository.existsById(client.getDni())) {
-                clientRepository.deleteById(client.getDni());       // deshacer MySQL
-            }
-            redirectAttributes.addFlashAttribute(
-                    "error", "No s'ha pogut completar el registre");
-            return "redirect:/clients/nou";
+            log.error("Error en l'alta del client", e);
+            ra.addFlashAttribute("error", "No s'ha pogut completar el registre");
         }
-
-        redirectAttributes.addFlashAttribute(
-                "missatge", "Client donat d'alta correctament!");
         return "redirect:/clients/nou";
     }
 
@@ -124,9 +75,10 @@ public class clientController {
                           @RequestParam(required = false) String dni,
                           @RequestParam(required = false) String estat,
                           @RequestParam(required = false) String email,
+                          @RequestParam(required = false)
                           @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataNaixement,
                           Model model) {
-        model.addAttribute("clients", clientLogic.llistar(q, dni, estat, email,dataNaixement));
+        model.addAttribute("clients", clientLogic.llistar(q, dni, estat, email, dataNaixement));
         model.addAttribute("q", q);
         model.addAttribute("dni", dni);
         model.addAttribute("estat", estat);
@@ -207,34 +159,34 @@ public class clientController {
                          @RequestParam(value = "fotoDniFrontal", required = false) MultipartFile fotoDniFrontal,
                          @RequestParam(value = "fotoDniPosterior", required = false) MultipartFile fotoDniPosterior,
                          @RequestParam(value = "fotoCarnet", required = false) MultipartFile fotoCarnet,
-                         RedirectAttributes ra) throws IOException {
+                         RedirectAttributes ra) {
         try {
             clientLogic.actualitzar(dni, dades, estatValidacio, premium,
                     fotoDniFrontal, fotoDniPosterior, fotoCarnet);
             ra.addFlashAttribute("missatge", "Client actualitzat correctament");
         } catch (DataIntegrityViolationException e) {
             ra.addFlashAttribute("error", "Aquest correu ja està en ús per un altre client");
-            return "redirect:/clients";
         } catch (IllegalArgumentException e) {
             ra.addFlashAttribute("error", e.getMessage());
-            return "redirect:/clients";
+        } catch (IOException e) {
+            log.error("Error llegint les imatges del client {}", dni, e);
+            ra.addFlashAttribute("error", "No s'han pogut llegir les imatges");
         }
-       return "redirect:/clients";
+        return "redirect:/clients";
     }
-        @PostMapping("/clients/{dni}/eliminar")
-        public String eliminar(@PathVariable String dni, RedirectAttributes ra) {
-                try {
-        clientLogic.eliminar(dni);
-        ra.addFlashAttribute("missatge", "Client eliminat correctament");
-    } catch (IllegalArgumentException e) {
-        ra.addFlashAttribute("error", e.getMessage());
-    } catch (DataIntegrityViolationException e) {
-        ra.addFlashAttribute("error", "No es pot eliminar: el client té reserves associades");
+    @PostMapping("/clients/{dni}/eliminar")
+    public String eliminar(@PathVariable String dni, RedirectAttributes ra) {
+        try {
+            clientLogic.eliminar(dni);
+            ra.addFlashAttribute("missatge", "Client eliminat correctament");
+        } catch (IllegalArgumentException e) {
+            ra.addFlashAttribute("error", e.getMessage());
+        } catch (DataIntegrityViolationException e) {
+            ra.addFlashAttribute("error", "No es pot eliminar: el client té reserves associades");
+        }
+        return "redirect:/clients";
     }
-    return "redirect:/clients";
-}
-        
-        
+
     // =====================================================
     // VALIDACIÓN DEL ADMINISTRADOR
     // =====================================================
@@ -255,17 +207,5 @@ public class clientController {
         clientLogic.canviarPremium(dni, premium);
         ra.addFlashAttribute("missatge", "Estat premium actualitzat");
        return "redirect:/clients";
-    }
-
-    // =====================================================
-    // AUXILIAR
-    // =====================================================
-
-    private boolean valida(MultipartFile f) {
-        if (f == null || f.isEmpty() || f.getSize() > MAX_IMATGE) {
-            return false;
-        }
-        String tipus = f.getContentType();
-        return "image/png".equals(tipus) || "image/jpeg".equals(tipus);
     }
 }

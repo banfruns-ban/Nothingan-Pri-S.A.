@@ -70,17 +70,65 @@ public class clientService {
                     .toList();
         }
         
-        if(email != null){
+        // 5. Filtre per email (parcial, sense distingir majúscules)
+        if (email != null && !email.isBlank()) {
+            String e = email.trim().toLowerCase();
             clients = clients.stream()
-                       .filter(c -> email.equals(c.getEmail()))
-                        . toList();
-            
+                    .filter(c -> conte(c.getEmail(), e))
+                    .toList();
         }
         return clients;
     }
 
     private boolean conte(String valor, String text) {
         return valor != null && valor.toLowerCase().contains(text);
+    }
+
+    // ---------- Alta ----------
+    @Transactional(rollbackFor = Exception.class)
+    public void alta(clientEntity client, MultipartFile fotoDniFrontal,
+            MultipartFile fotoDniPosterior, MultipartFile fotoCarnet) throws IOException {
+
+        // El format del DNI/NIE es valida aquí (no a l'entitat) perquè els registres antics es puguin editar
+        String dni = client.getDni() == null ? "" : client.getDni().trim().toUpperCase();
+        if (!dni.matches("^([0-9]{8}|[XYZ][0-9]{7})[A-Z]$")) {
+            throw new IllegalArgumentException(
+                    "El DNI ha de tenir 8 xifres i una lletra al final (o ser un NIE vàlid)");
+        }
+        client.setDni(dni);
+
+        if (clientRepository.existsById(dni)) {
+            throw new IllegalArgumentException("Ja existeix un client amb aquest DNI");
+        }
+        if (client.getPassword() == null || client.getPassword().length() < 8) {
+            throw new IllegalArgumentException("La contrasenya ha de tenir com a mínim 8 caràcters");
+        }
+        if (!hiHa(fotoDniFrontal) || !hiHa(fotoDniPosterior) || !hiHa(fotoCarnet)) {
+            throw new IllegalArgumentException("Cal pujar les 3 imatges (PNG o JPG, màxim 5MB)");
+        }
+        validaImatge(fotoDniFrontal);
+        validaImatge(fotoDniPosterior);
+        validaImatge(fotoCarnet);
+
+        client.setPremium(false);
+        client.setEstatValidacio(PENDENT);
+        clientRepository.saveAndFlush(client);
+
+        clientDocuments doc = new clientDocuments();
+        doc.setDni(dni);
+        if (hiHa(fotoDniFrontal)) {
+            doc.setFotoDniFrontal(fotoDniFrontal.getBytes());
+            doc.setTipusFotoDniFrontal(fotoDniFrontal.getContentType());
+        }
+        if (hiHa(fotoDniPosterior)) {
+            doc.setFotoDniPosterior(fotoDniPosterior.getBytes());
+            doc.setTipusFotoDniPosterior(fotoDniPosterior.getContentType());
+        }
+        if (hiHa(fotoCarnet)) {
+            doc.setFotoCarnet(fotoCarnet.getBytes());
+            doc.setTipusFotoCarnet(fotoCarnet.getContentType());
+        }
+        clientRepositoryMongo.save(doc);
     }
 
     public Optional<clientEntity> obtenir(String dni) {
@@ -116,6 +164,7 @@ public class clientService {
         c.setDataCaducitatDNI(dades.getDataCaducitatDNI());
         c.setEstatValidacio(estat);
         c.setPremium(premium);
+        
         clientRepository.saveAndFlush(c);
 
         if (hiHa(fotoDniFrontal) || hiHa(fotoDniPosterior) || hiHa(fotoCarnet)) {
@@ -137,6 +186,7 @@ public class clientService {
                 doc.setTipusFotoCarnet(fotoCarnet.getContentType());
             }
             clientRepositoryMongo.save(doc);
+            
         }
     }
 

@@ -8,199 +8,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <!-- FontAwesome per les icones -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <style>
-        :root {
-            --sidebar-bg: #111827;
-            --sidebar-active: #1d4ed8;
-            --main-bg: #f9fafb;
-            --card-border: #e5e7eb;
-        }
-
-        body {
-            background-color: var(--main-bg);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            min-height: 100vh;
-        }
-
-        /* Sidebar estil idèntic al panell */
-        .sidebar {
-            width: 260px;
-            background-color: var(--sidebar-bg);
-            color: #9ca3af;
-            min-height: 100vh;
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 100;
-        }
-
-        .sidebar .brand {
-            padding: 24px 20px;
-            color: #ffffff;
-            font-weight: 700;
-            font-size: 1.1rem;
-            border-bottom: 1px solid #1f2937;
-        }
-
-        .sidebar .brand span {
-            display: block;
-            font-size: 0.75rem;
-            color: #6b7280;
-            font-weight: 400;
-            margin-top: 2px;
-        }
-
-        .sidebar .nav-link {
-            color: #9ca3af;
-            padding: 12px 20px;
-            font-size: 0.95rem;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            border-radius: 8px;
-            margin: 4px 12px;
-            transition: all 0.2s;
-        }
-
-        .sidebar .nav-link:hover {
-            color: #ffffff;
-            background-color: #1f2937;
-        }
-
-        .sidebar .nav-link.active {
-            background-color: var(--sidebar-active);
-            color: #ffffff;
-            font-weight: 500;
-        }
-
-        /* Contingut Principal */
-        .main-content {
-            margin-left: 260px;
-            padding: 40px;
-        }
-
-        /* Targeta de Filtres */
-        .filter-card {
-            background: #ffffff;
-            border: 1px solid var(--card-border);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 28px;
-        }
-
-        .filter-card label {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: #374151;
-            margin-bottom: 6px;
-        }
-
-        /* Taula d'agents */
-        .custom-table-card {
-            background: #ffffff;
-            border: 1px solid var(--card-border);
-            border-radius: 12px;
-            overflow: hidden;
-        }
-
-        .table {
-            margin-bottom: 0;
-        }
-
-        .table thead {
-            background-color: #ffffff;
-            border-bottom: 1px solid var(--card-border);
-        }
-
-        .table thead th {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: #6b7280;
-            font-weight: 700;
-            padding: 16px 20px;
-            border: none;
-        }
-
-        .table tbody td {
-            padding: 16px 20px;
-            vertical-align: middle;
-            font-size: 0.9rem;
-            border-bottom: 1px solid #f3f4f6;
-            color: #111827;
-        }
-
-        .agent-img {
-            width: 48px;
-            height: 48px;
-            object-fit: cover;
-            border-radius: 50%;
-            border: 1px solid #e5e7eb;
-        }
-
-        .agent-title {
-            font-weight: 700;
-            color: #111827;
-            margin: 0;
-        }
-
-        .agent-sub {
-            font-size: 0.8rem;
-            color: #9ca3af;
-        }
-
-        .btn-editar {
-            background-color: #eff6ff;
-            color: #2563eb;
-            border: none;
-            font-weight: 600;
-            font-size: 0.85rem;
-            padding: 6px 14px;
-            border-radius: 6px;
-            text-decoration: none;
-        }
-
-        .btn-editar:hover {
-            background-color: #dbeafe;
-            color: #1d4ed8;
-        }
-
-        .btn-desactivar {
-            background-color: #f3f4f6;
-            color: #6b7280;
-            border: none;
-            font-weight: 500;
-            font-size: 0.85rem;
-            padding: 6px 14px;
-            border-radius: 6px;
-        }
-
-        .btn-desactivar:hover {
-            background-color: #fee2e2;
-            color: #991b1b;
-        }
-
-        .badge-admin {
-            background-color: #fee2e2;
-            color: #991b1b;
-            font-weight: 600;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-        }
-
-        .badge-agent {
-            background-color: #dbeafe;
-            color: #1e40af;
-            font-weight: 600;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-        }
-    </style>
+    <!-- Referència al CSS en resources/static/agents.css -->
+    <link rel="stylesheet" th:href="@{/agents.css}">
 </head>
 <body>
 
@@ -232,7 +41,6 @@
     <!-- Main Content -->
     <main class="main-content">
         
-        <!-- Header amb botó d'Alta (RF10) -->
         <div class="d-flex justify-content-between align-items-start mb-4">
             <div>
                 <h2 class="fw-bold text-dark m-0">Gestió d'Agents</h2>
@@ -243,7 +51,6 @@
             </a>
         </div>
 
-        <!-- Alertes de flash attributes -->
         <div th:if="${succes}" class="alert alert-success alert-dismissible fade show mb-4" role="alert">
             <span th:text="${succes}"></span>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -257,7 +64,6 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
 
-        <!-- Targeta de Filtres per DNI, Nom o Email (RF14) -->
         <div class="filter-card shadow-sm">
             <form th:action="@{/agents/llista}" method="get" class="row g-3">
                 <div class="col-md-9">
@@ -285,7 +91,6 @@
             </form>
         </div>
 
-        <!-- Taula de Llistat d'Agents (RF13 / RF14) -->
         <div class="custom-table-card shadow-sm">
             <table class="table">
                 <thead>
@@ -328,13 +133,8 @@
                             <span th:unless="${a.rol != null}">-</span>
                         </td>
                         <td class="text-end">
-                            <!-- Enllaç a Editar (RF12) -->
                             <a th:href="@{'/agents/editar/' + ${a.dni}}" class="btn-editar me-1">Editar</a>
-                            
-                            <!-- Enllaç a Detall (RF15) -->
                             <a th:href="@{'/agents/detall/' + ${a.dni}}" class="btn btn-sm btn-outline-secondary me-1" style="border-radius: 6px;">Detall</a>
-
-                            <!-- Formulari per Eliminar / Donar de baixa (RF11) -->
                             <form th:action="@{'/agents/eliminar/' + ${a.dni}}" method="post" class="d-inline"
                                   onsubmit="return confirm('Estàs segur de voler donar de baixa aquest agent?');">
                                 <button type="submit" class="btn-desactivar">Baixa</button>

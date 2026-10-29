@@ -9,6 +9,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -16,14 +17,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
  * Controlador Spring MVC per a la gestió d'agents.
- * S'encarrega de gestionar les peticions HTTP relacionades amb el registre,
- * llistat, edició i detall dels agents (RF10, RF12, RF13, RF14, RF15).
- * 
- * @author Grup 3
  */
 @Controller
 @RequestMapping("/agents")
@@ -31,7 +27,6 @@ public class agentController {
 
     private final agentService agentService;
 
-    // Injecció de dependència per constructor
     public agentController(agentService agentService) {
         this.agentService = agentService;
     }
@@ -46,22 +41,19 @@ public class agentController {
     }
 
     /**
-     * Processa el formulari d'alta i edició gestionant validacions, la pujada de la foto
-     * i el control de duplicats a la base de dades.
+     * Processa el formulari d'alta i edició.
      */
     @PostMapping("/alta")
     public String processarAlta(@Valid @ModelAttribute("agent") agentEntity agent,
                                 BindingResult result,
-                                @RequestParam("fitxerFoto") MultipartFile fitxerFoto,
+                                @RequestParam(value = "fitxerFoto", required = false) MultipartFile fitxerFoto,
                                 Model model) {
 
-        // 1. Validació de camps amb Bean Validation (@Valid)
         if (result.hasErrors()) {
             return "agents/alta_agent";
         }
 
-        // 2. Gestió de la foto de perfil si s'ha adjuntat un fitxer
-        if (!fitxerFoto.isEmpty()) {
+        if (fitxerFoto != null && !fitxerFoto.isEmpty()) {
             try {
                 String nomFitxer = agent.getDni() + "_" + fitxerFoto.getOriginalFilename();
                 Path ruta = Paths.get("uploads/" + nomFitxer);
@@ -74,7 +66,6 @@ public class agentController {
             }
         }
 
-        // 3. Desa l'agent a la BD controlant si el DNI o email ja existeixen
         try {
             agentService.guardarAgent(agent);
             return "redirect:/agents/llista?exit";
@@ -85,20 +76,17 @@ public class agentController {
     }
 
     /**
-     * RF13 & RF14: Mostra la llista d'agents, aplicant el filtre de cerca per
-     * DNI, Nom o Email si existeix.
+     * RF13 & RF14: Mostra la llista d'agents.
      */
     @GetMapping({"", "/", "/llista"})
     public String llistarAgents(@RequestParam(name = "cerca", required = false) String cerca, Model model) {
-        // Obtenim la llista filtrada o completa
         List<agentEntity> llista = agentService.llistarOFiltrarAgents(cerca);
         model.addAttribute("agents", llista);
-
         return "agents/llistat_agents";
     }
 
     /**
-     * RF14 & RF15: Consulta els detalls d'un agent concret a partir del seu DNI.
+     * RF14 & RF15: Consulta els detalls d'un agent.
      */
     @GetMapping("/detall/{dni}")
     public String consultarDetall(@PathVariable("dni") String dni, Model model) {
@@ -122,7 +110,10 @@ public class agentController {
         }
         return "redirect:/agents/llista";
     }
-    
+
+    /**
+     * RF11: Donar de baixa un agent.
+     */
     @PostMapping("/eliminar/{dni}")
     public String eliminarAgent(@PathVariable String dni, RedirectAttributes redirect) {
         try {
@@ -133,8 +124,6 @@ public class agentController {
         } catch (Exception e) {
             redirect.addFlashAttribute("error", "Error en intentar donar de baixa.");
         }
-        return "redirect:/agents";
+        return "redirect:/agents/llista";
     }
-    
-    //Filtro por dni, nombre y mail
 }

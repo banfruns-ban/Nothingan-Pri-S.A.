@@ -1,4 +1,4 @@
-package cat.copernic.projecte1Grup3.Reserves.Entity;
+package cat.copernic.projecte1Grup3.Informes.Entity;
 
 import java.math.BigDecimal;
 import java.util.List;

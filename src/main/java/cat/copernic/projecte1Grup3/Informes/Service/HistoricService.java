@@ -1,4 +1,4 @@
-package cat.copernic.projecte1Grup3.Reserves.Logic;
+package cat.copernic.projecte1Grup3.Informes.Service;
 
 import java.time.LocalDateTime;
 
@@ -6,21 +6,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import cat.copernic.projecte1Grup3.Reserves.Entity.EstatHistoric;
-import cat.copernic.projecte1Grup3.Reserves.Entity.HistoricReserva;
+import cat.copernic.projecte1Grup3.Informes.Entity.EstatHistoric;
+import cat.copernic.projecte1Grup3.Informes.Entity.HistoricReserva;
+import cat.copernic.projecte1Grup3.Informes.Repository.HistoricReservaRepository;
 import cat.copernic.projecte1Grup3.Reserves.Entity.reservesEntity;
-import cat.copernic.projecte1Grup3.Reserves.Repository.HistoricReservaRepository;
 import cat.copernic.projecte1Grup3.Usuaris.Client.Entity.clientEntity;
 import cat.copernic.projecte1Grup3.Vehicles.Entity.VehiclesEntity;
 
 @Service
-public class HistoricLogic {
+public class HistoricService {
  
-    private static final Logger log = LoggerFactory.getLogger(HistoricLogic.class);
+    private static final Logger log = LoggerFactory.getLogger(HistoricService.class);
  
     private final HistoricReservaRepository repo;
  
-    public HistoricLogic(HistoricReservaRepository repo) {
+    public HistoricService(HistoricReservaRepository repo) {
         this.repo = repo;
     }
  

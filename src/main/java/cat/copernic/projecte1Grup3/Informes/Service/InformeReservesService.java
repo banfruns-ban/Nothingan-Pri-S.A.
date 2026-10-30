@@ -1,4 +1,4 @@
-package cat.copernic.projecte1Grup3.Reserves.Logic;
+package cat.copernic.projecte1Grup3.Informes.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -10,16 +10,16 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import cat.copernic.projecte1Grup3.Reserves.Entity.EstatHistoric;
-import cat.copernic.projecte1Grup3.Reserves.Entity.HistoricReserva;
-import cat.copernic.projecte1Grup3.Reserves.Entity.InformeReserves;
-import cat.copernic.projecte1Grup3.Reserves.Entity.InformeReservesFila;
-import cat.copernic.projecte1Grup3.Reserves.Repository.HistoricReservaRepository;
+import cat.copernic.projecte1Grup3.Informes.Entity.EstatHistoric;
+import cat.copernic.projecte1Grup3.Informes.Entity.HistoricReserva;
+import cat.copernic.projecte1Grup3.Informes.Entity.InformeReserves;
+import cat.copernic.projecte1Grup3.Informes.Entity.InformeReservesFila;
+import cat.copernic.projecte1Grup3.Informes.Repository.HistoricReservaRepository;
 
 @Service
-public class InformeReservesLogic {
-
-    private static final Logger log = LoggerFactory.getLogger(InformeReservesLogic.class);
+public class InformeReservesService {
+ 
+    private static final Logger log = LoggerFactory.getLogger(InformeReservesService.class);
  
     /** Per client i, dins de cada client, la reserva més recent primer. */
     private static final Sort ORDRE = Sort.by(
@@ -31,7 +31,7 @@ public class InformeReservesLogic {
  
     private final HistoricReservaRepository repo;
  
-    public InformeReservesLogic(HistoricReservaRepository repo) {
+    public InformeReservesService(HistoricReservaRepository repo) {
         this.repo = repo;
     }
  
@@ -61,7 +61,7 @@ public class InformeReservesLogic {
                 .filter(h -> h.getEstat() != EstatHistoric.ANUL_LADA)
                 .toList();
         BigDecimal preuTotal = vigents.stream()
-            .map(this::obtenirImportTotal)
+                .map(h -> h.getImportTotal() == null ? BigDecimal.ZERO : h.getImportTotal())
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
  
         return new InformeReserves(files, vigents.size(), preuTotal,
@@ -91,16 +91,7 @@ public class InformeReservesLogic {
                 h.getDataReserva(),
                 h.getVehicleMatricula() + " - " + h.getVehicleMarca() + " " + h.getVehicleModel(),
                 h.getClientNom() + " (" + h.getClientDni() + ")",
-                obtenirImportTotal(h),
+                h.getImportTotal(),
                 h.getEstat());
-    }
-
-    private BigDecimal obtenirImportTotal(HistoricReserva reserva) {
-        try {
-            Object importTotal = reserva.getClass().getMethod("getImportTotal").invoke(reserva);
-            return importTotal == null ? BigDecimal.ZERO : new BigDecimal(importTotal.toString());
-        } catch (ReflectiveOperationException e) {
-            throw new IllegalStateException("No s'ha pogut obtenir l'import total de la reserva", e);
-        }
     }
 }

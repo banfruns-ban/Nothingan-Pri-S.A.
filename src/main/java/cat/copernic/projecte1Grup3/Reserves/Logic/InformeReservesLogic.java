@@ -18,7 +18,7 @@ import cat.copernic.projecte1Grup3.Reserves.Repository.HistoricReservaRepository
 
 @Service
 public class InformeReservesLogic {
- 
+
     private static final Logger log = LoggerFactory.getLogger(InformeReservesLogic.class);
  
     /** Per client i, dins de cada client, la reserva més recent primer. */
@@ -61,7 +61,7 @@ public class InformeReservesLogic {
                 .filter(h -> h.getEstat() != EstatHistoric.ANUL_LADA)
                 .toList();
         BigDecimal preuTotal = vigents.stream()
-                .map(h -> h.getImportTotal() == null ? BigDecimal.ZERO : h.getImportTotal())
+            .map(this::obtenirImportTotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
  
         return new InformeReserves(files, vigents.size(), preuTotal,
@@ -91,7 +91,16 @@ public class InformeReservesLogic {
                 h.getDataReserva(),
                 h.getVehicleMatricula() + " - " + h.getVehicleMarca() + " " + h.getVehicleModel(),
                 h.getClientNom() + " (" + h.getClientDni() + ")",
-                h.getImportTotal(),
+                obtenirImportTotal(h),
                 h.getEstat());
+    }
+
+    private BigDecimal obtenirImportTotal(HistoricReserva reserva) {
+        try {
+            Object importTotal = reserva.getClass().getMethod("getImportTotal").invoke(reserva);
+            return importTotal == null ? BigDecimal.ZERO : new BigDecimal(importTotal.toString());
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException("No s'ha pogut obtenir l'import total de la reserva", e);
+        }
     }
 }

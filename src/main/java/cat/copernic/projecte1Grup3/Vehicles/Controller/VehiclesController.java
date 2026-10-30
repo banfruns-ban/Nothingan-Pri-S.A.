@@ -8,14 +8,17 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Controladors per a les visites i accions del CRUD de Vehicles (RF40 - RF44).
- */
 @Controller
 @RequestMapping("/vehicles")
 public class VehiclesController {
@@ -27,9 +30,6 @@ public class VehiclesController {
         this.vehiclesService = vehiclesService;
     }
 
-    /**
-     * RF43: Llistar tots els vehicles amb opció de filtre (cerca, tipus, estat).
-     */
     @GetMapping
     public String llistarVehicles(
             @RequestParam(name = "cerca", required = false) String cerca,
@@ -46,34 +46,25 @@ public class VehiclesController {
         return "vehicles/llistat";
     }
 
-    /**
-     * RF44: Visualitzar detalls d'un vehicle.
-     */
     @GetMapping("/detall/{matricula}")
-    public String mostrarDetall(@PathVariable String matricula, Model model, RedirectAttributes redirect) {
+    public String mostrarDetall(@PathVariable("matricula") String matricula, Model model, RedirectAttributes redirect) {
         Optional<VehiclesEntity> vehicle = vehiclesService.buscarPerMatricula(matricula);
         if (vehicle.isPresent()) {
             model.addAttribute("vehicle", vehicle.get());
-            return "vehicles/detall";
+            return "vehicles/detallVehicle";
         }
-        redirect.addFlashAttribute("error", "El vehicle no existeix.");
+        redirect.addFlashAttribute("error", "El vehicle amb matrícula " + matricula + " no existeix.");
         return "redirect:/vehicles";
     }
 
-    /**
-     * RF40: Formulari exclusiu per a l'Alta d'un vehicle.
-     */
     @GetMapping("/nou")
     public String formulariNouVehicle(Model model) {
         model.addAttribute("vehicle", new VehiclesEntity());
         return "vehicles/altaVehicle";
     }
 
-    /**
-     * RF42: Formulari exclusiu per a la Modificació d'un vehicle.
-     */
     @GetMapping("/editar/{matricula}")
-    public String formulariEditarVehicle(@PathVariable String matricula, Model model, RedirectAttributes redirect) {
+    public String formulariEditarVehicle(@PathVariable("matricula") String matricula, Model model, RedirectAttributes redirect) {
         Optional<VehiclesEntity> vehicle = vehiclesService.buscarPerMatricula(matricula);
         if (vehicle.isPresent()) {
             model.addAttribute("vehicle", vehicle.get());
@@ -83,18 +74,16 @@ public class VehiclesController {
         return "redirect:/vehicles";
     }
 
-    /**
-     * Processa el desament (creació o modificació) d'un vehicle amb validacions.
-     */
     @PostMapping("/guardar")
     public String guardarVehicle(
             @Valid @ModelAttribute("vehicle") VehiclesEntity vehicle,
             BindingResult result,
+            @RequestParam(name = "file", required = false) MultipartFile file,
             Model model,
             RedirectAttributes redirect) {
 
-        boolean existeixBDD = vehicle.getMatricula() != null && 
-                              vehiclesService.buscarPerMatricula(vehicle.getMatricula()).isPresent();
+        Optional<VehiclesEntity> existentOpt = vehiclesService.buscarPerMatricula(vehicle.getMatricula());
+        boolean existeixBDD = vehicle.getMatricula() != null && existentOpt.isPresent();
 
         if (!existeixBDD && vehicle.getMatricula() != null && !vehicle.getMatricula().isBlank()) {
             if (vehiclesService.buscarPerMatricula(vehicle.getMatricula()).isPresent()) {
@@ -112,17 +101,32 @@ public class VehiclesController {
             return existeixBDD ? "vehicles/editarVehicle" : "vehicles/altaVehicle";
         }
 
+        // Gestió de la foto
+        if (file != null && !file.isEmpty()) {
+            try {
+                String fileName = vehicle.getMatricula() + "_" + file.getOriginalFilename();
+                Path uploadPath = Paths.get("uploads/vehicles");
+                if (!Files.exists(uploadPath)) {
+                    Files.createDirectories(uploadPath);
+                }
+                Files.copy(file.getInputStream(), uploadPath.resolve(fileName), StandardCopyOption.REPLACE_EXISTING);
+                vehicle.setFoto(fileName);
+            } catch (IOException e) {
+                redirect.addFlashAttribute("error", "Error en carregar la imatge del vehicle.");
+            }
+        } else if (existeixBDD) {
+            // Si estem editant i no s'ha pujat cap foto nova, mantenim la foto existent
+            vehicle.setFoto(existentOpt.get().getFoto());
+        }
+
         vehiclesService.guardarVehicle(vehicle);
         redirect.addFlashAttribute("succes", "Vehicle desat correctament.");
         return "redirect:/vehicles";
     }
 
-    /**
-     * Canvia l'estat d'activació (Actiu / Inactiu) des del menú desplegable de la taula.
-     */
     @PostMapping("/canviar-estat/{matricula}")
     public String canviarEstatVehicle(
-            @PathVariable String matricula, 
+            @PathVariable("matricula") String matricula, 
             @RequestParam("actiu") Boolean actiu, 
             RedirectAttributes redirect) {
         try {
@@ -134,11 +138,8 @@ public class VehiclesController {
         return "redirect:/vehicles";
     }
 
-    /**
-     * RF41: Baixa / Eliminar vehicle de la BDD.
-     */
     @PostMapping("/eliminar/{matricula}")
-    public String eliminarVehicle(@PathVariable String matricula, RedirectAttributes redirect) {
+    public String eliminarVehicle(@PathVariable("matricula") String matricula, RedirectAttributes redirect) {
         try {
             vehiclesService.eliminarVehicle(matricula);
             redirect.addFlashAttribute("succes", "Vehicle eliminat amb èxit.");

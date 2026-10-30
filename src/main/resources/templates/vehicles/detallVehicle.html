@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fitxa del Vehicle - NOTHINGAN PRI S.A</title>
+    <!-- Bootstrap 5 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <!-- FontAwesome per les icones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- CSS Unificat -->
+    <link rel="stylesheet" th:href="@{/agents.css}">
+</head>
+<body>
+
+    <!-- Sidebar Lateral -->
+    <aside class="sidebar">
+        <div class="brand">
+            NOTHINGAN PRI S.A
+            <span>PANEL DE CONTROL AGENT</span>
+        </div>
+        <nav class="mt-3">
+            <a th:href="@{/dashboard}" class="nav-link">
+                <i class="fa-solid fa-border-all"></i> Dashboard
+            </a>
+            <a th:href="@{/vehicles}" class="nav-link active">
+                <i class="fa-solid fa-car"></i> Flota de Vehicles
+            </a>
+            <a th:href="@{/agents/llista}" class="nav-link">
+                <i class="fa-solid fa-user-gear"></i> Gestió d'Agents
+            </a>
+            <a th:href="@{/clients}" class="nav-link">
+                <i class="fa-solid fa-users"></i> Gestió de Clients
+            </a>
+            <a th:href="@{/reserves}" class="nav-link">
+                <i class="fa-regular fa-calendar-check"></i> Reserves Actives
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold text-dark m-0">Fitxa del Vehicle</h2>
+                <p class="text-muted small mb-0 mt-1">Informació detallada, tarifes i especificacions tècniques.</p>
+            </div>
+            <div>
+                <a th:href="@{'/vehicles/editar/' + ${vehicle.matricula}}" class="btn btn-outline-primary me-2 fw-semibold px-3 py-2" style="border-radius: 8px;">
+                    <i class="fa-solid fa-pen-to-square me-1"></i> Editar
+                </a>
+                <a th:href="@{/vehicles}" class="btn btn-secondary fw-semibold px-3 py-2" style="border-radius: 8px;">
+                    <i class="fa-solid fa-arrow-left me-1"></i> Tornar al llistat
+                </a>
+            </div>
+        </div>
+
+        <div class="detail-card shadow-sm">
+            <div class="row align-items-center pb-4 mb-4 border-bottom">
+                <div class="col-auto">
+                    <img th:if="${vehicle.foto != null and !vehicle.foto.isBlank()}"
+                         th:src="@{'/uploads/vehicles/' + ${vehicle.foto}}"
+                         alt="Foto Vehicle" class="profile-img-large" style="width: 110px; height: 110px; object-fit: cover; border-radius: 12px; border: 1px solid #e5e7eb;">
+                    <div th:unless="${vehicle.foto != null and !vehicle.foto.isBlank()}" 
+                         class="rounded-circle bg-light d-flex align-items-center justify-content-center border" style="width: 110px; height: 110px;">
+                        <i class="fa-solid fa-car fa-3x text-secondary"></i>
+                    </div>
+                </div>
+                <div class="col">
+                    <h3 class="fw-bold text-dark m-0" th:text="${vehicle.marca + ' ' + vehicle.model}">Toyota Corolla</h3>
+                    <p class="text-muted mb-2" th:text="'Matrícula: ' + ${vehicle.matricula}">1234ABC</p>
+                    <span th:class="${vehicle.actiu ? 'badge-agent' : 'badge-admin'}" 
+                          th:text="${vehicle.actiu ? 'ACTIU' : 'INACTIU'}">ACTIU</span>
+                    <span class="badge bg-secondary ms-1" th:text="${vehicle.estat}">DISPONIBLE</span>
+                    <span class="badge bg-primary text-white ms-1" th:text="${vehicle.tipusVehicle}">TURISME</span>
+                </div>
+            </div>
+
+            <h5 class="fw-bold text-primary mb-3">Especificacions del Vehicle</h5>
+            <div class="row g-4 mb-4">
+                <div class="col-md-4">
+                    <div class="label-title">Matrícula</div>
+                    <div class="value-text" th:text="${vehicle.matricula}">1234ABC</div>
+                </div>
+                <div class="col-md-4">
+                    <div class="label-title">Marca</div>
+                    <div class="value-text" th:text="${vehicle.marca}">Toyota</div>
+                </div>
+                <div class="col-md-4">
+                    <div class="label-title">Model</div>
+                    <div class="value-text" th:text="${vehicle.model}">Corolla</div>
+                </div>
+                <div class="col-md-4">
+                    <div class="label-title">Any de matriculació</div>
+                    <div class="value-text" th:text="${vehicle.anyMatriculacio}">2022</div>
+                </div>
+                <div class="col-md-4">
+                    <div class="label-title">Tipus de Vehicle</div>
+                    <div class="value-text" th:text="${vehicle.tipusVehicle}">Turisme</div>
+                </div>
+                <div class="col-md-4">
+                    <div class="label-title">Límit de Quilometratge</div>
+                    <div class="value-text" th:text="${vehicle.limitQuilometratge != null ? vehicle.limitQuilometratge + ' km' : 'Sense límit'}">300 km</div>
+                </div>
+            </div>
+
+            <h5 class="fw-bold text-primary mb-3 border-top pt-4">Tarifes i Condicions de Lloguer</h5>
+            <div class="row g-4 mb-4">
+                <div class="col-md-3">
+                    <div class="label-title">Preu per hora</div>
+                    <div class="value-text text-success" th:text="${vehicle.preuHora + ' €/h'}">15.00 €/h</div>
+                </div>
+                <div class="col-md-3">
+                    <div class="label-title">Fiança requerida</div>
+                    <div class="value-text" th:text="${vehicle.fianca + ' €'}">300.00 €</div>
+                </div>
+                <div class="col-md-3">
+                    <div class="label-title">Mínim de dies</div>
+                    <div class="value-text" th:text="${vehicle.minDiesLloguer + ' dia/es'}">1 dia/es</div>
+                </div>
+                <div class="col-md-3">
+                    <div class="label-title">Màxim de dies</div>
+                    <div class="value-text" th:text="${vehicle.maxDiesLloguer + ' dies'}">30 dies</div>
+                </div>
+            </div>
+
+            <h5 class="fw-bold text-primary mb-3 border-top pt-4">Informació Addicional</h5>
+            <div class="row g-4">
+                <div class="col-md-12">
+                    <div class="label-title">Descripció Pública</div>
+                    <div class="value-text fw-normal" th:text="${vehicle.descripcio}">Vehicle en perfecte estat.</div>
+                </div>
+                <div class="col-md-12" th:if="${vehicle.comentarisPrivats != null and !#strings.isEmpty(vehicle.comentarisPrivats)}">
+                    <div class="label-title text-danger"><i class="fa-solid fa-lock me-1"></i> Comentaris Privats (Ús Intern)</div>
+                    <div class="p-3 bg-light rounded border border-warning value-text fw-normal" th:text="${vehicle.comentarisPrivats}">Anotacions internes del vehicle.</div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

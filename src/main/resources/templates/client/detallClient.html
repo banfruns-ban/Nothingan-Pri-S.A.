@@ -50,7 +50,7 @@
                 <a th:href="@{'/reserves/nova?dni=' + ${client.dni}}" class="btn btn-primary me-2 fw-semibold px-3 py-2" style="border-radius: 8px;">
                     <i class="fa-regular fa-calendar-plus me-1"></i> Nova Reserva
                 </a>
-                <a th:href="@{'/clients/editar/' + ${client.dni}}" class="btn btn-outline-primary me-2 fw-semibold px-3 py-2" style="border-radius: 8px;">
+                <a th:href="@{'/clients/' + ${client.dni} + '/editar'}" class="btn btn-outline-primary me-2 fw-semibold px-3 py-2" style="border-radius: 8px;">
                     <i class="fa-solid fa-pen-to-square me-1"></i> Editar
                 </a>
                 <a th:href="@{/clients}" class="btn btn-secondary fw-semibold px-3 py-2" style="border-radius: 8px;">
@@ -64,19 +64,48 @@
                 <div class="col-auto">
                     <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold fs-3" 
                          style="width: 90px; height: 90px;">
-                        <span th:text="${#strings.substring(client.nom, 0, 1)}">C</span>
+                        <span th:text="${client.nom != null and !#strings.isEmpty(client.nom) ? #strings.substring(client.nom, 0, 1) : 'C'}">C</span>
                     </div>
                 </div>
                 <div class="col">
                     <h3 class="fw-bold text-dark m-0" th:text="${client.nom}">Nom del Client</h3>
                     <p class="text-muted mb-2" th:text="'DNI: ' + ${client.dni}">12345678Z</p>
-                    <span class="badge" 
-                          th:classappend="${client.validat ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-warning-emphasis'}"
-                          th:text="${client.validat ? 'Client Validat' : 'Pendent de Validació'}">Estat</span>
+
+                    <!-- CORRECCIÓN: Se usa client.estatValidacio en lugar de client.validat -->
+                    <span th:if="${client.estatValidacio == 'VALIDAT'}" 
+                          class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 fw-bold">
+                          VALIDAT
+                    </span>
+                    <span th:if="${client.estatValidacio == 'PENDENT' or client.estatValidacio == null}" 
+                          class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-2 py-1 fw-bold">
+                          PENDENT
+                    </span>
+                    <span th:if="${client.estatValidacio == 'REBUTJAT'}" 
+                          class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1 fw-bold">
+                          REBUTJAT
+                    </span>
+
+                    <span class="badge bg-primary text-white ms-1" th:if="${client.premium}">PREMIUM</span>
+                </div>
+
+                <!-- ACCIONS DE VALIDACIÓ RF82 -->
+                <div class="col-auto d-flex gap-2">
+                    <form th:action="@{'/clients/' + ${client.dni} + '/validacio'}" method="post">
+                        <input type="hidden" name="estat" value="VALIDAT" />
+                        <button type="submit" class="btn btn-success fw-semibold px-3 py-2" style="border-radius: 8px;">
+                            <i class="fa-solid fa-check me-1"></i> Validar
+                        </button>
+                    </form>
+                    <form th:action="@{'/clients/' + ${client.dni} + '/validacio'}" method="post">
+                        <input type="hidden" name="estat" value="REBUTJAT" />
+                        <button type="submit" class="btn btn-danger fw-semibold px-3 py-2" style="border-radius: 8px;">
+                            <i class="fa-solid fa-xmark me-1"></i> Rebutjar
+                        </button>
+                    </form>
                 </div>
             </div>
 
-            <div class="row g-4">
+            <div class="row g-4 border-bottom pb-4 mb-4">
                 <div class="col-md-6">
                     <div class="label-title">DNI / NIE</div>
                     <div class="value-text" th:text="${client.dni}">12345678Z</div>
@@ -94,9 +123,59 @@
 
                 <div class="col-md-6">
                     <div class="label-title">Telèfon de contacte</div>
-                    <div class="value-text" th:text="${client.telefon != null ? client.telefon : '-'}">600000000</div>
+                    <div class="value-text" th:text="${client.telefon != null and !#strings.isEmpty(client.telefon) ? client.telefon : '-'}">600000000</div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="label-title">Adreça</div>
+                    <div class="value-text" th:text="${client.adreca}">Carrer Principal 12</div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="label-title">Nacionalitat</div>
+                    <div class="value-text" th:text="${client.nacionalitat}">Espanyola</div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="label-title">Tipus de llicència</div>
+                    <div class="value-text" th:text="${client.tipusLlicencia}">B</div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="label-title">Data de caducitat DNI</div>
+                    <div class="value-text" th:text="${client.dataCaducitatDNI}">2028-12-31</div>
                 </div>
             </div>
+
+            <!-- DOCUMENTACIÓ ADJUNTA (MongoDB) -->
+            <h4 class="fw-bold text-dark mb-3">Documentació per a Validació (MongoDB)</h4>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="card h-100 p-2 text-center border">
+                        <span class="small fw-bold text-muted mb-2">DNI Frontal</span>
+                        <img th:src="@{'/clients/' + ${client.dni} + '/imatge/frontal'}" 
+                             class="img-fluid rounded border" style="max-height: 180px; object-fit: contain;"
+                             onerror="this.src='https://via.placeholder.com/250x150?text=DNI+Frontal';">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100 p-2 text-center border">
+                        <span class="small fw-bold text-muted mb-2">DNI Posterior</span>
+                        <img th:src="@{'/clients/' + ${client.dni} + '/imatge/posterior'}" 
+                             class="img-fluid rounded border" style="max-height: 180px; object-fit: contain;"
+                             onerror="this.src='https://via.placeholder.com/250x150?text=DNI+Posterior';">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100 p-2 text-center border">
+                        <span class="small fw-bold text-muted mb-2">Carnet de Conduir</span>
+                        <img th:src="@{'/clients/' + ${client.dni} + '/imatge/carnet'}" 
+                             class="img-fluid rounded border" style="max-height: 180px; object-fit: contain;"
+                             onerror="this.src='https://via.placeholder.com/250x150?text=Carnet';">
+                    </div>
+                </div>
+            </div>
+
         </div>
 
     </main>

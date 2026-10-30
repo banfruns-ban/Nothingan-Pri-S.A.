@@ -32,13 +32,12 @@ public class clientController {
     // ALTA DE CLIENTE
     // =====================================================
 
-    // Acepta /clients/alta, /clients/altaUsuari y /clients/nou evitando el error 404
     @GetMapping({"/clients/alta", "/clients/altaUsuari", "/clients/nou"})
     public String mostrarFormulari(Model model) {
         if (!model.containsAttribute("client")) {
             model.addAttribute("client", new clientEntity());
         }
-        return "client/altaUsuari"; // Retorna la vista en la carpeta client/ (en singular)
+        return "client/altaUsuari";
     }
 
     @PostMapping({"/clients/alta", "/clients/altaUsuari"})
@@ -82,8 +81,8 @@ public class clientController {
         return "client/llistaClients";
     }
 
-    // Mapeado como /clients/detall/{dni} para no colisionar con /clients/alta
-    @GetMapping("/clients/detall/{dni}")
+    // Acepta tanto /clients/{dni} como /clients/detall/{dni} para evitar errores 404
+    @GetMapping({"/clients/{dni}", "/clients/detall/{dni}"})
     public String detall(@PathVariable String dni, Model model, RedirectAttributes ra) {
         return clientLogic.obtenir(dni).map(c -> {
             model.addAttribute("client", c);
@@ -183,7 +182,7 @@ public class clientController {
     }
 
     // =====================================================
-    // VALIDACIÓN Y ESTADO
+    // VALIDACIÓN Y ESTADO (RF82)
     // =====================================================
 
     @PostMapping("/clients/{dni}/validacio")

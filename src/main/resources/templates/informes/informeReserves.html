@@ -64,7 +64,7 @@
                 </thead>
                 <tbody id="cosTaula">
                     <tr class="fila-reserva" th:each="f : ${informe.files()}"
-                        th:classappend="${f.estat() == T(cat.copernic.projecte1Grup3.Historic.Entity.EstatHistoric).CANCELADA} ? 'cancelled'">
+                        th:classappend="${f.estat() != null and f.estat().name() == 'CANCELADA'} ? 'cancelled'">
                         <td class="nowrap struck"
                             th:text="${f.data() != null ? #temporals.format(f.data(), 'dd/MM/yyyy HH:mm') : '—'}">
                             01/01/2026 10:00</td>
@@ -75,7 +75,12 @@
                             0,00 €</td>
                         <td>
                             <span class="badge-estat" th:if="${f.estat() != null}" th:classappend="${f.estat().name()}"
-                                th:text="${f.estat().name()}">Estat</span>
+                                th:text="${f.estat().name() == 'PENDENT' ? 'Pendent'
+                                : (f.estat().name() == 'CONFIRMADA' ? 'Confirmada'
+                                : (f.estat().name() == 'EN_CURS' ? 'En curs'
+                                : (f.estat().name() == 'FINALITZADA' ? 'Finalitzada'
+                                : (f.estat().name() == 'CANCELADA' ? 'Cancel·lada' : 'Eliminada'))))}">Estat
+                            </span>
                         </td>
                     </tr>
                     <tr th:if="${#lists.isEmpty(informe.files())}">

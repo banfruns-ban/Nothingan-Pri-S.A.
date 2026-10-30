@@ -1,5 +1,10 @@
 package cat.copernic.projecte1Grup3.Informes.Entity;
 
 public enum EstatHistoric {
-    CREADA, ANUL_LADA, FINALITZADA
+    PENDENT,
+    CONFIRMADA,
+    EN_CURS,
+    FINALITZADA,
+    CANCELADA,
+    ELIMINADA
 }

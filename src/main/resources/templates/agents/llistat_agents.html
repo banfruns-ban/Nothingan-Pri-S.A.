@@ -20,7 +20,7 @@
             <span>PANEL DE CONTROL AGENT</span>
         </div>
         <nav class="mt-3">
-            <a href="#" class="nav-link">
+            <a th:href="@{/dashboard}" class="nav-link">
                 <i class="fa-solid fa-border-all"></i> Dashboard
             </a>
             <a th:href="@{/vehicles}" class="nav-link">
@@ -32,7 +32,7 @@
             <a th:href="@{/clients}" class="nav-link">
                 <i class="fa-solid fa-users"></i> Gestió de Clients
             </a>
-            <a href="#" class="nav-link">
+            <a th:href="@{/reserves}" class="nav-link">
                 <i class="fa-regular fa-calendar-check"></i> Reserves Actives
             </a>
         </nav>
@@ -92,7 +92,7 @@
         </div>
 
         <div class="custom-table-card shadow-sm">
-            <table class="table">
+            <table class="table align-middle">
                 <thead>
                     <tr>
                         <th>FOTO</th>
@@ -133,12 +133,17 @@
                             <span th:unless="${a.rol != null}">-</span>
                         </td>
                         <td class="text-end">
-                            <a th:href="@{'/agents/editar/' + ${a.dni}}" class="btn-editar me-1">Editar</a>
-                            <a th:href="@{'/agents/detall/' + ${a.dni}}" class="btn btn-sm btn-outline-secondary me-1" style="border-radius: 6px;">Detall</a>
-                            <form th:action="@{'/agents/eliminar/' + ${a.dni}}" method="post" class="d-inline"
-                                  onsubmit="return confirm('Estàs segur de voler donar de baixa aquest agent?');">
-                                <button type="submit" class="btn-desactivar">Baixa</button>
-                            </form>
+                            <div class="d-inline-flex gap-1 align-items-center">
+                                <a th:href="@{'/reserves/nova?dni=' + ${a.dni}}" class="btn btn-outline-primary btn-sm me-1 fw-semibold" style="border-radius: 6px;" title="Crear reserva">
+                                    <i class="fa-regular fa-calendar-plus me-1"></i> Reserva
+                                </a>
+                                <a th:href="@{'/agents/editar/' + ${a.dni}}" class="btn-editar me-1">Editar</a>
+                                <a th:href="@{'/agents/detall/' + ${a.dni}}" class="btn btn-sm btn-outline-secondary me-1" style="border-radius: 6px;">Detall</a>
+                                <form th:action="@{'/agents/eliminar/' + ${a.dni}}" method="post" class="d-inline"
+                                      onsubmit="return confirm('Estàs segur de voler donar de baixa aquest agent?');">
+                                    <button type="submit" class="btn-desactivar">Baixa</button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                     

@@ -26,8 +26,6 @@ public class reservesController {
 
     private final reservesService reservesLogic;
     private final clientService clientLogic;
-    
-    
 
     public reservesController(
             reservesService reservesLogic,
@@ -73,6 +71,7 @@ public class reservesController {
     @GetMapping("/reserves/nova")
     public String mostrarFormulari(
             @RequestParam(required = false) String dni,
+            @RequestParam(required = false) String matricula, // <-- Afegit per rebre la matrícula del vehicle
             Model model,
             RedirectAttributes ra) {
 
@@ -81,7 +80,7 @@ public class reservesController {
 
             if (client.isEmpty()) {
                 ra.addFlashAttribute("error", "Client no trobat");
-                return "redirect:/reserves";          // vuelve a la lista
+                return "redirect:/reserves";          // torna a la llista
             }
 
             model.addAttribute("client", client.get());
@@ -92,9 +91,14 @@ public class reservesController {
                     clientLogic.llistar(null, null, "VALIDAT", null, null));
         }
 
+        // Si ve una matrícula preseleccionada des de la fitxa del vehicle, la passem a la vista
+        if (matricula != null && !matricula.isBlank()) {
+            model.addAttribute("matriculaPreseleccionada", matricula.trim().toUpperCase());
+        }
+
         model.addAttribute("vehicles", reservesLogic.vehiclesActius());
 
-        return "reservas/altaReserva";               // el formulario, en su carpeta
+        return "reservas/altaReserva";               // el formulari, a la seva carpeta
     }
 
     @PostMapping("/reserves/alta")
@@ -144,8 +148,8 @@ public class reservesController {
 
         return "redirect:/reserves/nova?dni=" + dni;
     }
-    
-     @PostMapping("/reserves/{codi}/eliminar")
+
+    @PostMapping("/reserves/{codi}/eliminar")
     public String eliminar(@PathVariable Long codi, RedirectAttributes ra) {
         try {
             reservesLogic.eliminar(codi);

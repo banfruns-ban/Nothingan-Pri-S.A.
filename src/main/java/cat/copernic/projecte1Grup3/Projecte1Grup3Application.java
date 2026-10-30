@@ -18,7 +18,8 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
 })
 @EnableMongoRepositories(basePackages = {
     "cat.copernic.projecte1Grup3.Usuaris.Client.Repository",
-    "cat.copernic.projecte1Grup3.Reserves.Repository"
+    "cat.copernic.projecte1Grup3.Reserves.Repository",
+    "cat.copernic.projecte1Grup3.Informes.Repository"
 })
 @EntityScan(basePackages = "cat.copernic.projecte1Grup3")
 public class Projecte1Grup3Application {

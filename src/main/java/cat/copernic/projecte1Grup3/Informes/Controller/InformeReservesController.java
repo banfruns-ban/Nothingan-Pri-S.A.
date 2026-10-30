@@ -7,6 +7,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import cat.copernic.projecte1Grup3.Informes.Service.InformeException;
 import cat.copernic.projecte1Grup3.Informes.Service.InformeReservesService;
 import cat.copernic.projecte1Grup3.Usuaris.Client.Service.clientService;
 
@@ -28,7 +29,7 @@ public class InformeReservesController {
      */
     @GetMapping("/informes/reserves")
     public String informeReserves(@RequestParam(required = false) List<String> dnis,
-                                  Model model) {
+                                  Model model) throws InformeException {
         // Mateixa crida que ja feu servir a reservesController per al desplegable de clients
         model.addAttribute("clients", clientLogic.llistar(null, null, "VALIDAT", null, null));
         model.addAttribute("dnisSeleccionats", dnis == null ? List.of() : dnis);
@@ -37,6 +38,7 @@ public class InformeReservesController {
         } catch (IllegalArgumentException e) {
             model.addAttribute("error", e.getMessage());
         }
+
         return "informes/informeReserves";
     }
 }

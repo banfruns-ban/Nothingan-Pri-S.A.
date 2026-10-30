@@ -8,12 +8,12 @@ import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 
-@Entity
-@Table(name = "Clients")
+@Entity // Marca la clase como entidad persistente de JPA
+@Table(name = "Clients") // Asocia esta entidad con la tabla "Clients" en la base de datos MySQL
 @PrimaryKeyJoinColumn(
     name = "DNI",
     referencedColumnName = "dni"
-)
+) // Mapeo de herencia: comparte la clave primaria 'dni' con la entidad padre usuariEntity
 public class clientEntity extends usuariEntity {
 
     @Column(name = "data_caducitat_DNI", nullable = false)
@@ -32,9 +32,9 @@ public class clientEntity extends usuariEntity {
     private boolean premium;
 
     @Column(name = "estat_validacio", nullable = false)
-    private String estatValidacio;
+    private String estatValidacio; // Clave para el RF82 (PENDENT, VALIDAT, REBUTJAT)
 
-    // ---- Camps nous (sense nullable = false perquè els clients antics no els tenen) ----
+    // Campos opcionales (sin nullable = false) para compatibilidad con registros preexistentes
     @Column(name = "telefon")
     private String telefon;
 
@@ -44,7 +44,7 @@ public class clientEntity extends usuariEntity {
     @Column(name = "data_registre")
     private LocalDate dataRegistre;
 
-    // La data de registre s'omple sola en guardar un client nou
+    // Se ejecuta automáticamente antes de persistir un nuevo registro en la BD
     @PrePersist
     void alCrear() {
         if (dataRegistre == null) {
@@ -52,10 +52,12 @@ public class clientEntity extends usuariEntity {
         }
     }
 
+    // Constructor sin argumentos por defecto para JPA
     public clientEntity() {
         super();
     }
 
+    // Constructor completo que inicializa también la superclase (usuariEntity)
     public clientEntity(String dataCaducitatDNI,
                         String nacionalitat,
                         String adreca,
@@ -76,7 +78,7 @@ public class clientEntity extends usuariEntity {
         this.estatValidacio = estatValidacio;
     }
 
-    // ---------- Getters i setters ----------
+    // Getters y Setters
     public String getDataCaducitatDNI() { return dataCaducitatDNI; }
     public void setDataCaducitatDNI(String dataCaducitatDNI) { this.dataCaducitatDNI = dataCaducitatDNI; }
 

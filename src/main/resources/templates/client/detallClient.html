@@ -70,9 +70,25 @@
                           th:text="${client.estatValidacio}">VALIDAT</span>
                     <span class="badge bg-primary text-white ms-1" th:if="${client.premium}">PREMIUM</span>
                 </div>
+
+                <!-- ACCIONS DE VALIDACIÓ RF82 -->
+                <div class="col-auto d-flex gap-2">
+                    <form th:action="@{'/clients/' + ${client.dni} + '/validacio'}" method="post">
+                        <input type="hidden" name="estat" value="VALIDAT" />
+                        <button type="submit" class="btn btn-success fw-semibold px-3 py-2" style="border-radius: 8px;">
+                            <i class="fa-solid fa-check me-1"></i> Validar
+                        </button>
+                    </form>
+                    <form th:action="@{'/clients/' + ${client.dni} + '/validacio'}" method="post">
+                        <input type="hidden" name="estat" value="REBUTJAT" />
+                        <button type="submit" class="btn btn-danger fw-semibold px-3 py-2" style="border-radius: 8px;">
+                            <i class="fa-solid fa-xmark me-1"></i> Rebutjar
+                        </button>
+                    </form>
+                </div>
             </div>
 
-            <div class="row g-4">
+            <div class="row g-4 border-bottom pb-4 mb-4">
                 <div class="col-md-6">
                     <div class="label-title">Número d'identificació (DNI / NIE)</div>
                     <div class="value-text" th:text="${client.dni}">12345678Z</div>
@@ -113,6 +129,36 @@
                     <div class="value-text" th:text="${client.dataCaducitatDNI}">2028-12-31</div>
                 </div>
             </div>
+
+            <!-- SECCIÓ DE DOCUMENTACIÓ ADJUNTA (MongoDB) PER A LA REVISIÓ DEL RF82 -->
+            <h4 class="fw-bold text-dark mb-3">Documentació per a Validació</h4>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="card h-100 p-2 text-center border">
+                        <span class="small fw-bold text-muted mb-2">DNI Frontal</span>
+                        <img th:src="@{'/clients/' + ${client.dni} + '/imatge/frontal'}" 
+                             class="img-fluid rounded border" style="max-height: 180px; object-fit: contain;"
+                             onerror="this.src='https://via.placeholder.com/250x150?text=DNI+Frontal';">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100 p-2 text-center border">
+                        <span class="small fw-bold text-muted mb-2">DNI Posterior</span>
+                        <img th:src="@{'/clients/' + ${client.dni} + '/imatge/posterior'}" 
+                             class="img-fluid rounded border" style="max-height: 180px; object-fit: contain;"
+                             onerror="this.src='https://via.placeholder.com/250x150?text=DNI+Posterior';">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100 p-2 text-center border">
+                        <span class="small fw-bold text-muted mb-2">Carnet de Conduir</span>
+                        <img th:src="@{'/clients/' + ${client.dni} + '/imatge/carnet'}" 
+                             class="img-fluid rounded border" style="max-height: 180px; object-fit: contain;"
+                             onerror="this.src='https://via.placeholder.com/250x150?text=Carnet';">
+                    </div>
+                </div>
+            </div>
+
         </div>
 
     </main>

@@ -1,34 +1,31 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package cat.copernic.projecte1Grup3.Usuaris.Client.Documents;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+// Define que esta clase se guarda como un documento dentro de la colección 'client_documents' en MongoDB
 @Document(collection = "client_documents")
 public class clientDocuments {
 
     @Id
-    private String dni;                 // mismo DNI que en MySQL
+    private String dni; // Mismo DNI de la base de datos relacional (MySQL) para vincular los datos
 
-    private byte[] fotoDniFrontal;
-    private String tipusFotoDniFrontal;     // image/png o image/jpeg
+    private byte[] fotoDniFrontal;        // Array de bytes con el contenido de la foto frontal del DNI
+    private String tipusFotoDniFrontal;     // Tipo MIME (image/png, image/jpeg) para la cabecera HTTP
 
-    private byte[] fotoDniPosterior;
-    private String tipusFotoDniPosterior;
+    private byte[] fotoDniPosterior;      // Array de bytes con el contenido de la foto trasera del DNI
+    private String tipusFotoDniPosterior;   // Tipo MIME de la foto trasera
 
-    private byte[] fotoCarnet;
-    private String tipusFotoCarnet;
+    private byte[] fotoCarnet;            // Array de bytes con la imagen del carnet de conducir
+    private String tipusFotoCarnet;         // Tipo MIME del carnet de conducir
 
+    // Constructor vacío por defecto
     public clientDocuments() {}
-    
-    
 
-
-
-    public clientDocuments(String dni, byte[] fotoDniFrontal, String tipusFotoDniFrontal, byte[] fotoDniPosterior, String tipusFotoDniPosterior, byte[] fotoCarnet, String tipusFotoCarnet) {
+    // Constructor parametrizado completo
+    public clientDocuments(String dni, byte[] fotoDniFrontal, String tipusFotoDniFrontal, 
+                           byte[] fotoDniPosterior, String tipusFotoDniPosterior, 
+                           byte[] fotoCarnet, String tipusFotoCarnet) {
         this.dni = dni;
         this.fotoDniFrontal = fotoDniFrontal;
         this.tipusFotoDniFrontal = tipusFotoDniFrontal;
@@ -38,6 +35,7 @@ public class clientDocuments {
         this.tipusFotoCarnet = tipusFotoCarnet;
     }
 
+    // Getters y Setters
     public String getDni() {
         return dni;
     }
@@ -93,6 +91,4 @@ public class clientDocuments {
     public void setTipusFotoCarnet(String tipusFotoCarnet) {
         this.tipusFotoCarnet = tipusFotoCarnet;
     }
-    
-    
 }

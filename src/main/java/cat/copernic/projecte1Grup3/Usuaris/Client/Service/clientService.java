@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package cat.copernic.projecte1Grup3.Usuaris.Client.Service;
 
 import cat.copernic.projecte1Grup3.Usuaris.Client.Documents.clientDocuments;
@@ -16,13 +12,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-/**
- *
- * @author User
- */
-@Service
+@Service // Marca la clase como Capa de Servicio (Lógica de Negocio)
 public class clientService {
 
+    // Constantes de estado para el cumplimiento del RF82
     public static final String PENDENT = "PENDENT";
     public static final String VALIDAT = "VALIDAT";
     public static final String REBUTJAT = "REBUTJAT";
@@ -30,17 +23,20 @@ public class clientService {
     private final clientRepository clientRepository;
     private final clientRepositoryMongo clientRepositoryMongo;
 
+    // Inyección de dependencias por constructor de ambos repositorios (Relacional + NoSQL)
     public clientService(clientRepository clientRepository,
-            clientRepositoryMongo clientRepositoryMongo) {
+                         clientRepositoryMongo clientRepositoryMongo) {
         this.clientRepository = clientRepository;
         this.clientRepositoryMongo = clientRepositoryMongo;
     }
 
-    // ---------- Listar y buscar ----------
+    // ---------- LISTAR Y FILTRAR ----------
     public List<clientEntity> llistar(String q, String dni, String estat, String email,
-            LocalDate dataNaixement) {
-        // 1. Cerca general (nom, DNI/NIE, email o telèfon)
+                                     LocalDate dataNaixement) {
+        // 1. Búsqueda general inicial en MySQL
         List<clientEntity> clients = clientRepository.findAll();
+
+        // 2. Filtro general por texto (nombre, DNI/NIE, email o teléfono)
         if (q != null && !q.isBlank()) {
             String text = q.trim().toLowerCase();
             clients = clients.stream()
@@ -49,7 +45,7 @@ public class clientService {
                     .toList();
         }
 
-        // 2. Filtre per DNI / NIE
+        // 3. Filtro específico por DNI / NIE
         if (dni != null && !dni.isBlank()) {
             String d = dni.trim().toUpperCase();
             clients = clients.stream()
@@ -57,21 +53,21 @@ public class clientService {
                     .toList();
         }
 
-        // 3. Filtre per estat
+        // 4. Filtro por estado de validación (PENDENT, VALIDAT, REBUTJAT)
         if (estat != null && !estat.isBlank()) {
             clients = clients.stream()
                     .filter(c -> estat.equals(c.getEstatValidacio()))
                     .toList();
         }
 
-        // 4. Filtre per data de naixement exacta
+        // 5. Filtro por fecha de nacimiento exacta
         if (dataNaixement != null) {
             clients = clients.stream()
                     .filter(c -> dataNaixement.equals(c.getDataNaixement()))
                     .toList();
         }
 
-        // 5. Filtre per email (parcial, sense distingir majúscules)
+        // 6. Filtro por correo electrónico
         if (email != null && !email.isBlank()) {
             String e = email.trim().toLowerCase();
             clients = clients.stream()
@@ -85,12 +81,12 @@ public class clientService {
         return valor != null && valor.toLowerCase().contains(text);
     }
 
-    // ---------- Alta ----------
-    @Transactional(rollbackFor = Exception.class)
+    // ---------- ALTA DE CLIENTE (Doble Persistencia) ----------
+    @Transactional(rollbackFor = Exception.class) // Asegura que se guarde en ambas BD o se cancele todo si hay un error
     public void alta(clientEntity client, MultipartFile fotoDniFrontal,
-            MultipartFile fotoDniPosterior, MultipartFile fotoCarnet) throws IOException {
+                     MultipartFile fotoDniPosterior, MultipartFile fotoCarnet) throws IOException {
 
-        // El format del DNI/NIE es valida aquí (no a l'entitat) perquè els registres antics es puguin editar
+        // Validación del formato oficial de DNI/NIE con Expresión Regular
         String dni = client.getDni() == null ? "" : client.getDni().trim().toUpperCase();
         if (!dni.matches("^([0-9]{8}|[XYZ][0-9]{7})[A-Z]$")) {
             throw new IllegalArgumentException(
@@ -111,10 +107,12 @@ public class clientService {
         validaImatge(fotoDniPosterior);
         validaImatge(fotoCarnet);
 
+        // RF82: Todo registro externo nace en estado PENDENT por defecto
         client.setPremium(false);
         client.setEstatValidacio(PENDENT);
-        clientRepository.saveAndFlush(client);
+        clientRepository.saveAndFlush(client); // Guarda en MySQL
 
+        // Guarda las 3 imágenes en formato binario dentro de MongoDB
         clientDocuments doc = new clientDocuments();
         doc.setDni(dni);
         if (hiHa(fotoDniFrontal)) {
@@ -129,7 +127,7 @@ public class clientService {
             doc.setFotoCarnet(fotoCarnet.getBytes());
             doc.setTipusFotoCarnet(fotoCarnet.getContentType());
         }
-        clientRepositoryMongo.save(doc);
+        clientRepositoryMongo.save(doc); // Guarda en MongoDB
     }
 
     public Optional<clientEntity> obtenir(String dni) {
@@ -140,10 +138,11 @@ public class clientService {
         return clientRepositoryMongo.findById(dni);
     }
 
+    // ---------- ACTUALIZACIÓN ----------
     @Transactional(rollbackFor = Exception.class)
     public void actualitzar(String dni, clientEntity dades, String estat, boolean premium,
-            MultipartFile fotoDniFrontal, MultipartFile fotoDniPosterior,
-            MultipartFile fotoCarnet) throws IOException {
+                            MultipartFile fotoDniFrontal, MultipartFile fotoDniPosterior,
+                            MultipartFile fotoCarnet) throws IOException {
 
         clientEntity c = clientRepository.findById(dni)
                 .orElseThrow(() -> new IllegalArgumentException("Client no trobat"));
@@ -168,6 +167,7 @@ public class clientService {
 
         clientRepository.saveAndFlush(c);
 
+        // Actualiza los archivos en MongoDB solo si se adjuntaron imágenes nuevas
         if (hiHa(fotoDniFrontal) || hiHa(fotoDniPosterior) || hiHa(fotoCarnet)) {
             clientDocuments doc = clientRepositoryMongo.findById(dni).orElseGet(() -> {
                 clientDocuments nou = new clientDocuments();
@@ -187,7 +187,6 @@ public class clientService {
                 doc.setTipusFotoCarnet(fotoCarnet.getContentType());
             }
             clientRepositoryMongo.save(doc);
-
         }
     }
 
@@ -195,6 +194,7 @@ public class clientService {
         return f != null && !f.isEmpty();
     }
 
+    // Comprueba formato (PNG/JPEG) y restringe el tamaño a 5MB máx.
     private void validaImatge(MultipartFile f) {
         if (!hiHa(f)) {
             return;
@@ -206,17 +206,19 @@ public class clientService {
         }
     }
 
+    // ---------- ELIMINACIÓN DE CLIENTE ----------
     @Transactional
     public void eliminar(String dni) {
         clientEntity c = clientRepository.findById(dni)
                 .orElseThrow(() -> new IllegalArgumentException("Client no trobat"));
 
         clientRepository.delete(c);
-        clientRepository.flush();                  // si hay reservas asociadas, el error salta aquí
+        clientRepository.flush(); // Si el cliente tiene reservas asociadas, salta la excepción aquí y cancela el borrado
 
-        clientRepositoryMongo.deleteById(dni);     // solo se llega aquí si MySQL ha ido bien
+        clientRepositoryMongo.deleteById(dni); // Elimina de MongoDB solo tras confirmar el éxito en MySQL
     }
 
+    // ---------- CAMBIO DE ESTADO DE VALIDACIÓN (RF82) ----------
     @Transactional
     public void canviarEstat(String dni, String estat) {
         if (!VALIDAT.equals(estat) && !REBUTJAT.equals(estat) && !PENDENT.equals(estat)) {
@@ -228,6 +230,7 @@ public class clientService {
         clientRepository.save(c);
     }
 
+    // ---------- CAMBIO DE ESTADO PREMIUM ----------
     @Transactional
     public void canviarPremium(String dni, boolean premium) {
         clientEntity c = clientRepository.findById(dni)

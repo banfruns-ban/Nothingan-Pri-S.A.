@@ -64,15 +64,15 @@
         <!-- Targeta de Filtres -->
         <div class="filter-card shadow-sm mb-4">
             <form th:action="@{/clients}" method="get" class="row g-3 align-items-end">
-                <div class="col-md-11">
+                <div class="col-md-9">
                     <label for="cerca" class="form-label">Cerca per nom, DNI o correu electrònic</label>
                     <input type="text" id="cerca" name="cerca" class="form-control" 
                            placeholder="Ex. Joan Garcia, 12345678Z..." 
                            th:value="${cerca}">
                 </div>
-                <div class="col-md-1 d-flex gap-1">
-                    <button type="submit" class="btn btn-primary w-100" title="Filtrar">
-                        <i class="fa-solid fa-filter"></i>
+                <div class="col-md-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary w-100 fw-semibold">
+                        <i class="fa-solid fa-filter me-1"></i> Filtrar
                     </button>
                     <a th:if="${cerca != null and !#strings.isEmpty(cerca)}" 
                        th:href="@{/clients}" 
@@ -116,14 +116,14 @@
                         </td>
                         <td class="text-end">
                             <div class="d-inline-flex gap-1 align-items-center">
-                                <a th:href="@{'/reserves/nova?dni=' + ${c.dni}}" class="btn btn-outline-primary btn-sm fw-semibold me-1" style="border-radius: 6px;" title="Crear reserva per a aquest client">
-                                    <i class="fa-regular fa-calendar-plus me-1"></i> Reservar
+                                <a th:href="@{'/reserves/nova?dni=' + ${c.dni}}" class="btn btn-primary btn-sm fw-semibold me-1" style="border-radius: 6px;" title="Crear reserva per a aquest client">
+                                    <i class="fa-regular fa-calendar-plus me-1"></i> Reserva
                                 </a>
-                                <a th:href="@{'/clients/editar/' + ${c.dni}}" class="btn btn-editar">Editar</a>
+                                <a th:href="@{'/clients/editar/' + ${c.dni}}" class="btn-editar me-1">Editar</a>
                                 <a th:href="@{'/clients/detall/' + ${c.dni}}" class="btn btn-outline-secondary btn-sm me-1 fw-semibold" style="border-radius: 6px; padding: 6px 14px;">Detall</a>
                                 <form th:action="@{'/clients/eliminar/' + ${c.dni}}" method="post" class="d-inline"
                                       onsubmit="return confirm('Estàs segur de voler eliminar aquest client?');">
-                                    <button type="submit" class="btn btn-desactivar">Eliminar</button>
+                                    <button type="submit" class="btn-desactivar">Eliminar</button>
                                 </form>
                             </div>
                         </td>

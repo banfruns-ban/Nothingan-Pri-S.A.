@@ -18,14 +18,12 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-// Controlador Spring MVC encargado de la gestión integral de Clientes (Peticiones HTTP GET/POST)
 @Controller
 public class clientController {
 
     private static final Logger log = LoggerFactory.getLogger(clientController.class);
     private final clientService clientLogic;
 
-    // Inyección de dependencias por constructor
     public clientController(clientService clientLogic) {
         this.clientLogic = clientLogic;
     }
@@ -34,17 +32,16 @@ public class clientController {
     // ALTA DE CLIENTE
     // =====================================================
 
-    // GET /clients/nou: Carga la vista del formulario de alta inyectando un objeto cliente vacío
-    @GetMapping("/clients/nou")
+    // Acepta /clients/alta, /clients/altaUsuari y /clients/nou evitando el error 404
+    @GetMapping({"/clients/alta", "/clients/altaUsuari", "/clients/nou"})
     public String mostrarFormulari(Model model) {
         if (!model.containsAttribute("client")) {
             model.addAttribute("client", new clientEntity());
         }
-        return "client/altaUsuari";
+        return "client/altaUsuari"; // Retorna la vista en la carpeta client/ (en singular)
     }
 
-    // POST /clients/alta: Procesa el registro del cliente y la subida de sus 3 imágenes obligatorias
-    @PostMapping("/clients/alta")
+    @PostMapping({"/clients/alta", "/clients/altaUsuari"})
     public String altaClient(
             @ModelAttribute("client") clientEntity client,
             @RequestParam("fotoDniFrontal") MultipartFile fotoDniFrontal,
@@ -54,20 +51,20 @@ public class clientController {
         try {
             clientLogic.alta(client, fotoDniFrontal, fotoDniPosterior, fotoCarnet);
             ra.addFlashAttribute("missatge", "Client donat d'alta correctament!");
+            return "redirect:/clients";
         } catch (IllegalArgumentException e) {
             ra.addFlashAttribute("error", e.getMessage());
         } catch (Exception e) {
             log.error("Error en l'alta del client", e);
             ra.addFlashAttribute("error", "No s'ha pogut completar el registre");
         }
-        return "redirect:/clients/nou";
+        return "redirect:/clients/alta";
     }
 
     // =====================================================
     // LISTADO Y DETALLE
     // =====================================================
 
-    // GET /clients: Muestra el listado de clientes aplicando filtros opcionales (búsqueda, DNI, estado, etc.)
     @GetMapping("/clients")
     public String llistar(@RequestParam(required = false) String q,
                           @RequestParam(required = false) String dni,
@@ -85,8 +82,8 @@ public class clientController {
         return "client/llistaClients";
     }
 
-    // GET /clients/{dni}: Carga la vista con la información detallada del cliente por su DNI
-    @GetMapping("/clients/{dni}")
+    // Mapeado como /clients/detall/{dni} para no colisionar con /clients/alta
+    @GetMapping("/clients/detall/{dni}")
     public String detall(@PathVariable String dni, Model model, RedirectAttributes ra) {
         return clientLogic.obtenir(dni).map(c -> {
             model.addAttribute("client", c);
@@ -97,7 +94,6 @@ public class clientController {
         });
     }
 
-    // GET /clients/{dni}/imatge/{tipus}: Sirve las imágenes desde MongoDB en formato binario hacia la vista HTML
     @GetMapping("/clients/{dni}/imatge/{tipus}")
     @ResponseBody
     public ResponseEntity<byte[]> imatge(@PathVariable String dni, @PathVariable String tipus) {
@@ -139,7 +135,6 @@ public class clientController {
     // EDICIÓN Y ELIMINACIÓN
     // =====================================================
 
-    // GET /clients/{dni}/editar: Carga el formulario con los datos recuperados del cliente
     @GetMapping("/clients/{dni}/editar")
     public String formulariEditar(@PathVariable String dni, Model model, RedirectAttributes ra) {
         return clientLogic.obtenir(dni).map(c -> {
@@ -151,7 +146,6 @@ public class clientController {
         });
     }
 
-    // POST /clients/{dni}/editar: Actualiza la información del cliente, su estado e imágenes adjuntas
     @PostMapping("/clients/{dni}/editar")
     public String editar(@PathVariable String dni,
                          @ModelAttribute("client") clientEntity dades,
@@ -175,7 +169,6 @@ public class clientController {
         return "redirect:/clients";
     }
 
-    // POST /clients/{dni}/eliminar: Elimina la ficha del cliente validando dependencias con reservas
     @PostMapping("/clients/{dni}/eliminar")
     public String eliminar(@PathVariable String dni, RedirectAttributes ra) {
         try {
@@ -190,10 +183,9 @@ public class clientController {
     }
 
     // =====================================================
-    // VALIDACIÓ Y ESTAT (RF82)
+    // VALIDACIÓN Y ESTADO
     // =====================================================
 
-    // POST /clients/{dni}/validacio: RF82 - Cambia el estado del cliente (PENDENT -> VALIDAT / REBUTJAT)
     @PostMapping("/clients/{dni}/validacio")
     public String validar(@PathVariable String dni, @RequestParam String estat, RedirectAttributes ra) {
         clientLogic.canviarEstat(dni, estat);
@@ -201,7 +193,6 @@ public class clientController {
         return "redirect:/clients";
     }
 
-    // POST /clients/{dni}/premium: Actualiza la condición de cliente Premium
     @PostMapping("/clients/{dni}/premium")
     public String premium(@PathVariable String dni, @RequestParam boolean premium, RedirectAttributes ra) {
         clientLogic.canviarPremium(dni, premium);

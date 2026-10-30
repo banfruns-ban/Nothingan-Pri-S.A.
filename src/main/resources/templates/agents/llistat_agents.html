@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <!-- FontAwesome per les icones -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Referència al CSS en resources/static/agents.css -->
+    <!-- CSS Unificat -->
     <link rel="stylesheet" th:href="@{/agents.css}">
 </head>
 <body>
@@ -51,6 +51,7 @@
             </a>
         </div>
 
+        <!-- Alertes Flash -->
         <div th:if="${succes}" class="alert alert-success alert-dismissible fade show mb-4" role="alert">
             <span th:text="${succes}"></span>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -64,7 +65,8 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
 
-        <div class="filter-card shadow-sm">
+        <!-- Targeta de Filtres -->
+        <div class="filter-card shadow-sm mb-4">
             <form th:action="@{/agents/llista}" method="get" class="row g-3">
                 <div class="col-md-9">
                     <label for="cerca">Cerca per DNI, nom o correu electrònic</label>
@@ -91,6 +93,7 @@
             </form>
         </div>
 
+        <!-- Taula de Llistat d'Agents -->
         <div class="custom-table-card shadow-sm">
             <table class="table align-middle">
                 <thead>
@@ -134,9 +137,6 @@
                         </td>
                         <td class="text-end">
                             <div class="d-inline-flex gap-1 align-items-center">
-                                <a th:href="@{'/reserves/nova?dni=' + ${a.dni}}" class="btn btn-outline-primary btn-sm me-1 fw-semibold" style="border-radius: 6px;" title="Crear reserva">
-                                    <i class="fa-regular fa-calendar-plus me-1"></i> Reserva
-                                </a>
                                 <a th:href="@{'/agents/editar/' + ${a.dni}}" class="btn-editar me-1">Editar</a>
                                 <a th:href="@{'/agents/detall/' + ${a.dni}}" class="btn btn-sm btn-outline-secondary me-1" style="border-radius: 6px;">Detall</a>
                                 <form th:action="@{'/agents/eliminar/' + ${a.dni}}" method="post" class="d-inline"

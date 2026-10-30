@@ -4,12 +4,6 @@
  */
 package cat.copernic.projecte1Grup3.Reserves.Service;
 
-import cat.copernic.projecte1Grup3.Reserves.Entity.reservesEntity;
-import cat.copernic.projecte1Grup3.Reserves.Repository.reservesRepository;
-import cat.copernic.projecte1Grup3.Usuaris.Client.Entity.clientEntity;
-import cat.copernic.projecte1Grup3.Usuaris.Client.Repository.clientRepository;
-import cat.copernic.projecte1Grup3.Vehicles.Entity.VehiclesEntity;
-import cat.copernic.projecte1Grup3.Vehicles.Repository.VehiclesRepository;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Duration;
@@ -18,8 +12,16 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Comparator;
 import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import cat.copernic.projecte1Grup3.Reserves.Entity.reservesEntity;
+import cat.copernic.projecte1Grup3.Reserves.Repository.reservesRepository;
+import cat.copernic.projecte1Grup3.Usuaris.Client.Entity.clientEntity;
+import cat.copernic.projecte1Grup3.Usuaris.Client.Repository.clientRepository;
+import cat.copernic.projecte1Grup3.Vehicles.Entity.VehiclesEntity;
+import cat.copernic.projecte1Grup3.Vehicles.Repository.VehiclesRepository;
 
 @Service
 public class reservesService {

@@ -1,104 +1,60 @@
 package cat.copernic.projecte1Grup3.Reserves.Entity;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field;
 
 import jakarta.persistence.Id;
 
-@Document(collection = "HistoricReserves")
-public class historicReserva {
-
+@Document(collection = "historic_reserves")
+public class HistoricReserva {
+ 
     @Id
-    private String id; // ID técnico interno de MongoDB (_id)
-
-    @Field("idReserva")
-    private String idReserva; // Clave primaria de negocio del diagrama
-
-    @Field("clientDni")
-    private String clientDni; // DNI del cliente asociado
-
-    @Field("matriculaVehicle")
-    private String matriculaVehicle; // Matrícula del vehículo alquilado
-
-    @Field("dataInici")
-    private LocalDateTime dataInici; // Fecha y hora de inicio de la reserva
-
-    @Field("dataFi")
-    private LocalDateTime dataFi; // Fecha y hora de finalización
-
-    @Field("preuTotal")
-    private Double preuTotal; // Importe total de la reserva
-
-    // Constructor vacío (requerido por Spring Data)
-    public historicReserva() {
-    }
-
-    public historicReserva(String idReserva, String clientDni, String matriculaVehicle, 
-                           LocalDateTime dataInici, LocalDateTime dataFi, Double preuTotal) {
-        this.idReserva = idReserva;
-        this.clientDni = clientDni;
-        this.matriculaVehicle = matriculaVehicle;
-        this.dataInici = dataInici;
-        this.dataFi = dataFi;
-        this.preuTotal = preuTotal;
-    }
-
-    // Getters y Setters
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getIdReserva() {
-        return idReserva;
-    }
-
-    public void setIdReserva(String idReserva) {
-        this.idReserva = idReserva;
-    }
-
-    public String getClientDni() {
-        return clientDni;
-    }
-
-    public void setClientDni(String clientDni) {
-        this.clientDni = clientDni;
-    }
-
-    public String getMatriculaVehicle() {
-        return matriculaVehicle;
-    }
-
-    public void setMatriculaVehicle(String matriculaVehicle) {
-        this.matriculaVehicle = matriculaVehicle;
-    }
-
-    public LocalDateTime getDataInici() {
-        return dataInici;
-    }
-
-    public void setDataInici(LocalDateTime dataInici) {
-        this.dataInici = dataInici;
-    }
-
-    public LocalDateTime getDataFi() {
-        return dataFi;
-    }
-
-    public void setDataFi(LocalDateTime dataFi) {
-        this.dataFi = dataFi;
-    }
-
-    public Double getPreuTotal() {
-        return preuTotal;
-    }
-
-    public void setPreuTotal(Double preuTotal) {
-        this.preuTotal = preuTotal;
-    }
+    private Long idReserva;
+ 
+    private LocalDateTime dataReserva;   // data de creació de la reserva
+    private LocalDate dataInici;
+    private LocalDate dataFi;
+ 
+    @Indexed
+    private String clientDni;
+    private String clientNom;
+ 
+    private String vehicleMatricula;
+    private String vehicleMarca;
+    private String vehicleModel;
+ 
+    private BigDecimal importTotal;      // només lloguer, sense fiança
+    private EstatHistoric estat;
+    private LocalDateTime dataUltimEvent;
+ 
+    public HistoricReserva() { }
+ 
+    public Long getIdReserva() { return idReserva; }
+    public void setIdReserva(Long idReserva) { this.idReserva = idReserva; }
+    public LocalDateTime getDataReserva() { return dataReserva; }
+    public void setDataReserva(LocalDateTime dataReserva) { this.dataReserva = dataReserva; }
+    public LocalDate getDataInici() { return dataInici; }
+    public void setDataInici(LocalDate dataInici) { this.dataInici = dataInici; }
+    public LocalDate getDataFi() { return dataFi; }
+    public void setDataFi(LocalDate dataFi) { this.dataFi = dataFi; }
+    public String getClientDni() { return clientDni; }
+    public void setClientDni(String clientDni) { this.clientDni = clientDni; }
+    public String getClientNom() { return clientNom; }
+    public void setClientNom(String clientNom) { this.clientNom = clientNom; }
+    public String getVehicleMatricula() { return vehicleMatricula; }
+    public void setVehicleMatricula(String v) { this.vehicleMatricula = v; }
+    public String getVehicleMarca() { return vehicleMarca; }
+    public void setVehicleMarca(String vehicleMarca) { this.vehicleMarca = vehicleMarca; }
+    public String getVehicleModel() { return vehicleModel; }
+    public void setVehicleModel(String vehicleModel) { this.vehicleModel = vehicleModel; }
+    public BigDecimal getImportTotal() { return importTotal; }
+    public void setImportTotal(BigDecimal importTotal) { this.importTotal = importTotal; }
+    public EstatHistoric getEstat() { return estat; }
+    public void setEstat(EstatHistoric estat) { this.estat = estat; }
+    public LocalDateTime getDataUltimEvent() { return dataUltimEvent; }
+    public void setDataUltimEvent(LocalDateTime d) { this.dataUltimEvent = d; }
 }

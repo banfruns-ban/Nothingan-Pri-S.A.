@@ -60,7 +60,7 @@
             <div class="row align-items-center pb-4 mb-4 border-bottom">
                 <div class="col-auto">
                     <img th:if="${agent.foto != null and !agent.foto.isBlank()}" 
-                         th:src="@{'/uploads/' + ${agent.foto}}" 
+                         th:src="@{'/uploads/agents' + ${agent.foto}}" 
                          alt="Foto Agent" class="profile-img-large"
                          onerror="this.src='https://via.placeholder.com/110?text=User';">
                     <img th:unless="${agent.foto != null and !agent.foto.isBlank()}" 

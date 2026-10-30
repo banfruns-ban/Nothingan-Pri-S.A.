@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Optional;
 
@@ -41,7 +42,7 @@ public class agentController {
     }
 
     /**
-     * Processa el formulari d'alta i edició.
+     * Processa el formulari d'alta i edició d'agents.
      */
     @PostMapping("/alta")
     public String processarAlta(@Valid @ModelAttribute("agent") agentEntity agent,
@@ -49,21 +50,34 @@ public class agentController {
                                 @RequestParam(value = "fitxerFoto", required = false) MultipartFile fitxerFoto,
                                 Model model) {
 
+        Optional<agentEntity> agentExistent = agentService.obtenirPerDni(agent.getDni());
+        boolean esEdicio = agentExistent.isPresent();
+
         if (result.hasErrors()) {
             return "agents/alta_agent";
         }
 
+        // Gestió de la imatge de perfil
         if (fitxerFoto != null && !fitxerFoto.isEmpty()) {
             try {
                 String nomFitxer = agent.getDni() + "_" + fitxerFoto.getOriginalFilename();
-                Path ruta = Paths.get("uploads/" + nomFitxer);
-                Files.createDirectories(ruta.getParent());
-                Files.write(ruta, fitxerFoto.getBytes());
+                
+                // Desa les fotos directament dins de uploads/agentes
+                Path directoriUploads = Paths.get("uploads/agents");
+                if (!Files.exists(directoriUploads)) {
+                    Files.createDirectories(directoriUploads);
+                }
+
+                Path rutaFitxer = directoriUploads.resolve(nomFitxer);
+                Files.copy(fitxerFoto.getInputStream(), rutaFitxer, StandardCopyOption.REPLACE_EXISTING);
                 agent.setFoto(nomFitxer);
             } catch (IOException e) {
                 model.addAttribute("error", "Error en pujar la foto del perfil.");
                 return "agents/alta_agent";
             }
+        } else if (esEdicio) {
+            // Si és una edició i no s'ha adjuntat cap foto nova, mantenim la foto que ja tenia
+            agent.setFoto(agentExistent.get().getFoto());
         }
 
         try {
@@ -115,7 +129,7 @@ public class agentController {
      * RF11: Donar de baixa un agent.
      */
     @PostMapping("/eliminar/{dni}")
-    public String eliminarAgent(@PathVariable String dni, RedirectAttributes redirect) {
+    public String eliminarAgent(@PathVariable("dni") String dni, RedirectAttributes redirect) {
         try {
             agentService.eliminarAgent(dni);
             redirect.addFlashAttribute("succes", "Agent donat de baixa amb èxit.");

@@ -108,7 +108,7 @@
                     <tr th:each="a : ${agents}">
                         <td>
                             <img th:if="${a.foto != null and !a.foto.isBlank()}" 
-                                 th:src="@{'/uploads/' + ${a.foto}}" 
+                                 th:src="@{'/uploads/agents/' + ${a.foto}}" 
                                  alt="Foto Agent" class="agent-img"
                                  onerror="this.src='https://via.placeholder.com/48?text=User';">
                             <img th:unless="${a.foto != null and !a.foto.isBlank()}" 

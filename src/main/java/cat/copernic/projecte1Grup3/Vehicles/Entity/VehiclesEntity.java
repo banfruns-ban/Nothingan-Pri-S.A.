@@ -14,7 +14,6 @@ import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 
-
 @Entity
 @Table(name = "vehicle")
 public class VehiclesEntity {
@@ -83,6 +82,9 @@ public class VehiclesEntity {
     @Column(name = "comentaris_privats", columnDefinition = "TEXT")
     private String comentarisPrivats;
 
+    @Column(name = "foto", length = 255)
+    private String foto;
+
     /**
      * Constructor per defecte requerit per JPA.
      */
@@ -90,7 +92,7 @@ public class VehiclesEntity {
     }
 
     /**
-     * Constructor complet.
+     * Constructor complet sense foto.
      */
     public VehiclesEntity(String matricula, String marca, String model, Integer anyMatriculacio, 
                           String descripcio, String tipusVehicle, Integer limitQuilometratge, 
@@ -110,6 +112,18 @@ public class VehiclesEntity {
         this.estat = estat;
         this.actiu = actiu;
         this.comentarisPrivats = comentarisPrivats;
+    }
+
+    /**
+     * Constructor complet amb foto.
+     */
+    public VehiclesEntity(String matricula, String marca, String model, Integer anyMatriculacio, 
+                          String descripcio, String tipusVehicle, Integer limitQuilometratge, 
+                          BigDecimal preuHora, BigDecimal fianca, Integer minDiesLloguer, 
+                          Integer maxDiesLloguer, String estat, Boolean actiu, String comentarisPrivats, String foto) {
+        this(matricula, marca, model, anyMatriculacio, descripcio, tipusVehicle, limitQuilometratge, 
+             preuHora, fianca, minDiesLloguer, maxDiesLloguer, estat, actiu, comentarisPrivats);
+        this.foto = foto;
     }
 
     // --- GETTERS I SETTERS ---
@@ -224,5 +238,13 @@ public class VehiclesEntity {
 
     public void setComentarisPrivats(String comentarisPrivats) {
         this.comentarisPrivats = comentarisPrivats;
+    }
+
+    public String getFoto() {
+        return foto;
+    }
+
+    public void setFoto(String foto) {
+        this.foto = foto;
     }
 }

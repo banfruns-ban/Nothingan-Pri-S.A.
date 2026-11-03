@@ -103,6 +103,12 @@ public class clientService {
         if (!hiHa(fotoDniFrontal) || !hiHa(fotoDniPosterior) || !hiHa(fotoCarnet)) {
             throw new IllegalArgumentException("Cal pujar les 3 imatges (PNG o JPG, màxim 5MB)");
         }
+        
+        if (client.getDataCaducitatCarnet() == null || client.getDataCaducitatCarnet().isBefore(LocalDate.now())) {
+    throw new IllegalArgumentException("El carnet de conduir no pot estar caducat");
+}
+        
+        
         validaImatge(fotoDniFrontal);
         validaImatge(fotoDniPosterior);
         validaImatge(fotoCarnet);
@@ -138,61 +144,78 @@ public class clientService {
         return clientRepositoryMongo.findById(dni);
     }
 
-    // ---------- ACTUALIZACIÓN ----------
-    @Transactional(rollbackFor = Exception.class)
-    public void actualitzar(String dni, clientEntity dades, String estat, boolean premium,
-                            MultipartFile fotoDniFrontal, MultipartFile fotoDniPosterior,
-                            MultipartFile fotoCarnet) throws IOException {
+// ---------- ACTUALIZACIÓN ----------
+@Transactional(rollbackFor = Exception.class)
+public void actualitzar(String dni, clientEntity dades, String estat, boolean premium,
+                        MultipartFile fotoDniFrontal, MultipartFile fotoDniPosterior,
+                        MultipartFile fotoCarnet) throws IOException {
 
-        clientEntity c = clientRepository.findById(dni)
-                .orElseThrow(() -> new IllegalArgumentException("Client no trobat"));
+    clientEntity c = clientRepository.findById(dni)
+            .orElseThrow(() -> new IllegalArgumentException("Client no trobat"));
 
-        if (!VALIDAT.equals(estat) && !REBUTJAT.equals(estat) && !PENDENT.equals(estat)) {
-            throw new IllegalArgumentException("Estat no vàlid");
-        }
-        validaImatge(fotoDniFrontal);
-        validaImatge(fotoDniPosterior);
-        validaImatge(fotoCarnet);
+    if (!VALIDAT.equals(estat) && !REBUTJAT.equals(estat) && !PENDENT.equals(estat)) {
+        throw new IllegalArgumentException("Estat no vàlid");
+    }
 
-        c.setNom(dades.getNom());
-        c.setEmail(dades.getEmail());
-        c.setTelefon(dades.getTelefon());
+    // El correu només és duplicat si el té UN ALTRE client (DNI diferent)
+    String email = dades.getEmail() == null ? "" : dades.getEmail().trim();
+    if (!email.isEmpty() && clientRepository.existsByEmailIgnoreCaseAndDniNot(email, dni)) {
+        throw new IllegalArgumentException("Aquest correu ja està en ús per un altre client");
+    }
+
+    validaImatge(fotoDniFrontal);
+    validaImatge(fotoDniPosterior);
+    validaImatge(fotoCarnet);
+
+    c.setNom(dades.getNom());
+    c.setEmail(email);
+    c.setTelefon(dades.getTelefon());
+    c.setNacionalitat(dades.getNacionalitat());
+    c.setAdreca(dades.getAdreca());
+    c.setTipusLlicencia(dades.getTipusLlicencia());
+
+    // Només se sobreescriuen les dates si el formulari les envia (evita pisar amb null)
+    if (dades.getDataNaixement() != null) {
         c.setDataNaixement(dades.getDataNaixement());
-        c.setNacionalitat(dades.getNacionalitat());
-        c.setAdreca(dades.getAdreca());
-        c.setTipusLlicencia(dades.getTipusLlicencia());
+    }
+    if (dades.getDataCaducitatDNI() != null) {
         c.setDataCaducitatDNI(dades.getDataCaducitatDNI());
-        c.setEstatValidacio(estat);
-        c.setPremium(premium);
+    }
+    if (dades.getDataCaducitatCarnet() != null) {
+        c.setDataCaducitatCarnet(dades.getDataCaducitatCarnet());
+    }
 
-        clientRepository.saveAndFlush(c);
+    c.setEstatValidacio(estat);
+    c.setPremium(premium);
 
-        // Actualiza los archivos en MongoDB solo si se adjuntaron imágenes nuevas
-        if (hiHa(fotoDniFrontal) || hiHa(fotoDniPosterior) || hiHa(fotoCarnet)) {
-            clientDocuments doc = clientRepositoryMongo.findById(dni).orElseGet(() -> {
-                clientDocuments nou = new clientDocuments();
-                nou.setDni(dni);
-                return nou;
-            });
-            if (hiHa(fotoDniFrontal)) {
-                doc.setFotoDniFrontal(fotoDniFrontal.getBytes());
-                doc.setTipusFotoDniFrontal(fotoDniFrontal.getContentType());
-            }
-            if (hiHa(fotoDniPosterior)) {
-                doc.setFotoDniPosterior(fotoDniPosterior.getBytes());
-                doc.setTipusFotoDniPosterior(fotoDniPosterior.getContentType());
-            }
-            if (hiHa(fotoCarnet)) {
-                doc.setFotoCarnet(fotoCarnet.getBytes());
-                doc.setTipusFotoCarnet(fotoCarnet.getContentType());
-            }
-            clientRepositoryMongo.save(doc);
+    clientRepository.saveAndFlush(c);
+
+    // Actualiza los archivos en MongoDB solo si se adjuntaron imágenes nuevas
+    if (hiHa(fotoDniFrontal) || hiHa(fotoDniPosterior) || hiHa(fotoCarnet)) {
+        clientDocuments doc = clientRepositoryMongo.findById(dni).orElseGet(() -> {
+            clientDocuments nou = new clientDocuments();
+            nou.setDni(dni);
+            return nou;
+        });
+        if (hiHa(fotoDniFrontal)) {
+            doc.setFotoDniFrontal(fotoDniFrontal.getBytes());
+            doc.setTipusFotoDniFrontal(fotoDniFrontal.getContentType());
         }
+        if (hiHa(fotoDniPosterior)) {
+            doc.setFotoDniPosterior(fotoDniPosterior.getBytes());
+            doc.setTipusFotoDniPosterior(fotoDniPosterior.getContentType());
+        }
+        if (hiHa(fotoCarnet)) {
+            doc.setFotoCarnet(fotoCarnet.getBytes());
+            doc.setTipusFotoCarnet(fotoCarnet.getContentType());
+        }
+        clientRepositoryMongo.save(doc);
     }
+}
 
-    private boolean hiHa(MultipartFile f) {
-        return f != null && !f.isEmpty();
-    }
+private boolean hiHa(MultipartFile f) {
+    return f != null && !f.isEmpty();
+}
 
     // Comprueba formato (PNG/JPEG) y restringe el tamaño a 5MB máx.
     private void validaImatge(MultipartFile f) {
@@ -226,6 +249,7 @@ public class clientService {
         }
         clientEntity c = clientRepository.findById(dni)
                 .orElseThrow(() -> new IllegalArgumentException("Client no trobat"));
+        
         c.setEstatValidacio(estat);
         clientRepository.save(c);
     }

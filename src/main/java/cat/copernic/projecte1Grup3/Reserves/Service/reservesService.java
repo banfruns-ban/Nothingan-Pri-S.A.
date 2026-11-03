@@ -1,9 +1,11 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package cat.copernic.projecte1Grup3.Reserves.Service;
 
+import cat.copernic.projecte1Grup3.Reserves.Entity.reservesEntity;
+import cat.copernic.projecte1Grup3.Reserves.Repository.reservesRepository;
+import cat.copernic.projecte1Grup3.Usuaris.Client.Entity.clientEntity;
+import cat.copernic.projecte1Grup3.Usuaris.Client.Repository.clientRepository;
+import cat.copernic.projecte1Grup3.Vehicles.Entity.VehiclesEntity;
+import cat.copernic.projecte1Grup3.Vehicles.Repository.VehiclesRepository;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Duration;
@@ -12,18 +14,8 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Comparator;
 import java.util.List;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import cat.copernic.projecte1Grup3.Informes.Entity.EstatHistoric;
-import cat.copernic.projecte1Grup3.Informes.Service.HistoricService;
-import cat.copernic.projecte1Grup3.Reserves.Entity.reservesEntity;
-import cat.copernic.projecte1Grup3.Reserves.Repository.reservesRepository;
-import cat.copernic.projecte1Grup3.Usuaris.Client.Entity.clientEntity;
-import cat.copernic.projecte1Grup3.Usuaris.Client.Repository.clientRepository;
-import cat.copernic.projecte1Grup3.Vehicles.Entity.VehiclesEntity;
-import cat.copernic.projecte1Grup3.Vehicles.Repository.VehiclesRepository;
 
 @Service
 public class reservesService {
@@ -38,16 +30,12 @@ public class reservesService {
     private final clientRepository clientRepository;
     private final VehiclesRepository vehiclesRepository;
 
-    private final HistoricService historicService;
-
     public reservesService(reservesRepository reservesRepository,
             clientRepository clientRepository,
-            VehiclesRepository vehiclesRepository,
-            HistoricService historicService) {
+            VehiclesRepository vehiclesRepository) {
         this.reservesRepository = reservesRepository;
         this.clientRepository = clientRepository;
         this.vehiclesRepository = vehiclesRepository;
-        this.historicService = historicService;
     }
 
     // Recoge los vehiculos activos para saber cuales vehiculos se pueden reservar
@@ -68,11 +56,11 @@ public class reservesService {
             reserves = reserves.stream()
                     .filter(r -> conte(String.valueOf(r.getCodiReserva()), text)
                             || (r.getClient() != null
-                                    && (conte(r.getClient().getNom(), text) || conte(r.getClient().getDni(), text)))
+                            && (conte(r.getClient().getNom(), text) || conte(r.getClient().getDni(), text)))
                             || (r.getVehicle() != null
-                                    && (conte(r.getVehicle().getMatricula(), text)
-                                            || conte(r.getVehicle().getMarca(), text)
-                                            || conte(r.getVehicle().getModel(), text))))
+                            && (conte(r.getVehicle().getMatricula(), text)
+                            || conte(r.getVehicle().getMarca(), text)
+                            || conte(r.getVehicle().getModel(), text))))
                     .toList();
         }
 
@@ -136,7 +124,7 @@ public class reservesService {
         return valor != null && valor.toLowerCase().contains(text);
     }
 
-    @Transactional // <--si algo falla, no se guarda nada.
+    @Transactional //<--si algo falla, no se guarda nada.
     public reservesEntity crear(String dni, String matricula,
             LocalDate dataInici, LocalTime horaInici,
             LocalDate dataFi, LocalTime horaFi,
@@ -152,7 +140,7 @@ public class reservesService {
             throw new IllegalArgumentException("Cal indicar les dates i hores d'inici i fi");
         }
 
-        // 2. El client existeix i no està validat
+        // 2. El client existeix i  no està validat
         clientEntity client = clientRepository.findById(dni.trim().toUpperCase())
                 .orElseThrow(() -> new IllegalArgumentException("Client no trobat"));
         if (!"VALIDAT".equals(client.getEstatValidacio())) {
@@ -163,7 +151,7 @@ public class reservesService {
         // 3. El vehicle existeix i està actiu
         VehiclesEntity vehicle = vehiclesRepository.findById(matricula)
                 .orElseThrow(() -> new IllegalArgumentException("Vehicle no trobat"));
-        if (!Boolean.TRUE.equals(vehicle.getActiu())) { // <-- si vehiculo NO en lista de activos
+        if (!Boolean.TRUE.equals(vehicle.getActiu())) { //<-- si vehiculo NO en lista de activos
             throw new IllegalArgumentException("Aquest vehicle no està disponible per a reserves");
         }
 
@@ -177,8 +165,7 @@ public class reservesService {
             throw new IllegalArgumentException("La data i hora de fi han de ser posteriors a les d'inici");
         }
 
-        // 5. Durada: es compta en hores senceres (les hores parcials s'arrodoneixen
-        // amunt)
+        // 5. Durada: es compta en hores senceres (les hores parcials s'arrodoneixen amunt)
         long minuts = Duration.between(inici, fi).toMinutes();
         long hores = (minuts + 59) / 60;
         long dies = (hores + 23) / 24;
@@ -192,7 +179,8 @@ public class reservesService {
         }
 
         // 6. El vehicle no pot estar ja reservat en aquest interval
-        List<reservesEntity> existents = reservesRepository.findByVehicleMatriculaAndEstatNot(matricula, CANCELADA);
+        List<reservesEntity> existents
+                = reservesRepository.findByVehicleMatriculaAndEstatNot(matricula, CANCELADA);
         for (reservesEntity r : existents) {
             LocalDateTime iniciR = LocalDateTime.of(r.getDataInici(), r.getHoraInici());
             LocalDateTime fiR = LocalDateTime.of(r.getDataFi(), r.getHoraFi());
@@ -217,24 +205,21 @@ public class reservesService {
         reserva.setFianca(vehicle.getFianca());
         reserva.setEstat(PENDENT);
         reserva.setObservacions(observacions == null || observacions.isBlank()
-                ? null
-                : observacions.trim());
+                ? null : observacions.trim());
 
-        reservesEntity guardada = reservesRepository.save(reserva);
-        historicService.desar(guardada, EstatHistoric.PENDENT);
-        return guardada;
+        return reservesRepository.save(reserva);
     }
-
-    @Transactional
+    
+     @Transactional
     public void eliminar(Long codi) {
         reservesEntity r = reservesRepository.findById(codi)
                 .orElseThrow(() -> new IllegalArgumentException("Reserva no trobada"));
-
+ 
         if (EN_CURS.equals(r.getEstat()) || FINALITZADA.equals(r.getEstat())) {
             throw new IllegalArgumentException(
                     "No es pot eliminar una reserva en curs o finalitzada");
         }
-        historicService.desar(r, EstatHistoric.ELIMINADA);
         reservesRepository.delete(r);
     }
 }
+

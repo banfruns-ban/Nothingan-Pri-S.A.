@@ -40,7 +40,7 @@
 
     <!-- Main Content -->
     <main class="main-content">
-        
+
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
                 <h2 class="fw-bold text-dark m-0">Alta de Nou Client</h2>
@@ -67,11 +67,11 @@
 
         <div class="form-card shadow-sm">
             <form th:action="@{/clients/alta}" th:object="${client}" method="post" enctype="multipart/form-data">
-                
+
                 <!-- 1. Dades Personals -->
                 <h5 class="fw-bold text-primary mb-3 border-bottom pb-2">1. Dades personals i d'accés</h5>
                 <div class="row g-3 mb-4">
-                    <div class="col-md-6">
+                    <div class="col-md-12">
                         <label class="form-label">Nom complet (com figura al DNI)</label>
                         <input type="text" th:field="*{nom}" class="form-control" placeholder="Ex: Joan Garcia i Soler" required>
                     </div>
@@ -79,6 +79,11 @@
                     <div class="col-md-6">
                         <label class="form-label">DNI / NIE / Passaport</label>
                         <input type="text" th:field="*{dni}" class="form-control" placeholder="Ex: 12345678Z" maxlength="9" required>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Data de caducitat del DNI</label>
+                        <input type="date" th:field="*{dataCaducitatDNI}" class="form-control" required>
                     </div>
 
                     <div class="col-md-6">
@@ -121,8 +126,8 @@
                     </div>
 
                     <div class="col-md-6">
-                        <label class="form-label">Data de caducitat DNI</label>
-                        <input type="date" th:field="*{dataCaducitatDNI}" class="form-control" required>
+                        <label class="form-label">Data de caducitat del carnet de conduir</label>
+                        <input type="date" th:field="*{dataCaducitatCarnet}" class="form-control" required>
                     </div>
                 </div>
 

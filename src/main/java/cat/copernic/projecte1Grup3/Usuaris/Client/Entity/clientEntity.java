@@ -27,6 +27,9 @@ public class clientEntity extends usuariEntity {
 
     @Column(name = "tipus_llicencia", nullable = false)
     private String tipusLlicencia;
+    
+    @Column(name = "data_caducitat_carnet")
+    private LocalDate dataCaducitatCarnet;
 
     @Column(name = "premium", nullable = false)
     private boolean premium;
@@ -40,6 +43,8 @@ public class clientEntity extends usuariEntity {
 
     @Column(name = "data_naixement")
     private LocalDate dataNaixement;
+    
+    
 
     @Column(name = "data_registre")
     private LocalDate dataRegistre;
@@ -105,4 +110,7 @@ public class clientEntity extends usuariEntity {
 
     public LocalDate getDataRegistre() { return dataRegistre; }
     public void setDataRegistre(LocalDate dataRegistre) { this.dataRegistre = dataRegistre; }
+    
+    public LocalDate getDataCaducitatCarnet() { return dataCaducitatCarnet; }
+    public void setDataCaducitatCarnet(LocalDate dataCaducitatCarnet) { this.dataCaducitatCarnet = dataCaducitatCarnet; }
 }

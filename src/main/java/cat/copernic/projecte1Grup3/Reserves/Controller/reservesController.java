@@ -26,6 +26,8 @@ public class reservesController {
 
     private final reservesService reservesLogic;
     private final clientService clientLogic;
+    
+    
 
     public reservesController(
             reservesService reservesLogic,
@@ -34,9 +36,9 @@ public class reservesController {
         this.clientLogic = clientLogic;
     }
 
-    @GetMapping("/reserves")
+    @GetMapping("/reserves") //<-- Mostra, no modifica
     public String llistar(
-            @RequestParam(required = false) String q,
+            @RequestParam(required = false) String q, //<--@RequestParam= "Dame los datos escritos por el usuario" 
             @RequestParam(required = false) String dni,
             @RequestParam(required = false) String email,
             @RequestParam(required = false)
@@ -46,7 +48,7 @@ public class reservesController {
             @RequestParam(required = false) String estat,
             Model model) {
 
-        model.addAttribute("reserves",
+        model.addAttribute("reserves", //<-- Un puente entre springbook y html
                 reservesLogic.llistar(
                         q,
                         dni,
@@ -71,7 +73,6 @@ public class reservesController {
     @GetMapping("/reserves/nova")
     public String mostrarFormulari(
             @RequestParam(required = false) String dni,
-            @RequestParam(required = false) String matricula, // <-- Afegit per rebre la matrícula del vehicle
             Model model,
             RedirectAttributes ra) {
 
@@ -80,7 +81,7 @@ public class reservesController {
 
             if (client.isEmpty()) {
                 ra.addFlashAttribute("error", "Client no trobat");
-                return "redirect:/reserves";          // torna a la llista
+                return "redirect:/reserves";          // vuelve a la lista
             }
 
             model.addAttribute("client", client.get());
@@ -91,17 +92,12 @@ public class reservesController {
                     clientLogic.llistar(null, null, "VALIDAT", null, null));
         }
 
-        // Si ve una matrícula preseleccionada des de la fitxa del vehicle, la passem a la vista
-        if (matricula != null && !matricula.isBlank()) {
-            model.addAttribute("matriculaPreseleccionada", matricula.trim().toUpperCase());
-        }
-
         model.addAttribute("vehicles", reservesLogic.vehiclesActius());
 
-        return "reservas/altaReserva";               // el formulari, a la seva carpeta
+        return "reservas/altaReserva";               // el formulario, en su carpeta
     }
 
-    @PostMapping("/reserves/alta")
+    @PostMapping("/reserves/alta") //-- Envia datos para crear reserva<
     public String altaReserva(
             @RequestParam String dni,
             @RequestParam String matricula,
@@ -127,7 +123,7 @@ public class reservesController {
                     observacions
             );
 
-            ra.addFlashAttribute(
+            ra.addFlashAttribute( //<-- mensaje que lanza cuando se crea bien
                     "missatge",
                     "Reserva creada correctament (codi "
                     + reserva.getCodiReserva() + ")"
@@ -135,11 +131,11 @@ public class reservesController {
 
             return "redirect:/reserves";
 
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) { //<-- mensjae conocido
             ra.addFlashAttribute("error", e.getMessage());
 
         } catch (Exception e) {
-            log.error("Error en l'alta de la reserva", e);
+            log.error("Error en l'alta de la reserva", e);//<-- mebsaje desconocido
             ra.addFlashAttribute(
                     "error",
                     "No s'ha pogut crear la reserva"
@@ -148,8 +144,8 @@ public class reservesController {
 
         return "redirect:/reserves/nova?dni=" + dni;
     }
-
-    @PostMapping("/reserves/{codi}/eliminar")
+    
+     @PostMapping("/reserves/{codi}/eliminar") //-- Envia datos para eliminar reserva
     public String eliminar(@PathVariable Long codi, RedirectAttributes ra) {
         try {
             reservesLogic.eliminar(codi);

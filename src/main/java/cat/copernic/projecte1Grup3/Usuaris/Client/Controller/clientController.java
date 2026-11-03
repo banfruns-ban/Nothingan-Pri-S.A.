@@ -145,28 +145,33 @@ public class clientController {
         });
     }
 
-    @PostMapping("/clients/{dni}/editar")
-    public String editar(@PathVariable String dni,
-                         @ModelAttribute("client") clientEntity dades,
-                         @RequestParam String estatValidacio,
-                         @RequestParam(defaultValue = "false") boolean premium,
-                         @RequestParam(value = "fotoDniFrontal", required = false) MultipartFile fotoDniFrontal,
-                         @RequestParam(value = "fotoDniPosterior", required = false) MultipartFile fotoDniPosterior,
-                         @RequestParam(value = "fotoCarnet", required = false) MultipartFile fotoCarnet,
-                         RedirectAttributes ra) {
-        try {
-            clientLogic.actualitzar(dni, dades, estatValidacio, premium, fotoDniFrontal, fotoDniPosterior, fotoCarnet);
-            ra.addFlashAttribute("missatge", "Client actualitzat correctament");
-        } catch (DataIntegrityViolationException e) {
-            ra.addFlashAttribute("error", "Aquest correu ja està en ús per un altre client");
-        } catch (IllegalArgumentException e) {
-            ra.addFlashAttribute("error", e.getMessage());
-        } catch (IOException e) {
-            log.error("Error llegint les imatges del client {}", dni, e);
-            ra.addFlashAttribute("error", "No s'han pogut llegir les imatges");
-        }
-        return "redirect:/clients";
+   @PostMapping("/clients/{dni}/editar")
+public String editar(@PathVariable String dni,
+                     @ModelAttribute("client") clientEntity dades,
+                     @RequestParam String estatValidacio,
+                     @RequestParam(defaultValue = "false") boolean premium,
+                     @RequestParam(value = "fotoDniFrontal", required = false) MultipartFile fotoDniFrontal,
+                     @RequestParam(value = "fotoDniPosterior", required = false) MultipartFile fotoDniPosterior,
+                     @RequestParam(value = "fotoCarnet", required = false) MultipartFile fotoCarnet,
+                     RedirectAttributes ra) {
+    try {
+        clientLogic.actualitzar(dni, dades, estatValidacio, premium,
+                fotoDniFrontal, fotoDniPosterior, fotoCarnet);
+        ra.addFlashAttribute("missatge", "Client actualitzat correctament");
+    } catch (IllegalArgumentException e) {
+        // Errores de validación de negocio: email duplicado, estado no válido, imagen incorrecta...
+        ra.addFlashAttribute("error", e.getMessage());
+    } catch (DataIntegrityViolationException e) {
+        // Violación de BD no prevista: se guarda la causa real en el log
+        log.error("Error d'integritat editant el client {}: {}", dni, e.getMostSpecificCause().getMessage(), e);
+        ra.addFlashAttribute("error",
+                "No s'ha pogut guardar el client. Revisa que totes les dades siguin vàlides");
+    } catch (IOException e) {
+        log.error("Error llegint les imatges del client {}", dni, e);
+        ra.addFlashAttribute("error", "No s'han pogut llegir les imatges");
     }
+    return "redirect:/clients";
+}
 
     @PostMapping("/clients/{dni}/eliminar")
     public String eliminar(@PathVariable String dni, RedirectAttributes ra) {

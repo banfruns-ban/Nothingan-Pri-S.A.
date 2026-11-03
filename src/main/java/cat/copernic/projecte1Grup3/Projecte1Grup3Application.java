@@ -14,7 +14,8 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
     "cat.copernic.projecte1Grup3.Usuaris.Client.Repository",
     "cat.copernic.projecte1Grup3.Reserves.Repository",// Si clientRepository és JPA
     "cat.copernic.projecte1Grup3.Usuaris.Client.Repository", // Si clientRepository és JPA
-    "cat.copernic.projecte1Grup3.Usuaris.Agent.Repository"
+    "cat.copernic.projecte1Grup3.Usuaris.Agent.Repository",
+    
 })
 @EnableMongoRepositories(basePackages = {
     "cat.copernic.projecte1Grup3.Usuaris.Client.Repository",

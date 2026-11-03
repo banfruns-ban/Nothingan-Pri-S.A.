@@ -145,6 +145,20 @@ public class reservesController {
         return "redirect:/reserves/nova?dni=" + dni;
     }
     
+    @GetMapping("/reserves/{codi}") //<-- Mostra els detalls d'una reserva
+public String detall(@PathVariable Long codi, Model model, RedirectAttributes ra) {
+    var reserva = reservesLogic.obtenir(codi);
+
+    if (reserva.isEmpty()) {
+        ra.addFlashAttribute("error", "Reserva no trobada");
+        return "redirect:/reserves";
+    }
+
+    model.addAttribute("reserva", reserva.get());
+    return "reservas/detallReserva";
+}
+    
+    
      @PostMapping("/reserves/{codi}/eliminar") //-- Envia datos para eliminar reserva
     public String eliminar(@PathVariable Long codi, RedirectAttributes ra) {
         try {

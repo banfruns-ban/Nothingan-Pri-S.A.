@@ -1,8 +1,8 @@
 package cat.copernic.projecte1Grup3.Informes.Service;
 
 import java.math.BigDecimal;
+import java.util.EnumSet;
 import java.util.List;
-import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
@@ -31,8 +31,8 @@ public class InformeReservesService {
     private static final Pattern FORMAT_DNI = Pattern.compile("^[A-Za-z0-9]{5,15}$");
 
     /** Estats que no compten als totals. */
-    private static final Set<EstatHistoric> NO_COMPTABLES =
-            Set.of(EstatHistoric.CANCELADA, EstatHistoric.ELIMINADA);
+    private static final EnumSet<EstatHistoric> NO_COMPTABLES =
+        EnumSet.of(EstatHistoric.CANCELADA, EstatHistoric.ELIMINADA);
 
     private final HistoricReservaRepository repo;
 

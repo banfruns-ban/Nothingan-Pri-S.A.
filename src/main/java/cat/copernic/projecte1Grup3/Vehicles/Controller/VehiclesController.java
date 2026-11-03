@@ -19,18 +19,18 @@ import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Optional;
 
-@Controller
-@RequestMapping("/vehicles")
+@Controller // Indica que la classe es un controlador **
+@RequestMapping("/vehicles") // Base de las url de todas las rutas del doc
 public class VehiclesController {
 
-    private final VehiclesService vehiclesService;
+    private final VehiclesService vehiclesService; //Declara una variable que conecta controller con service
 
-    @Autowired
+    @Autowired //Inyecta las dependencias de la classe Service para poder usar sus metodos
     public VehiclesController(VehiclesService vehiclesService) {
         this.vehiclesService = vehiclesService;
     }
 
-    @GetMapping
+    @GetMapping//Protocolo http que ejecuta la orden GET (Listar,ver,detalle,cargar vista,formularios, etc...)
     public String llistarVehicles(
             @RequestParam(name = "cerca", required = false) String cerca,
             @RequestParam(name = "tipus", required = false) String tipus,
@@ -58,7 +58,7 @@ public class VehiclesController {
     }
 
     @GetMapping("/nou")
-    public String formulariNouVehicle(Model model) {
+    public String formulariNouVehicle(Model model) {//Conecta la capa controller directamente con la capa vista
         model.addAttribute("vehicle", new VehiclesEntity());
         return "vehicles/altaVehicle";
     }
@@ -74,14 +74,14 @@ public class VehiclesController {
         return "redirect:/vehicles";
     }
 
-    @PostMapping("/guardar")
+    @PostMapping("/guardar")//Protocolo http que ejecuta la orden POST (Modificar,Guardar,Eliminar,etc..)
     public String guardarVehicle(
             @Valid @ModelAttribute("vehicle") VehiclesEntity vehicle,
             BindingResult result,
             @RequestParam(name = "file", required = false) MultipartFile file,
             Model model,
             RedirectAttributes redirect) {
-
+        //Asegura que no da problemas en atributos que pueden ser nulos
         Optional<VehiclesEntity> existentOpt = vehiclesService.buscarPerMatricula(vehicle.getMatricula());
         boolean existeixBDD = vehicle.getMatricula() != null && existentOpt.isPresent();
 

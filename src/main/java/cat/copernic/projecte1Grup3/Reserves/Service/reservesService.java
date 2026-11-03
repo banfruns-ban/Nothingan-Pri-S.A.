@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -123,6 +124,10 @@ public class reservesService {
     private boolean conte(String valor, String text) {
         return valor != null && valor.toLowerCase().contains(text);
     }
+        
+        public Optional<reservesEntity> obtenir(Long codi) {
+    return reservesRepository.findById(codi); // usa el nombre real de tu repositorio
+}
 
     @Transactional //<--si algo falla, no se guarda nada.
     public reservesEntity crear(String dni, String matricula,

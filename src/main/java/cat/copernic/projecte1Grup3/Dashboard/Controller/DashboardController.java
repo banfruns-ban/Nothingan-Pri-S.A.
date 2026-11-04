@@ -1,11 +1,12 @@
 package cat.copernic.projecte1Grup3.Dashboard.Controller;
 
-import cat.copernic.projecte1Grup3.Reserves.Service.reservesService;
-import cat.copernic.projecte1Grup3.Usuaris.Client.Service.clientService;
-import cat.copernic.projecte1Grup3.Vehicles.Service.VehiclesService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+
+import cat.copernic.projecte1Grup3.Reserves.Service.reservesService;
+import cat.copernic.projecte1Grup3.Usuaris.Client.Service.clientService;
+import cat.copernic.projecte1Grup3.Vehicles.Service.VehiclesService;
 
 @Controller
 public class DashboardController {
@@ -22,7 +23,7 @@ public class DashboardController {
         this.vehiclesLogic = vehiclesLogic;
     }
 
-    @GetMapping({"/", "/dashboard"})
+    @GetMapping({"/dashboard"})
     public String mostrarDashboard(Model model) {
         long pendentsLliurament = reservesLogic.comptarPendentsLliurament();
         long pendentsRetorn = reservesLogic.comptarPendentsRetorn();

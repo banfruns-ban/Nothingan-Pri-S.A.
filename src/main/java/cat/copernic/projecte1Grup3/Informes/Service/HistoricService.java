@@ -18,8 +18,6 @@ import cat.copernic.projecte1Grup3.Reserves.Entity.reservesEntity;
 @Service
 public class HistoricService {
 
-    public static final String ELIMINADA = "ELIMINADA";
-
     private static final Logger log = LoggerFactory.getLogger(HistoricService.class);
 
     private final HistoricReservaRepository repo;

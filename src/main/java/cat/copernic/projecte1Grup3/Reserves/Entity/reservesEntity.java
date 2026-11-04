@@ -9,15 +9,11 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import jakarta.persistence.Table;
 
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 @Entity
 @Table(name = "Reserves")
 public class reservesEntity {
@@ -32,8 +28,7 @@ public class reservesEntity {
     private clientEntity client;
 
     @ManyToOne
-    @JoinColumn(name = "Matricula_vehicle",
-            referencedColumnName = "matricula")
+    @JoinColumn(name = "Matricula_vehicle", referencedColumnName = "matricula")
     private VehiclesEntity vehicle;
 
     @Column(name = "data_inici")
@@ -57,6 +52,9 @@ public class reservesEntity {
     @Column(name = "data_lliurament")
     private LocalDate dataLliurament;
 
+    @Column(name = "hora_lliurament")
+    private LocalTime horaLliurament;
+
     @Column(name = "estat")
     private String estat;
 
@@ -69,7 +67,7 @@ public class reservesEntity {
     public reservesEntity() {
     }
 
-    public reservesEntity(Long codiReserva, clientEntity client, VehiclesEntity vehicle, LocalDate dataInici, LocalDate dataFi, LocalTime horaInici, LocalTime horaFi, BigDecimal costTotal, BigDecimal fianca, LocalDate dataLliurament, String estat, LocalDate dataRetorn, String observacions) {
+    public reservesEntity(Long codiReserva, clientEntity client, VehiclesEntity vehicle, LocalDate dataInici, LocalDate dataFi, LocalTime horaInici, LocalTime horaFi, BigDecimal costTotal, BigDecimal fianca, LocalDate dataLliurament, LocalTime horaLliurament, String estat, LocalDate dataRetorn, String observacions) {
         this.codiReserva = codiReserva;
         this.client = client;
         this.vehicle = vehicle;
@@ -80,6 +78,7 @@ public class reservesEntity {
         this.costTotal = costTotal;
         this.fianca = fianca;
         this.dataLliurament = dataLliurament;
+        this.horaLliurament = horaLliurament;
         this.estat = estat;
         this.dataRetorn = dataRetorn;
         this.observacions = observacions;
@@ -163,6 +162,14 @@ public class reservesEntity {
 
     public void setDataLliurament(LocalDate dataLliurament) {
         this.dataLliurament = dataLliurament;
+    }
+
+    public LocalTime getHoraLliurament() {
+        return horaLliurament;
+    }
+
+    public void setHoraLliurament(LocalTime horaLliurament) {
+        this.horaLliurament = horaLliurament;
     }
 
     public String getEstat() {

@@ -6,6 +6,7 @@ import cat.copernic.projecte1Grup3.Usuaris.Client.Entity.clientEntity;
 import cat.copernic.projecte1Grup3.Usuaris.Client.Repository.clientRepository;
 import cat.copernic.projecte1Grup3.Vehicles.Entity.VehiclesEntity;
 import cat.copernic.projecte1Grup3.Vehicles.Repository.VehiclesRepository;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Duration;
@@ -15,6 +16,7 @@ import java.time.LocalTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,7 +41,6 @@ public class reservesService {
         this.vehiclesRepository = vehiclesRepository;
     }
 
-    // Recoge los vehiculos activos para saber cuales vehiculos se pueden reservar
     public List<VehiclesEntity> vehiclesActius() {
         return vehiclesRepository.findAll().stream()
                 .filter(v -> Boolean.TRUE.equals(v.getActiu()))
@@ -51,7 +52,6 @@ public class reservesService {
             String codi, String estat) {
         List<reservesEntity> reserves = reservesRepository.findAll();
 
-        // 1. Cerca general: codi, nom/DNI del client, matrícula/marca/model del vehicle
         if (q != null && !q.isBlank()) {
             String text = q.trim().toLowerCase();
             reserves = reserves.stream()
@@ -65,7 +65,6 @@ public class reservesService {
                     .toList();
         }
 
-        // 2. Filtre per DNI
         if (dni != null && !dni.isBlank()) {
             String d = dni.trim().toLowerCase();
             reserves = reserves.stream()
@@ -73,7 +72,6 @@ public class reservesService {
                     .toList();
         }
 
-        // 3. Email del client
         if (email != null && !email.isBlank()) {
             String e = email.trim().toLowerCase();
             reserves = reserves.stream()
@@ -81,7 +79,6 @@ public class reservesService {
                     .toList();
         }
 
-        // 4. Data de reserva: reserves actives aquell dia (dataInici <= dia <= dataFi)
         if (dataReserva != null) {
             reserves = reserves.stream()
                     .filter(r -> r.getDataInici() != null && r.getDataFi() != null
@@ -90,7 +87,6 @@ public class reservesService {
                     .toList();
         }
 
-        // 5. Matrícula del vehicle
         if (matricula != null && !matricula.isBlank()) {
             String m = matricula.trim().toLowerCase();
             reserves = reserves.stream()
@@ -98,7 +94,6 @@ public class reservesService {
                     .toList();
         }
 
-        // 6. Codi de reserva (exacte)
         if (codi != null && !codi.isBlank()) {
             String c = codi.trim();
             reserves = reserves.stream()
@@ -106,7 +101,6 @@ public class reservesService {
                     .toList();
         }
 
-        // 7. Estat
         if (estat != null && !estat.isBlank()) {
             reserves = reserves.stream()
                     .filter(r -> r.getClient() != null
@@ -115,7 +109,6 @@ public class reservesService {
                     .toList();
         }
 
-        // 8. Les més noves primer
         return reserves.stream()
                 .sorted(Comparator.comparing(reservesEntity::getCodiReserva).reversed())
                 .toList();
@@ -124,12 +117,12 @@ public class reservesService {
     private boolean conte(String valor, String text) {
         return valor != null && valor.toLowerCase().contains(text);
     }
-        
-        public Optional<reservesEntity> obtenir(Long codi) {
-    return reservesRepository.findById(codi); // usa el nombre real de tu repositorio
-}
 
-    @Transactional //<--si algo falla, no se guarda nada.
+    public Optional<reservesEntity> obtenir(Long codi) {
+        return reservesRepository.findById(codi);
+    }
+
+    @Transactional
     public reservesEntity crear(String dni, String matricula,
             LocalDate dataInici, LocalTime horaInici,
             LocalDate dataFi, LocalTime horaFi,
@@ -145,7 +138,6 @@ public class reservesService {
             throw new IllegalArgumentException("Cal indicar les dates i hores d'inici i fi");
         }
 
-        // 2. El client existeix i  no està validat
         clientEntity client = clientRepository.findById(dni.trim().toUpperCase())
                 .orElseThrow(() -> new IllegalArgumentException("Client no trobat"));
         if (!"VALIDAT".equals(client.getEstatValidacio())) {
@@ -153,14 +145,12 @@ public class reservesService {
                     "El client ha d'estar validat per poder fer una reserva");
         }
 
-        // 3. El vehicle existeix i està actiu
         VehiclesEntity vehicle = vehiclesRepository.findById(matricula)
                 .orElseThrow(() -> new IllegalArgumentException("Vehicle no trobat"));
-        if (!Boolean.TRUE.equals(vehicle.getActiu())) { //<-- si vehiculo NO en lista de activos
+        if (!Boolean.TRUE.equals(vehicle.getActiu())) {
             throw new IllegalArgumentException("Aquest vehicle no està disponible per a reserves");
         }
 
-        // 4. Dates coherents
         LocalDateTime inici = LocalDateTime.of(dataInici, horaInici);
         LocalDateTime fi = LocalDateTime.of(dataFi, horaFi);
         if (inici.isBefore(LocalDateTime.now())) {
@@ -170,7 +160,6 @@ public class reservesService {
             throw new IllegalArgumentException("La data i hora de fi han de ser posteriors a les d'inici");
         }
 
-        // 5. Durada: es compta en hores senceres (les hores parcials s'arrodoneixen amunt)
         long minuts = Duration.between(inici, fi).toMinutes();
         long hores = (minuts + 59) / 60;
         long dies = (hores + 23) / 24;
@@ -183,7 +172,6 @@ public class reservesService {
                     "La durada màxima de lloguer és de " + vehicle.getMaxDiesLloguer() + " dia(es)");
         }
 
-        // 6. El vehicle no pot estar ja reservat en aquest interval
         List<reservesEntity> existents
                 = reservesRepository.findByVehicleMatriculaAndEstatNot(matricula, CANCELADA);
         for (reservesEntity r : existents) {
@@ -196,7 +184,6 @@ public class reservesService {
             }
         }
 
-        // 7. Valors que decideix el servidor, no el formulari
         reservesEntity reserva = new reservesEntity();
         reserva.setClient(client);
         reserva.setVehicle(vehicle);
@@ -214,17 +201,144 @@ public class reservesService {
 
         return reservesRepository.save(reserva);
     }
-    
-     @Transactional
+
+    @Transactional
     public void eliminar(Long codi) {
         reservesEntity r = reservesRepository.findById(codi)
                 .orElseThrow(() -> new IllegalArgumentException("Reserva no trobada"));
- 
+
         if (EN_CURS.equals(r.getEstat()) || FINALITZADA.equals(r.getEstat())) {
             throw new IllegalArgumentException(
                     "No es pot eliminar una reserva en curs o finalitzada");
         }
         reservesRepository.delete(r);
     }
-}
 
+    // LLIURAMENT DEL VEHICLE (PANTALLA 9)
+    @Transactional
+    public reservesEntity lliurar(Long codi, LocalDate dataLliurament, LocalTime horaLliurament,
+                                   Integer kmInicials, String nivellCombustible, String novesObservacions) {
+        reservesEntity r = reservesRepository.findById(codi)
+                .orElseThrow(() -> new IllegalArgumentException("Reserva no trobada: #" + codi));
+
+        if (EN_CURS.equals(r.getEstat()) || FINALITZADA.equals(r.getEstat()) || CANCELADA.equals(r.getEstat())) {
+            throw new IllegalArgumentException("No es pot lliurar una reserva en estat " + r.getEstat());
+        }
+
+        r.setDataLliurament(dataLliurament != null ? dataLliurament : LocalDate.now());
+        r.setHoraLliurament(horaLliurament != null ? horaLliurament : LocalTime.now());
+        r.setEstat(EN_CURS);
+
+        StringBuilder obs = new StringBuilder();
+        if (r.getObservacions() != null && !r.getObservacions().isBlank()) {
+            obs.append(r.getObservacions()).append("\n");
+        }
+        obs.append("[Lliurament ").append(r.getDataLliurament()).append("]: ");
+        if (kmInicials != null) obs.append("Km inicials: ").append(kmInicials).append(" km. ");
+        if (nivellCombustible != null && !nivellCombustible.isBlank()) obs.append("Combustible: ").append(nivellCombustible).append(". ");
+        if (novesObservacions != null && !novesObservacions.isBlank()) {
+            obs.append("Notes: ").append(novesObservacions.trim());
+        }
+
+        r.setObservacions(obs.toString());
+        return reservesRepository.save(r);
+    }
+
+    // RETORN DEL VEHICLE I LIQUIDACIÓ DE FIANÇA
+    @Transactional
+    public reservesEntity retornar(Long codi, LocalDate dataRetorn, LocalTime horaRetorn,
+                                    boolean teDesperfectes, boolean desperfectesImputables,
+                                    BigDecimal importDanys, BigDecimal deduccioCarburant,
+                                    String novesObservacions) {
+        reservesEntity r = reservesRepository.findById(codi)
+                .orElseThrow(() -> new IllegalArgumentException("Reserva no trobada: #" + codi));
+
+        if (!EN_CURS.equals(r.getEstat())) {
+            throw new IllegalArgumentException("Només es poden retornar vehicles de reserves EN_CURS.");
+        }
+
+        LocalDate dataTornada = (dataRetorn != null) ? dataRetorn : LocalDate.now();
+        LocalTime horaTornada = (horaRetorn != null) ? horaRetorn : LocalTime.now();
+
+        r.setDataRetorn(dataTornada);
+
+        // 1. Càlcul de retard
+        LocalDateTime previst = LocalDateTime.of(r.getDataFi(), r.getHoraFi());
+        LocalDateTime real = LocalDateTime.of(dataTornada, horaTornada);
+
+        BigDecimal penalitzacioRetard = BigDecimal.ZERO;
+        long horesRetard = 0;
+        if (real.isAfter(previst)) {
+            long minutsRetard = Duration.between(previst, real).toMinutes();
+            horesRetard = (minutsRetard + 59) / 60;
+            BigDecimal preuHora = (r.getVehicle() != null && r.getVehicle().getPreuHora() != null)
+                    ? r.getVehicle().getPreuHora() : BigDecimal.ZERO;
+            penalitzacioRetard = preuHora.multiply(BigDecimal.valueOf(horesRetard));
+        }
+
+        // 2. Resum econòmic i devolució de fiança
+        BigDecimal fiancaOriginal = (r.getFianca() != null) ? r.getFianca() : BigDecimal.ZERO;
+        BigDecimal carrecDanys = (teDesperfectes && desperfectesImputables && importDanys != null) ? importDanys : BigDecimal.ZERO;
+        BigDecimal carrecCombustible = (deduccioCarburant != null) ? deduccioCarburant : BigDecimal.ZERO;
+
+        BigDecimal totalDeduccions = carrecDanys.add(carrecCombustible).add(penalitzacioRetard);
+        BigDecimal fiancaARetornar = fiancaOriginal.subtract(totalDeduccions);
+        if (fiancaARetornar.compareTo(BigDecimal.ZERO) < 0) {
+            fiancaARetornar = BigDecimal.ZERO;
+        }
+
+        StringBuilder obs = new StringBuilder();
+        if (r.getObservacions() != null && !r.getObservacions().isBlank()) {
+            obs.append(r.getObservacions()).append("\n");
+        }
+        obs.append("[Retorn ").append(dataTornada).append(" ").append(horaTornada).append("]: ");
+
+        if (horesRetard > 0) {
+            obs.append("Retard: ").append(horesRetard).append("h (-").append(penalitzacioRetard).append("€). ");
+        }
+        if (teDesperfectes) {
+            if (desperfectesImputables) {
+                obs.append("Danys imputables al client (-").append(carrecDanys).append("€). ");
+            } else {
+                obs.append("Danys no imputables (avaria/tercers, 0€ càrrec). ");
+            }
+        }
+        if (carrecCombustible.compareTo(BigDecimal.ZERO) > 0) {
+            obs.append("Carburant no retornat complet (-").append(carrecCombustible).append("€). ");
+        }
+
+        obs.append("Resum fiança: ").append(fiancaOriginal).append("€ | Deduccions: ").append(totalDeduccions).append("€ | Retorn final: ").append(fiancaARetornar).append("€. ");
+
+        if (novesObservacions != null && !novesObservacions.isBlank()) {
+            obs.append("Descripció: ").append(novesObservacions.trim());
+        }
+
+        r.setObservacions(obs.toString());
+        r.setEstat(FINALITZADA);
+
+        return reservesRepository.save(r);
+    }
+
+    public long comptarPendentsLliurament() {
+        return reservesRepository.findAll().stream()
+                .filter(r -> PENDENT.equals(r.getEstat()) || CONFIRMADA.equals(r.getEstat()))
+                .count();
+    }
+
+    public long comptarPendentsRetorn() {
+        return reservesRepository.findAll().stream()
+                .filter(r -> EN_CURS.equals(r.getEstat()))
+                .count();
+    }
+
+    public List<reservesEntity> llistarPropersLliuraments() {
+        LocalDate avui = LocalDate.now();
+        return reservesRepository.findAll().stream()
+                .filter(r -> !CANCELADA.equals(r.getEstat()) && !FINALITZADA.equals(r.getEstat()))
+                .filter(r -> EN_CURS.equals(r.getEstat()) || (r.getDataInici() != null && !r.getDataInici().isBefore(avui)))
+                .sorted(Comparator.comparing(reservesEntity::getDataInici)
+                        .thenComparing(reservesEntity::getHoraInici))
+                .limit(10)
+                .toList();
+    }
+}

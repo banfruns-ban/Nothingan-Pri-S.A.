@@ -162,4 +162,21 @@ public class reservesController {
         }
         return "redirect:/reserves";
     }
+
+    // =====================================================
+    // RF49: LLIURAR VEHICLE (DASHBOARD I LLISTATS)
+    // =====================================================
+    @GetMapping("/reserves/{codi}/lliurar")
+    public String lliurarVehicle(@PathVariable Long codi, RedirectAttributes ra) {
+        try {
+            reservesLogic.lliurar(codi, LocalDate.now(), LocalTime.now(), "Lliurament efetuat des del Dashboard");
+            ra.addFlashAttribute("succes", "Reserva #" + codi + " lliurada correctament.");
+        } catch (IllegalArgumentException e) {
+            ra.addFlashAttribute("error", e.getMessage());
+        } catch (Exception e) {
+            log.error("Error lliurant la reserva {}", codi, e);
+            ra.addFlashAttribute("error", "No s'ha pogut lliurar la reserva #" + codi);
+        }
+        return "redirect:/dashboard";
+    }
 }

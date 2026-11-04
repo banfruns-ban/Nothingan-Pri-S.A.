@@ -221,6 +221,19 @@ public class reservesController {
         // Apunta a reservas/retornarReserva.html (r minúscula)
         return "reservas/retornarReserva";
     }
+    
+    @GetMapping("/reserves/{codi}")
+public String detall(@PathVariable Long codi, Model model, RedirectAttributes ra) {
+    Optional<reservesEntity> reserva = reservesLogic.obtenir(codi);
+
+    if (reserva.isEmpty()) {
+        ra.addFlashAttribute("error", "Reserva no trobada");
+        return "redirect:/reserves";
+    }
+
+    model.addAttribute("reserva", reserva.get());
+    return "reserves/detallReserva";
+}
 
     // POST: Confirmar Retorn i Liquidació de Fiança
     @PostMapping("/reserves/{codi}/retornar")

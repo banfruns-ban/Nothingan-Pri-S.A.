@@ -11,26 +11,25 @@
 </head>
 <body>
 
-    <!-- Header corporatiu del Portal Client -->
+    <!-- Header corporatiu (Enllaç del logo apunta a Home) -->
     <header>
-        <div class="marca">
+        <a th:href="@{/}" class="marca">
             <div class="logo">NP</div>
             <div>
                 <strong>NOTHINGAN PRI S.A.</strong>
                 <small>PORTAL CLIENT</small>
             </div>
-        </div>
+        </a>
 
         <div class="nav-header">
             <a th:href="@{/cataleg}">Catàleg</a>
             <a th:href="@{/ReservesClient}" class="active">Les meves reserves</a>
             
-            <!-- Accés / Registre per a usuaris -->
-            <div style="display: flex; gap: 10px; align-items: center; margin-left: 12px;">
-                <a th:href="@{/login}" class="btn" style="background: transparent; color: #fff; border: 1px solid #334155; padding: 6px 14px; border-radius: 6px; font-weight: 600; font-size: 12px;">
+            <div class="accés-usuaris">
+                <a th:href="@{/login}" class="btn btn-login">
                     Iniciar sessió
                 </a>
-                <a th:href="@{/registre}" class="btn" style="background: #2563eb; color: #fff; border: 1px solid #2563eb; padding: 6px 14px; border-radius: 6px; font-weight: 600; font-size: 12px;">
+                <a th:href="@{/registre}" class="btn btn-registre">
                     Registrar-se
                 </a>
             </div>
@@ -47,13 +46,13 @@
 
         <!-- Missatges de Feedback -->
         <div th:if="${missatge}" class="alert-success">
-            <i class="fa-solid fa-circle-check me-1"></i> <span th:text="${missatge}">Operació realitzada amb èxit.</span>
+            <i class="fa-solid fa-circle-check"></i> <span th:text="${missatge}"></span>
         </div>
         <div th:if="${error}" class="alert-error">
-            <i class="fa-solid fa-triangle-exclamation me-1"></i> <span th:text="${error}">Error en l'operació.</span>
+            <i class="fa-solid fa-triangle-exclamation"></i> <span th:text="${error}"></span>
         </div>
 
-        <!-- Llista / Taula de Reserves -->
+        <!-- Taula de Reserves -->
         <div class="card-taula">
             <table class="taula-reserves">
                 <thead>
@@ -68,44 +67,41 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- Si no hi ha reserves -->
                     <tr th:if="${reserves == null or #lists.isEmpty(reserves)}">
-                        <td colspan="7" class="text-center text-muted py-4">
-                            No tens cap reserva realitzada actualment. <a th:href="@{/cataleg}" style="color: #2563eb; font-weight: 600;">Explorar el catàleg</a>
+                        <td colspan="7" class="sense-reserves-msg">
+                            No tens cap reserva realitzada actualment. <a th:href="@{/cataleg}">Explorar el catàleg</a>
                         </td>
                     </tr>
 
-                    <!-- Filas dinámicas -->
                     <tr th:each="r : ${reserves}">
-                        <td class="fw-bold" th:text="${'#' + r.codiReserva}">#101</td>
+                        <td class="codi-reserva" th:text="${'#' + r.codiReserva}"></td>
                         <td>
                             <div class="vehicle-info">
-                                <strong th:text="${r.vehicle != null ? (r.vehicle.marca + ' ' + r.vehicle.model) : 'Vehicle'}">Toyota Yaris</strong>
-                                <small th:text="${r.vehicle != null ? r.vehicle.matricula : '-'}">4823KLP</small>
+                                <strong th:text="${r.vehicle != null ? (r.vehicle.marca + ' ' + r.vehicle.model) : '-'}"></strong>
+                                <small th:text="${r.vehicle != null ? r.vehicle.matricula : '-'}"></small>
                             </div>
                         </td>
                         <td>
                             <div class="dates-info">
-                                <span th:text="${#temporals.format(r.dataInici, 'dd/MM/yyyy')} + ' (' + ${r.horaInici} + ')'">12/06/2026 (09:00)</span>
-                                <i class="fa-solid fa-arrow-right fa-xs" style="color: #94a3b8;"></i>
-                                <span th:text="${#temporals.format(r.dataFi, 'dd/MM/yyyy')} + ' (' + ${r.horaFi} + ')'">17/06/2026 (19:00)</span>
+                                <span th:text="${#temporals.format(r.dataInici, 'dd/MM/yyyy')} + ' (' + ${r.horaInici} + ')'"></span>
+                                <i class="fa-solid fa-arrow-right icona-flecha"></i>
+                                <span th:text="${#temporals.format(r.dataFi, 'dd/MM/yyyy')} + ' (' + ${r.horaFi} + ')'"></span>
                             </div>
                         </td>
-                        <td class="fw-bold" th:text="${#numbers.formatDecimal(r.costTotal, 1, 2) + ' €'}">225.00 €</td>
-                        <td th:text="${#numbers.formatDecimal(r.fianca, 1, 2) + ' €'}">150.00 €</td>
+                        <td class="preu-total" th:text="${#numbers.formatDecimal(r.costTotal, 1, 2) + ' €'}"></td>
+                        <td th:text="${#numbers.formatDecimal(r.fianca, 1, 2) + ' €'}"></td>
                         <td>
                             <span class="badge-estat" 
                                   th:classappend="${r.estat == 'CONFIRMADA' ? 'badge-actiu' : (r.estat == 'ANULLADA' ? 'badge-inactiu' : 'badge-pendent')}"
-                                  th:text="${r.estat}">CONFIRMADA</span>
+                                  th:text="${r.estat}"></span>
                         </td>
                         <td>
-                            <!-- Botón de anulación -->
                             <form th:if="${r.estat != 'ANULLADA' and r.estat != 'FINALITZADA'}" 
                                   th:action="@{'/ReservesClient/anular/' + ${r.codiReserva}}" 
                                   method="post" 
                                   onsubmit="return confirm('Estàs segur que vols anul·lar aquesta reserva?');">
                                 <button type="submit" class="btn-anular">
-                                    <i class="fa-solid fa-xmark me-1"></i> Anul·lar
+                                    <i class="fa-solid fa-xmark"></i> Anul·lar
                                 </button>
                             </form>
                             <span th:unless="${r.estat != 'ANULLADA' and r.estat != 'FINALITZADA'}" class="text-muted">-</span>

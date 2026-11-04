@@ -305,3 +305,44 @@ header {
         align-items: stretch;
     }
 }
+/* Botons d'accés / registre a la capçalera */
+.accés-usuaris {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-left: 12px;
+}
+
+.btn-login {
+    background: transparent;
+    color: #ffffff;
+    border: 1px solid #334155;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 12px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.btn-login:hover {
+    background: #1e293b;
+    border-color: #475569;
+}
+
+.btn-registre {
+    background: #2563eb;
+    color: #ffffff;
+    border: 1px solid #2563eb;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 12px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.btn-registre:hover {
+    background: #1d4ed8;
+    border-color: #1d4ed8;
+}

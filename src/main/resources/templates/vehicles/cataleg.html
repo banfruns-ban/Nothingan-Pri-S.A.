@@ -12,13 +12,13 @@
 
     <!-- Header amb estil fosc corporatiu -->
     <header>
-        <div class="marca">
+        <a th:href="@{/cataleg}" class="marca" style="text-decoration: none; color: inherit;">
             <div class="logo">NP</div>
             <div>
                 <strong>NOTHINGAN PRI S.A.</strong>
                 <small>PORTAL CLIENT</small>
             </div>
-        </div>
+        </a>
 
         <div class="nav-header">
             <a th:href="@{/cataleg}" class="active">Catàleg</a>
@@ -41,12 +41,12 @@
         <form th:action="@{/cataleg}" method="get" class="form-filtres">
             <div class="grup-filtre">
                 <label>Data inici</label>
-                <input type="datetime-local" name="dataInici" th:value="${dataInici != null ? dataInici : '2026-06-12T09:00'}">
+                <input type="datetime-local" name="dataInici" th:value="${dataInici}">
             </div>
 
             <div class="grup-filtre">
                 <label>Data fi</label>
-                <input type="datetime-local" name="dataFi" th:value="${dataFi != null ? dataFi : '2026-06-17T19:00'}">
+                <input type="datetime-local" name="dataFi" th:value="${dataFi}">
             </div>
 
             <div class="grup-filtre">
@@ -73,19 +73,14 @@
 
             <div class="bloc-recollida">
                 <small>Recollida</small>
-                <p>12 Juny 2026 - 09:00h</p>
+                <p th:text="${dataInici != null ? dataInici : '-'}"></p>
                 <span>Oficina Terrassa Centre</span>
             </div>
 
             <div class="bloc-recollida">
                 <small>Retorn</small>
-                <p>17 Juny 2026 - 19:00h</p>
+                <p th:text="${dataFi != null ? dataFi : '-'}"></p>
                 <span>Oficina Terrassa Centre</span>
-            </div>
-
-            <div class="caixa-durada">
-                <span>Durada total lloguer:</span>
-                <span>5 dies</span>
             </div>
         </aside>
 
@@ -95,35 +90,34 @@
 
             <div class="graella-vehicles">
 
-                <!-- Missatge si no hi ha vehicles -->
-                <div th:if="${#lists.isEmpty(vehicles)}" style="grid-column: 1/-1; text-align: center; color: #94a3b8; padding: 40px;">
-                    No hi ha vehicles disponibles per als filtres seleccionats.
+                <!-- Missatge si la llista de la BD està buida -->
+                <div th:if="${vehicles == null or #lists.isEmpty(vehicles)}" style="grid-column: 1/-1; text-align: center; color: #94a3b8; padding: 40px;">
+                    No hi ha vehicles disponibles a la base de dades.
                 </div>
 
-                <!-- Recorregut dinàmic de vehicles -->
+                <!-- Recorregut 100% dinàmic des de MySQL -->
                 <article class="targeta-vehicle" th:each="v : ${vehicles}">
                     <img th:if="${v.foto != null and !v.foto.isBlank()}" 
                          th:src="@{'/uploads/vehicles/' + ${v.foto}}" alt="Foto Vehicle">
                     <img th:unless="${v.foto != null and !v.foto.isBlank()}" 
-                         src="https://via.placeholder.com/300x150?text=Sense+Imatge" alt="Foto por defecte">
+                         src="/images/default-car.png" alt="Sense imatge">
 
                     <div class="cos-vehicle">
-                        <span class="categoria-v" th:text="${v.tipusVehicle}">SUV / 4x4</span>
-                        <h4 th:text="${v.marca + ' ' + v.model}">Toyota RAV4</h4>
-                        <div class="specs-v">5 Seients • Automatic • Híbrid</div>
+                        <span class="categoria-v" th:text="${v.tipusVehicle}"></span>
+                        <h4 th:text="${v.marca + ' ' + v.model}"></h4>
 
                         <div class="desglos-preus">
                             <div class="linia-preu">
                                 <span>Taxa diària:</span>
-                                <strong th:text="${#numbers.formatDecimal(v.preuHora, 1, 0) + '€'}">72€</strong>
+                                <strong th:text="${#numbers.formatDecimal(v.preuHora, 1, 2) + ' €'}"></strong>
                             </div>
                             <div class="linia-preu">
                                 <span>Fiança (Dipòsit):</span>
-                                <strong th:text="${#numbers.formatDecimal(v.fianca, 1, 0) + '€'}">250€</strong>
+                                <strong th:text="${#numbers.formatDecimal(v.fianca, 1, 2) + ' €'}"></strong>
                             </div>
                         </div>
 
-                        <!-- Ruta directa cap a la creació de la reserva del Portal Client -->
+                        <!-- Ruta cap a la reserva -->
                         <a th:href="@{'/ReservesClient/nova?matricula=' + ${v.matricula}}" class="btn-reservar">
                             Reservar vehicle
                         </a>

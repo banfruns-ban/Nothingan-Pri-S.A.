@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registre de Client - NOTHINGAN PRI S.A.</title>
+    <!-- FontAwesome per les icones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/cataleg.css}">
+    <link rel="stylesheet" th:href="@{/registre.css}">
+</head>
+<body>
+
+    <!-- Header corporatiu -->
+    <header>
+        <div class="marca">
+            <div class="logo">NP</div>
+            <div>
+                <strong>NOTHINGAN PRI S.A.</strong>
+                <small>PORTAL CLIENT</small>
+            </div>
+        </div>
+
+        <div class="nav-header">
+            <a th:href="@{/cataleg}">Catàleg</a>
+            <a th:href="@{/login}" class="btn" style="background: transparent; color: #fff; border: 1px solid #334155; padding: 6px 14px; border-radius: 6px; font-weight: 600; font-size: 12px;">
+                Iniciar sessió
+            </a>
+        </div>
+    </header>
+
+    <!-- Formulari de Registre -->
+    <div class="registre-container">
+        <h2>Sol·licitud de Registre de Client</h2>
+        <p class="registre-subtitol">Completeu les vostres dades personals i documentació per activar el compte de client.</p>
+
+        <!-- Avisos d'error -->
+        <div th:if="${error}" class="alert-error">
+            <i class="fa-solid fa-triangle-exclamation me-1"></i> <span th:text="${error}">Error</span>
+        </div>
+
+        <form th:action="@{/registre}" th:object="${client}" method="post" enctype="multipart/form-data" class="form-grid">
+
+            <div class="seccio-títol">Dades Personals</div>
+
+            <div class="form-grup">
+                <label>Nom complet *</label>
+                <input type="text" th:field="*{nom}" required placeholder="Ex: Joan Garcia i Soler">
+            </div>
+
+            <div class="form-grup">
+                <label>DNI / NIE / Passaport *</label>
+                <input type="text" th:field="*{dni}" required placeholder="12345678Z">
+            </div>
+
+            <div class="form-grup">
+                <label>Data caducitat DNI *</label>
+                <input type="date" th:field="*{dataCaducitatDNI}" required>
+            </div>
+
+            <div class="form-grup">
+                <label>Nacionalitat *</label>
+                <input type="text" th:field="*{nacionalitat}" required placeholder="Espanyola">
+            </div>
+
+            <div class="form-grup full-width">
+                <label>Adreça de domicili *</label>
+                <input type="text" th:field="*{adreca}" required placeholder="Carrer Major, 123, 08221 Terrassa">
+            </div>
+
+            <div class="seccio-títol">Carnet de Conduir</div>
+
+            <div class="form-grup">
+                <label>Tipus de llicència *</label>
+                <select th:field="*{tipusLlicencia}" required>
+                    <option value="B">B (Automòbils)</option>
+                    <option value="A">A (Motocicletes)</option>
+                    <option value="C">C (Camions)</option>
+                </select>
+            </div>
+
+            <div class="form-grup">
+                <label>Data caducitat carnet *</label>
+                <input type="date" th:field="*{dataCaducitatCarnet}" required>
+            </div>
+
+            <div class="seccio-títol">Documentació Adjunta (Format Imatge max 5MB)</div>
+
+            <div class="form-grup">
+                <label>DNI / NIE (Frontal) *</label>
+                <input type="file" name="fotoDniFrontal" accept="image/png, image/jpeg" required>
+            </div>
+
+            <div class="form-grup">
+                <label>DNI / NIE (Posterior) *</label>
+                <input type="file" name="fotoDniPosterior" accept="image/png, image/jpeg" required>
+            </div>
+
+            <div class="form-grup full-width">
+                <label>Carnet de Conduir *</label>
+                <input type="file" name="fotoCarnet" accept="image/png, image/jpeg" required>
+            </div>
+
+            <div class="seccio-títol">Compte d'Accés</div>
+
+            <div class="form-grup">
+                <label>Correu electrònic (Nom d'usuari) *</label>
+                <input type="email" th:field="*{email}" required placeholder="usuari@domini.com">
+            </div>
+
+            <div class="form-grup">
+                <label>Contrasenya * (mínim 8 caràcters)</label>
+                <input type="password" th:field="*{password}" minlength="8" required>
+            </div>
+
+            <div class="form-grup full-width" style="margin-top: 16px;">
+                <button type="submit" class="btn-enviar-registre">
+                    Enviar sol·licitud de registre
+                </button>
+            </div>
+        </form>
+    </div>
+
+</body>
+</html>

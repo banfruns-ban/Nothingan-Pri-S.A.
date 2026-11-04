@@ -33,4 +33,8 @@ public interface VehiclesRepository extends JpaRepository<VehiclesEntity, String
             @Param("cerca") String cerca, 
             @Param("tipus") String tipus, 
             @Param("actiu") Boolean actiu);
+    // Método a añadir en VehiclesRepository.java
+    List<VehiclesEntity> findByActiuTrue();
+    List<VehiclesEntity> findByActiuTrueAndTipusVehicle(String tipusVehicle);
+    
 }

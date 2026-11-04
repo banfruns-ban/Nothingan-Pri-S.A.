@@ -203,4 +203,36 @@ public String editar(@PathVariable String dni,
         ra.addFlashAttribute("missatge", "Estat premium actualitzat");
         return "redirect:/clients";
     }
+    // =====================================================
+    // REGISTRE DES DEL PORTAL CLIENT (RF81)
+    // =====================================================
+
+    @GetMapping("/registre")
+    public String mostrarFormulariRegistre(Model model) {
+        if (!model.containsAttribute("client")) {
+            model.addAttribute("client", new clientEntity());
+        }
+        return "client/registre"; // Plantilla HTML pública
+    }
+
+    @PostMapping("/registre")
+    public String processarRegistreClient(
+            @ModelAttribute("client") clientEntity client,
+            @RequestParam("fotoDniFrontal") MultipartFile fotoDniFrontal,
+            @RequestParam("fotoDniPosterior") MultipartFile fotoDniPosterior,
+            @RequestParam("fotoCarnet") MultipartFile fotoCarnet,
+            RedirectAttributes ra) {
+        try {
+            // Executa el teu service d'alta (assigna estat PENDENT i desa a MySQL + MongoDB)
+            clientLogic.alta(client, fotoDniFrontal, fotoDniPosterior, fotoCarnet);
+            ra.addFlashAttribute("missatge", "Sol·licitud de registre enviada amb èxit! L'administrador ha de validar el teu compte.");
+            return "redirect:/cataleg";
+        } catch (IllegalArgumentException e) {
+            ra.addFlashAttribute("error", e.getMessage());
+        } catch (Exception e) {
+            log.error("Error en el registre del client extern", e);
+            ra.addFlashAttribute("error", "No s'ha pogut completar el registre. Revisa que les dades i fitxers siguin correctes.");
+        }
+        return "redirect:/registre";
+    }
 }

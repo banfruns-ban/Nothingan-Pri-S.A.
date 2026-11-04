@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detall de la Reserva - NOTHINGAN PRI S.A</title>
+    <!-- Bootstrap 5 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <!-- FontAwesome per les icones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- CSS Unificat -->
+    <link rel="stylesheet" th:href="@{/agents.css}">
+</head>
+<body>
+
+    <!-- Sidebar Lateral -->
+    <aside class="sidebar">
+        <div class="brand">
+            NOTHINGAN PRI S.A
+            <span>PANEL DE CONTROL AGENT</span>
+        </div>
+        <nav class="mt-3">
+            <a th:href="@{/dashboard}" class="nav-link">
+                <i class="fa-solid fa-border-all"></i> Dashboard
+            </a>
+            <a th:href="@{/vehicles}" class="nav-link">
+                <i class="fa-solid fa-car"></i> Flota de Vehicles
+            </a>
+            <a th:href="@{/agents/llista}" class="nav-link">
+                <i class="fa-solid fa-user-gear"></i> Gestió d'Agents
+            </a>
+            <a th:href="@{/clients}" class="nav-link">
+                <i class="fa-solid fa-users"></i> Gestió de Clients
+            </a>
+            <a th:href="@{/reserves}" class="nav-link active">
+                <i class="fa-regular fa-calendar-check"></i> Reserves Actives
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold text-dark m-0">Fitxa de la Reserva</h2>
+                <p class="text-muted small mb-0 mt-1">Informació detallada de la reserva.</p>
+            </div>
+            <div>
+                <a th:if="${reserva.client != null}"
+                   th:href="@{'/clients/' + ${reserva.client.dni}}"
+                   class="btn btn-outline-primary me-2 fw-semibold px-3 py-2" style="border-radius: 8px;">
+                    <i class="fa-solid fa-user me-1"></i> Veure client
+                </a>
+                <a th:href="@{/reserves}" class="btn btn-secondary fw-semibold px-3 py-2" style="border-radius: 8px;">
+                    <i class="fa-solid fa-arrow-left me-1"></i> Tornar al llistat
+                </a>
+            </div>
+        </div>
+
+        <div class="detail-card shadow-sm mb-4">
+
+            <!-- CAPÇALERA DE LA TARGETA -->
+            <div class="row align-items-center pb-4 mb-4 border-bottom">
+                <div class="col-auto">
+                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold fs-3"
+                         style="width: 90px; height: 90px;">
+                        <i class="fa-regular fa-calendar-check"></i>
+                    </div>
+                </div>
+                <div class="col">
+                    <h3 class="fw-bold text-dark m-0" th:text="'Reserva #' + ${reserva.codiReserva}">Reserva #1</h3>
+                    <p class="text-muted mb-2"
+                       th:if="${reserva.client != null}"
+                       th:text="'Client: ' + ${reserva.client.nom} + ' (' + ${reserva.client.dni} + ')'">Client</p>
+
+                    <!-- Ajusta els valors d'estat als reals del teu camp "estat" -->
+                    <span th:if="${reserva.estat == 'ACTIVA'}"
+                          class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 fw-bold">
+                          ACTIVA
+                    </span>
+                    <span th:if="${reserva.estat == 'PENDENT'}"
+                          class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-2 py-1 fw-bold">
+                          PENDENT
+                    </span>
+                    <span th:if="${reserva.estat == 'FINALITZADA'}"
+                          class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-1 fw-bold">
+                          FINALITZADA
+                    </span>
+                    <span th:if="${reserva.estat == 'CANCELADA'}"
+                          class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1 fw-bold">
+                          CANCELADA
+                    </span>
+                </div>
+
+                <!-- ACCIONS -->
+                <div class="col-auto d-flex gap-2">
+                    <form th:action="@{'/reserves/' + ${reserva.codiReserva} + '/eliminar'}" method="post"
+                          onsubmit="return confirm('Segur que vols eliminar aquesta reserva?');">
+                        <button type="submit" class="btn btn-danger fw-semibold px-3 py-2" style="border-radius: 8px;">
+                            <i class="fa-solid fa-trash me-1"></i> Eliminar
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- DADES DE LA RESERVA -->
+            <div class="row g-4 border-bottom pb-4 mb-4">
+                <div class="col-md-6">
+                    <div class="label-title">Codi de reserva</div>
+                    <div class="value-text" th:text="${reserva.codiReserva}">1</div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="label-title">Estat</div>
+                    <div class="value-text" th:text="${reserva.estat}">ACTIVA</div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="label-title">Data d'inici</div>
+                    <div class="value-text" th:text="${reserva.dataInici}">2026-11-03</div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="label-title">Hora d'inici</div>
+                    <div class="value-text" th:text="${reserva.horaInici}">10:00</div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="label-title">Data de fi</div>
+                    <div class="value-text" th:text="${reserva.dataFi}">2026-11-05</div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="label-title">Hora de fi</div>
+                    <div class="value-text" th:text="${reserva.horaFi}">18:00</div>
+                </div>
+
+                <div class="col-12">
+                    <div class="label-title">Observacions</div>
+                    <div class="value-text"
+                         th:text="${reserva.observacions != null and !#strings.isEmpty(reserva.observacions) ? reserva.observacions : '-'}">-</div>
+                </div>
+            </div>
+
+            <!-- CLIENT -->
+            <h4 class="fw-bold text-dark mb-3">Client</h4>
+            <div class="row g-4 border-bottom pb-4 mb-4" th:if="${reserva.client != null}">
+                <div class="col-md-6">
+                    <div class="label-title">Nom complet</div>
+                    <div class="value-text" th:text="${reserva.client.nom}">Nom del Client</div>
+                </div>
+                <div class="col-md-6">
+                    <div class="label-title">DNI / NIE</div>
+                    <div class="value-text" th:text="${reserva.client.dni}">12345678Z</div>
+                </div>
+                <div class="col-md-6">
+                    <div class="label-title">Correu electrònic</div>
+                    <div class="value-text" th:text="${reserva.client.email}">client@email.com</div>
+                </div>
+                <div class="col-md-6">
+                    <div class="label-title">Telèfon de contacte</div>
+                    <div class="value-text"
+                         th:text="${reserva.client.telefon != null and !#strings.isEmpty(reserva.client.telefon) ? reserva.client.telefon : '-'}">600000000</div>
+                </div>
+            </div>
+
+            <!-- VEHICLE -->
+            <h4 class="fw-bold text-dark mb-3">Vehicle</h4>
+            <div class="row g-4" th:if="${reserva.vehicle != null}">
+                <div class="col-md-4">
+                    <div class="label-title">Matrícula</div>
+                    <div class="value-text" th:text="${reserva.vehicle.matricula}">1234ABC</div>
+                </div>
+                <div class="col-md-4">
+                    <div class="label-title">Marca</div>
+                    <div class="value-text" th:text="${reserva.vehicle.marca}">Marca</div>
+                </div>
+                <div class="col-md-4">
+                    <div class="label-title">Model</div>
+                    <div class="value-text" th:text="${reserva.vehicle.model}">Model</div>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -53,8 +53,8 @@
             </div>
         </div>
 
-        <!-- Missatge d'Error Flash -->
-        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+        <!-- Missatge d'Error Flash 	 $ <--Accede a una variable. -->
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show mb-4" role="alert"> 
             <span th:text="${error}"></span>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>

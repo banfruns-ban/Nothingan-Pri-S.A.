@@ -71,4 +71,18 @@ public class VehiclesService {
     public void eliminarVehicle(String matricula) {
         vehiclesRepository.deleteById(matricula);
     }
+    
+        // Métodos a añadir en VehiclesService.java
+    @Transactional(readOnly = true)
+    public List<VehiclesEntity> llistarActius() {
+        return vehiclesRepository.findByActiuTrue();
+    }
+
+    @Transactional(readOnly = true)
+    public List<VehiclesEntity> llistarActiusPerTipus(String tipus) {
+        if (tipus == null || tipus.isBlank()) {
+            return llistarActius();
+        }
+        return vehiclesRepository.findByActiuTrueAndTipusVehicle(tipus);
+    }
 }

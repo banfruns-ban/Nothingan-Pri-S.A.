@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catàleg de Vehicles - NOTHINGAN PRI S.A.</title>
+    <!-- FontAwesome per les icones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/cataleg.css}">
+</head>
+<body>
+
+    <!-- Header amb estil fosc corporatiu -->
+    <header>
+        <div class="marca">
+            <div class="logo">NP</div>
+            <div>
+                <strong>NOTHINGAN PRI S.A.</strong>
+                <small>PORTAL CLIENT</small>
+            </div>
+        </div>
+
+        <div class="nav-header">
+            <a th:href="@{/cataleg}" class="active">Catàleg</a>
+            <a th:href="@{/ReservesClient}">Les meves reserves</a>
+            
+            <!-- Accés / Registre per a usuaris -->
+            <div style="display: flex; gap: 10px; align-items: center; margin-left: 12px;">
+                <a th:href="@{/login}" class="btn" style="background: transparent; color: #fff; border: 1px solid #334155; padding: 6px 14px; border-radius: 6px; font-weight: 600; font-size: 12px;">
+                    Iniciar sessió
+                </a>
+                <a th:href="@{/registre}" class="btn" style="background: #2563eb; color: #fff; border: 1px solid #2563eb; padding: 6px 14px; border-radius: 6px; font-weight: 600; font-size: 12px;">
+                    Registrar-se
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Barra horitzontal de Filtres -->
+    <div class="barra-filtres">
+        <form th:action="@{/cataleg}" method="get" class="form-filtres">
+            <div class="grup-filtre">
+                <label>Data inici</label>
+                <input type="datetime-local" name="dataInici" th:value="${dataInici != null ? dataInici : '2026-06-12T09:00'}">
+            </div>
+
+            <div class="grup-filtre">
+                <label>Data fi</label>
+                <input type="datetime-local" name="dataFi" th:value="${dataFi != null ? dataFi : '2026-06-17T19:00'}">
+            </div>
+
+            <div class="grup-filtre">
+                <label>Tipus de vehicle</label>
+                <select name="tipus">
+                    <option value="">Tots els tipus</option>
+                    <option value="Compacte" th:selected="${tipusSeleccionat == 'Compacte'}">Compacte</option>
+                    <option value="Turisme" th:selected="${tipusSeleccionat == 'Turisme'}">Turisme</option>
+                    <option value="SUV / 4x4" th:selected="${tipusSeleccionat == 'SUV / 4x4'}">SUV / 4x4</option>
+                    <option value="Furgoneta" th:selected="${tipusSeleccionat == 'Furgoneta'}">Furgoneta</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn-cercar">Cercar disponibles</button>
+        </form>
+    </div>
+
+    <!-- Contingut Principal en 2 columnes -->
+    <div class="main-container">
+
+        <!-- Columna Esquerra: Resum del període -->
+        <aside class="card-resum">
+            <h3>Resum del període</h3>
+
+            <div class="bloc-recollida">
+                <small>Recollida</small>
+                <p>12 Juny 2026 - 09:00h</p>
+                <span>Oficina Terrassa Centre</span>
+            </div>
+
+            <div class="bloc-recollida">
+                <small>Retorn</small>
+                <p>17 Juny 2026 - 19:00h</p>
+                <span>Oficina Terrassa Centre</span>
+            </div>
+
+            <div class="caixa-durada">
+                <span>Durada total lloguer:</span>
+                <span>5 dies</span>
+            </div>
+        </aside>
+
+        <!-- Columna Dreta: Graella de Vehicles -->
+        <section class="seccio-cataleg">
+            <h2>Vehicles disponibles per al període seleccionat</h2>
+
+            <div class="graella-vehicles">
+
+                <!-- Missatge si no hi ha vehicles -->
+                <div th:if="${#lists.isEmpty(vehicles)}" style="grid-column: 1/-1; text-align: center; color: #94a3b8; padding: 40px;">
+                    No hi ha vehicles disponibles per als filtres seleccionats.
+                </div>
+
+                <!-- Recorregut dinàmic de vehicles -->
+                <article class="targeta-vehicle" th:each="v : ${vehicles}">
+                    <img th:if="${v.foto != null and !v.foto.isBlank()}" 
+                         th:src="@{'/uploads/vehicles/' + ${v.foto}}" alt="Foto Vehicle">
+                    <img th:unless="${v.foto != null and !v.foto.isBlank()}" 
+                         src="https://via.placeholder.com/300x150?text=Sense+Imatge" alt="Foto por defecte">
+
+                    <div class="cos-vehicle">
+                        <span class="categoria-v" th:text="${v.tipusVehicle}">SUV / 4x4</span>
+                        <h4 th:text="${v.marca + ' ' + v.model}">Toyota RAV4</h4>
+                        <div class="specs-v">5 Seients • Automatic • Híbrid</div>
+
+                        <div class="desglos-preus">
+                            <div class="linia-preu">
+                                <span>Taxa diària:</span>
+                                <strong th:text="${#numbers.formatDecimal(v.preuHora, 1, 0) + '€'}">72€</strong>
+                            </div>
+                            <div class="linia-preu">
+                                <span>Fiança (Dipòsit):</span>
+                                <strong th:text="${#numbers.formatDecimal(v.fianca, 1, 0) + '€'}">250€</strong>
+                            </div>
+                        </div>
+
+                        <!-- Ruta directa cap a la reserva del Portal Client -->
+                        <a th:href="@{'/ReservesClient?matricula=' + ${v.matricula}}" class="btn-reservar">
+                            Reservar vehicle
+                        </a>
+                    </div>
+                </article>
+
+            </div>
+        </section>
+
+    </div>
+
+</body>
+</html>

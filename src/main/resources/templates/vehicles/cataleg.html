@@ -10,9 +10,9 @@
 </head>
 <body>
 
-    <!-- Header amb estil fosc corporatiu -->
+    <!-- Header corporatiu (Enllaç del logo apunta a Home) -->
     <header>
-        <a th:href="@{/cataleg}" class="marca" style="text-decoration: none; color: inherit;">
+        <a th:href="@{/}" class="marca">
             <div class="logo">NP</div>
             <div>
                 <strong>NOTHINGAN PRI S.A.</strong>
@@ -24,12 +24,11 @@
             <a th:href="@{/cataleg}" class="active">Catàleg</a>
             <a th:href="@{/ReservesClient}">Les meves reserves</a>
             
-            <!-- Accés / Registre per a usuaris -->
-            <div style="display: flex; gap: 10px; align-items: center; margin-left: 12px;">
-                <a th:href="@{/login}" class="btn" style="background: transparent; color: #fff; border: 1px solid #334155; padding: 6px 14px; border-radius: 6px; font-weight: 600; font-size: 12px;">
+            <div class="accés-usuaris">
+                <a th:href="@{/login}" class="btn btn-login">
                     Iniciar sessió
                 </a>
-                <a th:href="@{/registre}" class="btn" style="background: #2563eb; color: #fff; border: 1px solid #2563eb; padding: 6px 14px; border-radius: 6px; font-weight: 600; font-size: 12px;">
+                <a th:href="@{/registre}" class="btn btn-registre">
                     Registrar-se
                 </a>
             </div>
@@ -64,10 +63,10 @@
         </form>
     </div>
 
-    <!-- Contingut Principal en 2 columnes -->
+    <!-- Contingut Principal -->
     <div class="main-container">
 
-        <!-- Columna Esquerra: Resum del període -->
+        <!-- Resum del període -->
         <aside class="card-resum">
             <h3>Resum del període</h3>
 
@@ -84,18 +83,18 @@
             </div>
         </aside>
 
-        <!-- Columna Dreta: Graella de Vehicles -->
+        <!-- Graella de Vehicles -->
         <section class="seccio-cataleg">
             <h2>Vehicles disponibles per al període seleccionat</h2>
 
             <div class="graella-vehicles">
 
-                <!-- Missatge si la llista de la BD està buida -->
-                <div th:if="${vehicles == null or #lists.isEmpty(vehicles)}" style="grid-column: 1/-1; text-align: center; color: #94a3b8; padding: 40px;">
+                <!-- Missatge si la llista està buida -->
+                <div th:if="${vehicles == null or #lists.isEmpty(vehicles)}" class="sense-vehicles">
                     No hi ha vehicles disponibles a la base de dades.
                 </div>
 
-                <!-- Recorregut 100% dinàmic des de MySQL -->
+                <!-- Recorregut dinàmic -->
                 <article class="targeta-vehicle" th:each="v : ${vehicles}">
                     <img th:if="${v.foto != null and !v.foto.isBlank()}" 
                          th:src="@{'/uploads/vehicles/' + ${v.foto}}" alt="Foto Vehicle">
@@ -117,7 +116,6 @@
                             </div>
                         </div>
 
-                        <!-- Ruta cap a la reserva -->
                         <a th:href="@{'/ReservesClient/nova?matricula=' + ${v.matricula}}" class="btn-reservar">
                             Reservar vehicle
                         </a>

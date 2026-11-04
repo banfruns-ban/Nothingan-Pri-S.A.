@@ -40,7 +40,7 @@ public class ReservesClientController {
         // Cargar solo las reservas del cliente autenticado
         // model.addAttribute("reserves", reservesService.buscarPerClient(clientLogueat.getDni()));
 
-        return "reservas/lesMevesReserves";
+        return "reserves/lesMevesReserves";
     }
 
     // Ruta: /ReservesClient/nova (Formulario de reserva)
@@ -79,7 +79,7 @@ public class ReservesClientController {
             model.addAttribute("reserva", new reservesEntity());
         }
 
-        return "reservas/crearReservaClient";
+        return "reserves/crearReservaClient";
     }
 
     // Ruta: POST /ReservesClient/guardar

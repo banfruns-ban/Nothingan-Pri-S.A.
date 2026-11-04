@@ -31,14 +31,6 @@ public class AuthController {
     }
 
     /**
-     * Vista de registro (enlace "Crear un compte" en la plantilla).
-     */
-    @GetMapping("/register")
-    public String registerPage() {
-        return "register";
-    }
-
-    /**
      * Vista de recuperación de contraseña (enlace "Has oblidat la contrasenya?").
      */
     @GetMapping("/forgot-password")

@@ -4,10 +4,17 @@
  */
 package cat.copernic.projecte1Grup3.Ressenya.Repository;
 
+import cat.copernic.projecte1Grup3.Ressenya.Entity.ressenyaEntity;
+import java.util.List;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
 /**
  *
  * @author User
  */
-public class ressenyaRepository {
-    
+@Repository
+public interface ressenyaRepository extends JpaRepository<ressenyaEntity, Long> {
+
+    List<ressenyaEntity> findByVehicleMatriculaOrderByDataCreacioDesc(String matricula);
 }

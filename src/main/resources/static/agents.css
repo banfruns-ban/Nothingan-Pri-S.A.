@@ -225,3 +225,10 @@ body {
 .section-title:first-child {
     margin-top: 0;
 }
+
+.rating { display: inline-flex; flex-direction: row-reverse; gap: 4px; }
+.rating input { display: none; }
+.rating label { font-size: 1.8rem; color: #d1d5db; cursor: pointer; transition: color .15s; }
+.rating input:checked ~ label,
+.rating label:hover,
+.rating label:hover ~ label { color: #ffc107; }

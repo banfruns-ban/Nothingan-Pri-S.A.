@@ -4,18 +4,21 @@
  */
 package cat.copernic.projecte1Grup3.Ressenya.Entity;
 
+import cat.copernic.projecte1Grup3.Reserves.Entity.reservesEntity;
 import cat.copernic.projecte1Grup3.Usuaris.Client.Entity.clientEntity;
+import cat.copernic.projecte1Grup3.Vehicles.Entity.VehiclesEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import java.time.LocalDate;
-
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "Ressenya")
@@ -26,42 +29,85 @@ public class ressenyaEntity {
     @Column(name = "id_ressenya")
     private Long idRessenya;
 
-    
-    @Column(name = "puntuacio", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "Matricula_vehicle",
+            referencedColumnName = "matricula")
+    private VehiclesEntity vehicle;
+
+    @ManyToOne
+    @JoinColumn(name = "DNI_client", referencedColumnName = "DNI")
+    private clientEntity client;
+
+    @ManyToOne
+    @JoinColumn(name = "codi_reserva")
+    private reservesEntity reserva;
+
+    @Min(1)
+    @Max(5)
+    @Column(nullable = false ,name  = "Puntuacio")
     private int puntuacio;
 
     @Column(name = "comentari")
     private String comentari;
 
-    @Column(name = "data", nullable = false)
-    private LocalDate data;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "DNI_client", nullable = false)
-    private clientEntity client;
+   @Column(nullable = false)
+    private LocalDateTime dataCreacio;
 
     public ressenyaEntity() {
     }
 
-    public ressenyaEntity(int puntuacio, String comentari, LocalDate data, clientEntity client) {
+    public ressenyaEntity(int puntuacio, String comentari, LocalDateTime dataCreacio, clientEntity client, VehiclesEntity vehicle) {
         this.puntuacio = puntuacio;
         this.comentari = comentari;
-        this.data = data;
+        this.dataCreacio = dataCreacio;
         this.client = client;
+        this.vehicle= vehicle;
     }
 
-    public Long getIdRessenya() { return idRessenya; }
-    public void setIdRessenya(Long idRessenya) { this.idRessenya = idRessenya; }
+    public Long getIdRessenya() {
+        return idRessenya;
+    }
 
-    public int getPuntuacio() { return puntuacio; }
-    public void setPuntuacio(int puntuacio) { this.puntuacio = puntuacio; }
+    public void setIdRessenya(Long idRessenya) {
+        this.idRessenya = idRessenya;
+    }
 
-    public String getComentari() { return comentari; }
-    public void setComentari(String comentari) { this.comentari = comentari; }
+    public int getPuntuacio() {
+        return puntuacio;
+    }
 
-    public LocalDate getData() { return data; }
-    public void setData(LocalDate data) { this.data = data; }
+    public void setPuntuacio(int puntuacio) {
+        this.puntuacio = puntuacio;
+    }
 
-    public clientEntity getClient() { return client; }
-    public void setClient(clientEntity client) { this.client = client; }
+    public String getComentari() {
+        return comentari;
+    }
+
+    public void setComentari(String comentari) {
+        this.comentari = comentari;
+    }
+
+    public LocalDateTime getDataCreacio() {
+        return dataCreacio;
+    }
+
+    public void setDataCreacio(LocalDateTime dataCreacio) {
+        this.dataCreacio = dataCreacio;
+    }
+
+    public clientEntity getClient() {
+        return client;
+    }
+
+    public void setClient(clientEntity client) {
+        this.client = client;
+    }
+        public VehiclesEntity getVehicle() {
+        return vehicle;
+    }
+
+    public void setVehicle(VehiclesEntity vehicle) {
+        this.vehicle = vehicle;
+    }
 }

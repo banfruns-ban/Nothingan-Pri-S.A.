@@ -7,7 +7,8 @@ package cat.copernic.projecte1Grup3.Reserves.Repository;
 import cat.copernic.projecte1Grup3.Reserves.Entity.reservesEntity;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
- 
+import org.springframework.stereotype.Repository;
+ @Repository
 public interface reservesRepository extends JpaRepository<reservesEntity, Long> {
  
     // Reserves d'un vehicle que no tenen l'estat indicat (s'usa per ignorar les CANCELADA)

@@ -1,5 +1,6 @@
 package cat.copernic.projecte1Grup3.Vehicles.Controller;
 
+import cat.copernic.projecte1Grup3.Ressenya.Service.ressenyaService;
 import cat.copernic.projecte1Grup3.Vehicles.Entity.VehiclesEntity;
 import cat.copernic.projecte1Grup3.Vehicles.Service.VehiclesService;
 import jakarta.validation.Valid;
@@ -23,11 +24,12 @@ import java.util.Optional;
 @RequestMapping("/vehicles") // Base de las url de todas las rutas del doc
 public class VehiclesController {
 
-    private final VehiclesService vehiclesService; //Declara una variable que conecta controller con service
-
-    @Autowired //Inyecta las dependencias de la classe Service para poder usar sus metodos
-    public VehiclesController(VehiclesService vehiclesService) {
+    private final VehiclesService vehiclesService;
+    private final ressenyaService ressenyaLogic;
+    @Autowired
+    public VehiclesController(VehiclesService vehiclesService, ressenyaService ressenyaLogic) {
         this.vehiclesService = vehiclesService;
+        this.ressenyaLogic = ressenyaLogic; 
     }
 
     @GetMapping//Protocolo http que ejecuta la orden GET (Listar,ver,detalle,cargar vista,formularios, etc...)
@@ -42,6 +44,7 @@ public class VehiclesController {
         model.addAttribute("cerca", cerca);
         model.addAttribute("tipus", tipus);
         model.addAttribute("estat", estat);
+       
         
         return "vehicles/llistat";
     }
@@ -51,6 +54,7 @@ public class VehiclesController {
         Optional<VehiclesEntity> vehicle = vehiclesService.buscarPerMatricula(matricula);
         if (vehicle.isPresent()) {
             model.addAttribute("vehicle", vehicle.get());
+            model.addAttribute("resenyes", ressenyaLogic.llistarPerVehicle(matricula));
             return "vehicles/detallVehicle";
         }
         redirect.addFlashAttribute("error", "El vehicle amb matrícula " + matricula + " no existeix.");

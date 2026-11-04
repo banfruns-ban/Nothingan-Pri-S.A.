@@ -17,7 +17,7 @@ import java.math.BigDecimal;
 @Entity
 @Table(name = "vehicle")
 public class VehiclesEntity {
-
+    
     @Id
     @NotBlank(message = "La matrícula és obligatòria")
     @Pattern(regexp = "^[0-9]{4}[A-Z]{3}$|^[A-Z]{1,2}[0-9]{4}[A-Z]{1,2}$", message = "Format de matrícula invàlid (Ex: 1234ABC)")

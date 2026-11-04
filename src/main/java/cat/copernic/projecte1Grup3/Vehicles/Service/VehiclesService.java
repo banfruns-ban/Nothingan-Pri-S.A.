@@ -14,7 +14,7 @@ public class VehiclesService {
 
     private final VehiclesRepository vehiclesRepository;
 
-    @Autowired
+    @Autowired //treure l'anotació
     public VehiclesService(VehiclesRepository vehiclesRepository) {
         this.vehiclesRepository = vehiclesRepository;
     }

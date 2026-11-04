@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nova Reserva - NOTHINGAN PRI S.A.</title>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/cataleg.css}">
+    <link rel="stylesheet" th:href="@{/registre.css}">
+</head>
+<body>
+
+    <!-- Header corporatiu -->
+    <header>
+        <div class="marca">
+            <div class="logo">NP</div>
+            <div>
+                <strong>NOTHINGAN PRI S.A.</strong>
+                <small>PORTAL CLIENT</small>
+            </div>
+        </div>
+
+        <div class="nav-header">
+            <a th:href="@{/cataleg}">Catàleg</a>
+            <a th:href="@{/ReservesClient}">Les meves reserves</a>
+            
+            <div style="display: flex; gap: 10px; align-items: center; margin-left: 12px;">
+                <a th:href="@{/login}" class="btn" style="background: transparent; color: #fff; border: 1px solid #334155; padding: 6px 14px; border-radius: 6px; font-weight: 600; font-size: 12px;">
+                    Iniciar sessió
+                </a>
+                <a th:href="@{/registre}" class="btn" style="background: #2563eb; color: #fff; border: 1px solid #2563eb; padding: 6px 14px; border-radius: 6px; font-weight: 600; font-size: 12px;">
+                    Registrar-se
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Formulari de Creació de Reserva -->
+    <div class="registre-container" style="max-width: 800px;">
+        <h2>Confirmació i Sol·licitud de Reserva</h2>
+        <p class="registre-subtitol">Comprova el vehicle seleccionat i indica les dates de lloguer desitjades.</p>
+
+        <!-- Avisos de Feedback -->
+        <div th:if="${error}" class="alert-error">
+            <i class="fa-solid fa-triangle-exclamation me-1"></i> <span th:text="${error}">Error</span>
+        </div>
+
+        <!-- Targeta Resum del Vehicle Seleccionat -->
+        <div th:if="${vehicleSeleccionat != null}" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin-bottom: 24px; display: flex; gap: 16px; align-items: center;">
+            <img th:if="${vehicleSeleccionat.foto != null and !vehicleSeleccionat.foto.isBlank()}" 
+                 th:src="@{'/uploads/vehicles/' + ${vehicleSeleccionat.foto}}" alt="Vehicle" style="width: 120px; height: 80px; object-fit: cover; border-radius: 6px;">
+            <img th:unless="${vehicleSeleccionat.foto != null and !vehicleSeleccionat.foto.isBlank()}" 
+                 src="https://via.placeholder.com/120x80?text=Sense+Imatge" alt="Vehicle" style="width: 120px; height: 80px; object-fit: cover; border-radius: 6px;">
+
+            <div>
+                <span style="font-size: 10px; color: #2563eb; font-weight: 700; text-transform: uppercase;" th:text="${vehicleSeleccionat.tipusVehicle}">TURISME</span>
+                <h3 style="margin: 2px 0 4px; font-size: 16px;" th:text="${vehicleSeleccionat.marca + ' ' + vehicleSeleccionat.model}">Toyota Corolla</h3>
+                <p style="margin: 0; font-size: 12px; color: #64748b;">
+                    Matrícula: <strong th:text="${vehicleSeleccionat.matricula}">1234ABC</strong> | 
+                    Preu: <strong th:text="${#numbers.formatDecimal(vehicleSeleccionat.preuHora, 1, 2) + ' €/h'}">15.00 €/h</strong> | 
+                    Fiança: <strong th:text="${#numbers.formatDecimal(vehicleSeleccionat.fianca, 1, 2) + ' €'}">150.00 €</strong>
+                </p>
+            </div>
+        </div>
+
+        <form th:action="@{/ReservesClient/guardar}" th:object="${reserva}" method="post" class="form-grid">
+            
+            <!-- Guardem la matrícula del vehicle -->
+            <input type="hidden" name="vehicle.matricula" th:value="${vehicleSeleccionat != null ? vehicleSeleccionat.matricula : ''}">
+
+            <div class="seccio-títol">Període de Recollida i Devolució</div>
+
+            <div class="form-grup">
+                <label>Data d'inici *</label>
+                <input type="date" name="dataInici" required th:value="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}">
+            </div>
+
+            <div class="form-grup">
+                <label>Hora d'inici *</label>
+                <input type="time" name="horaInici" required value="09:00">
+            </div>
+
+            <div class="form-grup">
+                <label>Data de devolució *</label>
+                <input type="date" name="dataFi" required>
+            </div>
+
+            <div class="form-grup">
+                <label>Hora de devolució *</label>
+                <input type="time" name="horaFi" required value="19:00">
+            </div>
+
+            <div class="seccio-títol">Observacions addicionals</div>
+
+            <div class="form-grup full-width">
+                <label>Comentaris o necessitats especials</label>
+                <input type="text" name="observacions" placeholder="Ex: Sella per a nadó, recollida en horari especial...">
+            </div>
+
+            <div class="form-grup full-width" style="margin-top: 16px; display: flex; gap: 12px;">
+                <a th:href="@{/cataleg}" class="btn" style="background: #f1f5f9; color: #475569; text-align: center; border: 1px solid #cbd5e1; flex: 1; padding: 12px; border-radius: 6px; font-weight: 600;">
+                    Cancel·lar
+                </a>
+                <button type="submit" class="btn-enviar-registre" style="flex: 2;">
+                    Confirmar i Sol·licitar Reserva
+                </button>
+            </div>
+        </form>
+    </div>
+
+</body>
+</html>

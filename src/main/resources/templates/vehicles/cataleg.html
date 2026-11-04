@@ -123,8 +123,8 @@
                             </div>
                         </div>
 
-                        <!-- Ruta directa cap a la reserva del Portal Client -->
-                        <a th:href="@{'/ReservesClient?matricula=' + ${v.matricula}}" class="btn-reservar">
+                        <!-- Ruta directa cap a la creació de la reserva del Portal Client -->
+                        <a th:href="@{'/ReservesClient/nova?matricula=' + ${v.matricula}}" class="btn-reservar">
                             Reservar vehicle
                         </a>
                     </div>

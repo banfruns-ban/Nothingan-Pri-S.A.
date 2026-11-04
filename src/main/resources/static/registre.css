@@ -1,5 +1,5 @@
 .registre-container {
-    max-width: 750px;
+    max-width: 800px;
     margin: 40px auto;
     background: #fff;
     color: #0f172a;
@@ -62,12 +62,12 @@
 
 .seccio-títol {
     grid-column: 1 / -1;
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 700;
     color: #2563eb;
     border-bottom: 1px solid #e2e8f0;
     padding-bottom: 6px;
-    margin-top: 12px;
+    margin-top: 16px;
 }
 
 .alert-error {

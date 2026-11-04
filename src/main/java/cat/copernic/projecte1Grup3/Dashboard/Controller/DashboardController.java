@@ -22,7 +22,7 @@ public class DashboardController {
         this.vehiclesLogic = vehiclesLogic;
     }
 
-    @GetMapping({"/", "/dashboard"})
+    @GetMapping({"/dashboard"})
     public String mostrarDashboard(Model model) {
         long pendentsLliurament = reservesLogic.comptarPendentsLliurament();
         long pendentsRetorn = reservesLogic.comptarPendentsRetorn();

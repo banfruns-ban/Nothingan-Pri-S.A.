@@ -67,7 +67,8 @@ public class reservesController {
         model.addAttribute("codi", codi);
         model.addAttribute("estat", estat);
 
-        return "reserves/llistaReserves";
+        // Apunta a reservas/LlistaReserves.html (L mayúscula)
+        return "reservas/LlistaReserves";
     }
 
     @GetMapping("/reserves/nova")
@@ -98,7 +99,8 @@ public class reservesController {
 
         model.addAttribute("vehicles", reservesLogic.vehiclesActius());
 
-        return "reserves/altaReserva";
+        // Apunta a reservas/altaReserva.html (a minúscula)
+        return "reservas/altaReserva";
     }
 
     @PostMapping("/reserves/alta")
@@ -177,16 +179,17 @@ public class reservesController {
             return "redirect:/dashboard";
         }
         model.addAttribute("reserva", r);
-        return "reserves/lliurarReserva";
+        // Apunta a reservas/LliurarReserva.html (L mayúscula)
+        return "reservas/LliurarReserva";
     }
 
     // POST: Confirmar Lliurament (Screen 9)
     @PostMapping("/reserves/{codi}/lliurar")
     public String processarLliurament(@PathVariable Long codi,
-            @RequestParam(required = false, defaultValue = "14850") Integer kmInicials,
-            @RequestParam(required = false, defaultValue = "100%") String nivellCombustible,
-            @RequestParam(required = false) String observacions,
-            RedirectAttributes ra) {
+                                      @RequestParam(required = false, defaultValue = "14850") Integer kmInicials,
+                                      @RequestParam(required = false, defaultValue = "100%") String nivellCombustible,
+                                      @RequestParam(required = false) String observacions,
+                                      RedirectAttributes ra) {
         try {
             reservesLogic.lliurar(codi, LocalDate.now(), LocalTime.now(), kmInicials, nivellCombustible, observacions);
             ra.addFlashAttribute("succes", "Reserva #" + codi + " lliurada correctament. Estat canviat a EN_CURS.");
@@ -215,7 +218,8 @@ public class reservesController {
         model.addAttribute("reserva", r);
         model.addAttribute("dataAvui", LocalDate.now());
         model.addAttribute("horaAvui", LocalTime.now());
-        return "reserves/retornarReserva";
+        // Apunta a reservas/retornarReserva.html (r minúscula)
+        return "reservas/retornarReserva";
     }
 
     // POST: Confirmar Retorn i Liquidació de Fiança

@@ -49,9 +49,4 @@ public class AuthController {
     public String agentPanel() {
         return "agent/panel"; // Panel del agente
     }
-
-    @GetMapping("/admin/dashboard")
-    public String adminDashboard() {
-        return "admin/dashboard"; // Panel de administración / ERP
-    }
 }

@@ -15,6 +15,7 @@ import java.time.LocalTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -226,5 +227,58 @@ public class reservesService {
         }
         reservesRepository.delete(r);
     }
-}
 
+    // =====================================================
+    // MÈTODES ADDICIONALS (LLIURAMENT I DASHBOARD)
+    // =====================================================
+
+    public Optional<reservesEntity> obtenir(Long codi) {
+        return reservesRepository.findById(codi);
+    }
+
+    @Transactional
+    public reservesEntity lliurar(Long codi, LocalDate dataLliurament, LocalTime horaLliurament, String novesObservacions) {
+        reservesEntity r = reservesRepository.findById(codi)
+                .orElseThrow(() -> new IllegalArgumentException("Reserva no trobada: #" + codi));
+
+        if (EN_CURS.equals(r.getEstat()) || FINALITZADA.equals(r.getEstat()) || CANCELADA.equals(r.getEstat())) {
+            throw new IllegalArgumentException("No es pot lliurar una reserva que està en estat " + r.getEstat());
+        }
+
+        r.setDataLliurament(dataLliurament != null ? dataLliurament : LocalDate.now());
+        r.setHoraLliurament(horaLliurament != null ? horaLliurament : LocalTime.now());
+        r.setEstat(EN_CURS);
+
+        if (novesObservacions != null && !novesObservacions.isBlank()) {
+            String actuals = r.getObservacions() != null ? r.getObservacions() + "\n" : "";
+            r.setObservacions(actuals + "[Lliurament]: " + novesObservacions.trim());
+        }
+
+        reservesEntity guardada = reservesRepository.save(r);
+        historicService.desar(guardada, EstatHistoric.EN_CURS);
+        return guardada;
+    }
+
+    public long comptarPendentsLliurament() {
+        return reservesRepository.findAll().stream()
+                .filter(r -> PENDENT.equals(r.getEstat()) || CONFIRMADA.equals(r.getEstat()))
+                .count();
+    }
+
+    public long comptarPendentsRetorn() {
+        return reservesRepository.findAll().stream()
+                .filter(r -> EN_CURS.equals(r.getEstat()))
+                .count();
+    }
+
+    public List<reservesEntity> llistarPropersLliuraments() {
+        LocalDate avui = LocalDate.now();
+        return reservesRepository.findAll().stream()
+                .filter(r -> r.getDataInici() != null && !r.getDataInici().isBefore(avui))
+                .filter(r -> !CANCELADA.equals(r.getEstat()) && !FINALITZADA.equals(r.getEstat()))
+                .sorted(Comparator.comparing(reservesEntity::getDataInici)
+                        .thenComparing(reservesEntity::getHoraInici))
+                .limit(10)
+                .toList();
+    }
+}

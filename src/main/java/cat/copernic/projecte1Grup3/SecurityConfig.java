@@ -24,7 +24,19 @@ public class SecurityConfig {
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/home", "/login", "/register", "/login.css", "/css/**", "/js/**", "/images/**").permitAll()
+                // Se permite acceso público a todos los CSS en la raíz (/*.css) y subdirectorios de estáticos
+                .requestMatchers(
+                    "/", 
+                    "/home", 
+                    "/cataleg", 
+                    "/login", 
+                    "/registre", 
+                    "/*.css", 
+                    "/css/**", 
+                    "/js/**", 
+                    "/images/**", 
+                    "/uploads/**"
+                ).permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/agent/**").hasRole("AGENT")
                 .anyRequest().authenticated()
@@ -52,7 +64,7 @@ public class SecurityConfig {
                     return;
                 }
             }
-            response.sendRedirect("/client/catalog");
+            response.sendRedirect("/cataleg");
         };
     }
 
@@ -61,9 +73,6 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    /**
-     * Inyecta el PasswordEncoder para cifrar las contraseñas en memoria
-     */
     @Bean
     public UserDetailsService userDetailsService(PasswordEncoder encoder) {
         UserDetails client = User.builder()

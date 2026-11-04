@@ -11,20 +11,20 @@
 </head>
 <body>
 
-    <!-- Header corporatiu -->
+    <!-- Header corporatiu (Enllaç del logo apunta a Home) -->
     <header>
-        <div class="marca">
+        <a th:href="@{/}" class="marca">
             <div class="logo">NP</div>
             <div>
                 <strong>NOTHINGAN PRI S.A.</strong>
                 <small>PORTAL CLIENT</small>
             </div>
-        </div>
+        </a>
 
         <div class="nav-header">
             <a th:href="@{/cataleg}">Catàleg</a>
-            <div style="display: flex; gap: 10px; align-items: center; margin-left: 12px;">
-                <a th:href="@{/login}" class="btn" style="background: transparent; color: #fff; border: 1px solid #334155; padding: 6px 14px; border-radius: 6px; font-weight: 600; font-size: 12px;">
+            <div class="accés-usuaris">
+                <a th:href="@{/login}" class="btn btn-login">
                     Iniciar sessió
                 </a>
             </div>
@@ -38,7 +38,7 @@
 
         <!-- Avisos d'error -->
         <div th:if="${error}" class="alert-error">
-            <i class="fa-solid fa-triangle-exclamation me-1"></i> <span th:text="${error}">Error</span>
+            <i class="fa-solid fa-triangle-exclamation"></i> <span th:text="${error}">Error</span>
         </div>
 
         <form th:action="@{/registre}" th:object="${client}" method="post" enctype="multipart/form-data" class="form-grid">
@@ -47,12 +47,12 @@
 
             <div class="form-grup full-width">
                 <label>Nom complet (com figura al DNI) *</label>
-                <input type="text" th:field="*{nom}" required placeholder="Ex: Joan Garcia i Soler">
+                <input type="text" th:field="*{nom}" required>
             </div>
 
             <div class="form-grup">
                 <label>DNI / NIE / Passaport *</label>
-                <input type="text" th:field="*{dni}" required placeholder="Ex: 12345678Z">
+                <input type="text" th:field="*{dni}" required>
             </div>
 
             <div class="form-grup">
@@ -62,17 +62,17 @@
 
             <div class="form-grup">
                 <label>Adreça electrònica *</label>
-                <input type="email" th:field="*{email}" required placeholder="Ex: joan@gmail.com">
+                <input type="email" th:field="*{email}" required>
             </div>
 
             <div class="form-grup">
                 <label>Contrasenya per al portal *</label>
-                <input type="password" th:field="*{password}" minlength="8" placeholder="Mínim 8 caràcters" required>
+                <input type="password" th:field="*{password}" minlength="8" required>
             </div>
 
             <div class="form-grup">
                 <label>Telèfon de contacte *</label>
-                <input type="tel" th:field="*{telefon}" required placeholder="Ex: 612 345 678">
+                <input type="tel" th:field="*{telefon}" required>
             </div>
 
             <div class="form-grup">
@@ -82,12 +82,12 @@
 
             <div class="form-grup">
                 <label>Nacionalitat *</label>
-                <input type="text" th:field="*{nacionalitat}" required placeholder="Ex: Espanyola">
+                <input type="text" th:field="*{nacionalitat}" required>
             </div>
 
-            <div class="form-grup">
+            <div class="form-grup full-width">
                 <label>Adreça completa *</label>
-                <input type="text" th:field="*{adreca}" required placeholder="Ex: Carrer Major 12, Terrassa">
+                <input type="text" th:field="*{adreca}" required>
             </div>
 
             <div class="seccio-títol">2. Permís de conduir</div>
@@ -95,6 +95,7 @@
             <div class="form-grup">
                 <label>Tipus de llicència *</label>
                 <select th:field="*{tipusLlicencia}" required>
+                    <option value="" disabled selected>Selecciona un tipus</option>
                     <option value="B">B (Automòbils)</option>
                     <option value="A">A (Motocicletes)</option>
                     <option value="C">C (Camions)</option>
@@ -123,7 +124,7 @@
                 <input type="file" name="fotoCarnet" accept="image/png, image/jpeg" required>
             </div>
 
-            <div class="form-grup full-width" style="margin-top: 16px;">
+            <div class="form-grup full-width">
                 <button type="submit" class="btn-enviar-registre">
                     Enviar sol·licitud de registre
                 </button>

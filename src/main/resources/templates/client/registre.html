@@ -23,9 +23,11 @@
 
         <div class="nav-header">
             <a th:href="@{/cataleg}">Catàleg</a>
-            <a th:href="@{/login}" class="btn" style="background: transparent; color: #fff; border: 1px solid #334155; padding: 6px 14px; border-radius: 6px; font-weight: 600; font-size: 12px;">
-                Iniciar sessió
-            </a>
+            <div style="display: flex; gap: 10px; align-items: center; margin-left: 12px;">
+                <a th:href="@{/login}" class="btn" style="background: transparent; color: #fff; border: 1px solid #334155; padding: 6px 14px; border-radius: 6px; font-weight: 600; font-size: 12px;">
+                    Iniciar sessió
+                </a>
+            </div>
         </div>
     </header>
 
@@ -41,34 +43,54 @@
 
         <form th:action="@{/registre}" th:object="${client}" method="post" enctype="multipart/form-data" class="form-grid">
 
-            <div class="seccio-títol">Dades Personals</div>
+            <div class="seccio-títol">1. Dades personals i d'accés</div>
 
-            <div class="form-grup">
-                <label>Nom complet *</label>
+            <div class="form-grup full-width">
+                <label>Nom complet (com figura al DNI) *</label>
                 <input type="text" th:field="*{nom}" required placeholder="Ex: Joan Garcia i Soler">
             </div>
 
             <div class="form-grup">
                 <label>DNI / NIE / Passaport *</label>
-                <input type="text" th:field="*{dni}" required placeholder="12345678Z">
+                <input type="text" th:field="*{dni}" required placeholder="Ex: 12345678Z">
             </div>
 
             <div class="form-grup">
-                <label>Data caducitat DNI *</label>
+                <label>Data de caducitat del DNI *</label>
                 <input type="date" th:field="*{dataCaducitatDNI}" required>
             </div>
 
             <div class="form-grup">
+                <label>Adreça electrònica *</label>
+                <input type="email" th:field="*{email}" required placeholder="Ex: joan@gmail.com">
+            </div>
+
+            <div class="form-grup">
+                <label>Contrasenya per al portal *</label>
+                <input type="password" th:field="*{password}" minlength="8" placeholder="Mínim 8 caràcters" required>
+            </div>
+
+            <div class="form-grup">
+                <label>Telèfon de contacte *</label>
+                <input type="tel" th:field="*{telefon}" required placeholder="Ex: 612 345 678">
+            </div>
+
+            <div class="form-grup">
+                <label>Data de naixement *</label>
+                <input type="date" th:field="*{dataNaixement}" required>
+            </div>
+
+            <div class="form-grup">
                 <label>Nacionalitat *</label>
-                <input type="text" th:field="*{nacionalitat}" required placeholder="Espanyola">
+                <input type="text" th:field="*{nacionalitat}" required placeholder="Ex: Espanyola">
             </div>
 
-            <div class="form-grup full-width">
-                <label>Adreça de domicili *</label>
-                <input type="text" th:field="*{adreca}" required placeholder="Carrer Major, 123, 08221 Terrassa">
+            <div class="form-grup">
+                <label>Adreça completa *</label>
+                <input type="text" th:field="*{adreca}" required placeholder="Ex: Carrer Major 12, Terrassa">
             </div>
 
-            <div class="seccio-títol">Carnet de Conduir</div>
+            <div class="seccio-títol">2. Permís de conduir</div>
 
             <div class="form-grup">
                 <label>Tipus de llicència *</label>
@@ -80,37 +102,25 @@
             </div>
 
             <div class="form-grup">
-                <label>Data caducitat carnet *</label>
+                <label>Data de caducitat del carnet de conduir *</label>
                 <input type="date" th:field="*{dataCaducitatCarnet}" required>
             </div>
 
-            <div class="seccio-títol">Documentació Adjunta (Format Imatge max 5MB)</div>
+            <div class="seccio-títol">3. Verificació d'identitat (Imatges max 5MB)</div>
 
             <div class="form-grup">
-                <label>DNI / NIE (Frontal) *</label>
+                <label>Foto DNI Frontal *</label>
                 <input type="file" name="fotoDniFrontal" accept="image/png, image/jpeg" required>
             </div>
 
             <div class="form-grup">
-                <label>DNI / NIE (Posterior) *</label>
+                <label>Foto DNI Posterior *</label>
                 <input type="file" name="fotoDniPosterior" accept="image/png, image/jpeg" required>
             </div>
 
             <div class="form-grup full-width">
-                <label>Carnet de Conduir *</label>
+                <label>Foto Carnet de Conduir *</label>
                 <input type="file" name="fotoCarnet" accept="image/png, image/jpeg" required>
-            </div>
-
-            <div class="seccio-títol">Compte d'Accés</div>
-
-            <div class="form-grup">
-                <label>Correu electrònic (Nom d'usuari) *</label>
-                <input type="email" th:field="*{email}" required placeholder="usuari@domini.com">
-            </div>
-
-            <div class="form-grup">
-                <label>Contrasenya * (mínim 8 caràcters)</label>
-                <input type="password" th:field="*{password}" minlength="8" required>
             </div>
 
             <div class="form-grup full-width" style="margin-top: 16px;">

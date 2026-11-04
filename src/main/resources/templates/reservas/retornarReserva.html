@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retorn de Vehicle - NOTHINGAN PRI S.A</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/agents.css}">
+    <link rel="stylesheet" th:href="@{/dashboard.css}">
+</head>
+<body class="bg-light">
+
+    <!-- Sidebar Lateral -->
+    <aside class="sidebar">
+        <div class="brand">
+            NOTHINGAN PRI S.A
+            <span>PANEL DE CONTROL AGENT</span>
+        </div>
+        <nav class="mt-3">
+            <a th:href="@{/dashboard}" class="nav-link"><i class="fa-solid fa-border-all"></i> Dashboard</a>
+            <a th:href="@{/vehicles}" class="nav-link"><i class="fa-solid fa-car"></i> Flota de Vehicles</a>
+            <a th:href="@{/clients}" class="nav-link"><i class="fa-solid fa-users"></i> Gestió de Clients</a>
+            <a th:href="@{/reserves}" class="nav-link active"><i class="fa-regular fa-calendar-check"></i> Reserves Actives</a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content p-4">
+
+        <!-- Capçalera -->
+        <div class="mb-4">
+            <h2 class="fw-bold text-dark">Retorn de vehicle</h2>
+            <p class="text-muted">Registre de l'estat en devolució, càlcul de danys, i liquidació de la fiança dipositada.</p>
+        </div>
+
+        <form th:action="@{'/reserves/' + ${reserva.codiReserva} + '/retornar'}" method="post">
+            
+            <!-- Targeta d'Informació de la Reserva -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body d-flex justify-content-between align-items-center py-3">
+                    <div>
+                        <span class="text-muted extra-small d-block text-uppercase fw-semibold">CODI RESERVA</span>
+                        <strong class="text-primary fs-5" th:text="${'RES-' + reserva.codiReserva}">RES-8922</strong>
+                    </div>
+                    <div>
+                        <span class="text-muted extra-small d-block text-uppercase fw-semibold">CLIENT</span>
+                        <strong class="text-dark" th:text="${reserva.client != null ? reserva.client.nom : 'Pere Sanchez i Vila'}">Pere Sanchez i Vila</strong>
+                    </div>
+                    <div>
+                        <span class="text-muted extra-small d-block text-uppercase fw-semibold">VEHICLE</span>
+                        <strong class="text-dark" th:text="${reserva.vehicle != null ? (reserva.vehicle.marca + ' ' + reserva.vehicle.model) : 'Renault Trafic Cargo'}">Renault Trafic Cargo (Furgoneta)</strong>
+                    </div>
+                    <div>
+                        <span class="text-muted extra-small d-block text-uppercase fw-semibold">MATRÍCULA</span>
+                        <strong class="text-dark" th:text="${reserva.vehicle != null ? reserva.vehicle.matricula : '1122-KML'}">1122-KML</strong>
+                    </div>
+                    <div>
+                        <span class="text-muted extra-small d-block text-uppercase fw-semibold">PERÍODE</span>
+                        <strong class="text-dark" th:text="${#temporals.format(reserva.dataInici, 'dd/MM/yyyy') + ' - ' + #temporals.format(reserva.dataFi, 'dd/MM/yyyy')}">05/06/2026 - 12/06/2026 (7 dies)</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <!-- Columna Esquerra: Checklist i Incidències -->
+                <div class="col-lg-7">
+                    
+                    <!-- Checklist -->
+                    <div class="card border-0 shadow-sm p-4 mb-4">
+                        <h5 class="fw-bold text-dark mb-3">Checklist d'estat de retorn</h5>
+                        
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="cRet1" name="teDesperfectes" value="true" onchange="recalcularResum()">
+                            <label class="form-check-label fw-semibold" for="cRet1">Exterior net i sense nous rascats o cops</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" checked id="cRet2">
+                            <label class="form-check-label fw-semibold" for="cRet2">Interior net, lliure de brutícia o olors</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" checked id="cRet3">
+                            <label class="form-check-label fw-semibold" for="cRet3">Dipòsit de combustible retornat complet (100%)</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" checked id="cRet4">
+                            <label class="form-check-label fw-semibold" for="cRet4">Llums i electrònica en perfecte funcionament</label>
+                        </div>
+                    </div>
+
+                    <!-- Incidències detectades -->
+                    <div class="card border-0 shadow-sm p-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="fw-bold text-dark mb-0">Incidències detectades?</h5>
+                            <span class="badge bg-warning text-dark px-3 py-1 rounded-pill fw-semibold">Sí (Incidència activa)</span>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label small text-muted fw-semibold">Gravetat del dany</label>
+                                <select id="gravetatDany" name="gravetat" class="form-select" onchange="recalcularResum()">
+                                    <option value="75" selected>Lleu (p. ex. petit ratllat lateral) - 75 €</option>
+                                    <option value="150">Moderat (cop superficial) - 150 €</option>
+                                    <option value="300">Greu (Retenció total fiança) - 300 €</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small text-muted fw-semibold">Imputable al client?</label>
+                                <select id="imputableClient" name="desperfectesImputables" class="form-select" onchange="recalcularResum()">
+                                    <option value="true" selected>Sí (Es descompta de la fiança)</option>
+                                    <option value="false">No (Responsabilitat empresa/tercers)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="form-label small text-muted fw-semibold">Descripció dels danys</label>
+                            <textarea name="observacions" class="form-control" rows="2">Ratllada de 15cm a la porta lateral dreta de càrrega.</textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Columna Dreta: Fotos i Resum Econòmic -->
+                <div class="col-lg-5">
+                    
+                    <!-- Fotos estat de retorn -->
+                    <div class="card border-0 shadow-sm p-4 mb-4">
+                        <h5 class="fw-bold text-dark mb-3">Fotos de l'estat de retorn</h5>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <div class="border rounded p-3 text-center bg-light text-muted" style="border-style: dashed !important;">
+                                    <i class="fa-regular fa-image fs-4 mb-1"></i>
+                                    <span class="d-block extra-small">Lateral afectat</span>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="border rounded p-3 text-center bg-light text-muted" style="border-style: dashed !important;">
+                                    <i class="fa-regular fa-image fs-4 mb-1"></i>
+                                    <span class="d-block extra-small">Posterior</span>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="border rounded p-3 text-center bg-light text-muted" style="border-style: dashed !important;">
+                                    <i class="fa-regular fa-image fs-4 mb-1"></i>
+                                    <span class="d-block extra-small">Quadre de km</span>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="border rounded p-3 text-center bg-light text-muted" style="border-style: dashed !important;">
+                                    <i class="fa-regular fa-image fs-4 mb-1"></i>
+                                    <span class="d-block extra-small">Interior furgoneta</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Resum econòmic i devolució -->
+                    <div class="card border-0 shadow-sm p-4">
+                        <h5 class="fw-bold text-dark mb-3">Resum econòmic i devolució</h5>
+                        
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Fiança dipositada</span>
+                            <span class="fw-bold text-dark">300,00 €</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-danger">Deduccions per danys (Lleu)</span>
+                            <span id="deduccioText" class="fw-bold text-danger">- 75,00 €</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-3 pb-2 border-bottom">
+                            <span class="text-muted">Deduccions per carburant</span>
+                            <span class="fw-bold text-dark">0,00 €</span>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mb-4">
+                            <strong class="text-primary fs-5">Import a retornar</strong>
+                            <strong id="importRetornarText" class="text-primary fs-5">225,00 €</strong>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold">
+                            Confirmar retorn i tancar contracte
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </main>
+
+    <script>
+        function recalcularResum() {
+            const gravetat = parseFloat(document.getElementById('gravetatDany').value);
+            const imputable = document.getElementById('imputableClient').value === "true";
+            
+            let deducció = imputable ? gravetat : 0;
+            let importFinal = 300 - deducció;
+            if (importFinal < 0) importFinal = 0;
+
+            document.getElementById('deduccioText').innerText = "- " + deducció.toFixed(2) + " €";
+            document.getElementById('importRetornarText').innerText = importFinal.toFixed(2) + " €";
+        }
+    </script>
+</body>
+</html>

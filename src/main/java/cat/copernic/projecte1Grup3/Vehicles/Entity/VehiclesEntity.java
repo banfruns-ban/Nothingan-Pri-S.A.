@@ -1,8 +1,11 @@
 package cat.copernic.projecte1Grup3.Vehicles.Entity;
 
+import cat.copernic.projecte1Grup3.Reserves.Entity.reservesEntity;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Max;
@@ -13,6 +16,8 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "vehicle")
@@ -84,6 +89,10 @@ public class VehiclesEntity {
 
     @Column(name = "foto", length = 255)
     private String foto;
+
+    // --- RELACIÓ ONE-TO-MANY AMB RESERVES ---
+    @OneToMany(mappedBy = "vehicle", cascade = CascadeType.ALL)
+    private List<reservesEntity> reserves = new ArrayList<>();
 
     /**
      * Constructor per defecte requerit per JPA.
@@ -246,5 +255,13 @@ public class VehiclesEntity {
 
     public void setFoto(String foto) {
         this.foto = foto;
+    }
+
+    public List<reservesEntity> getReserves() {
+        return reserves;
+    }
+
+    public void setReserves(List<reservesEntity> reserves) {
+        this.reserves = reserves;
     }
 }

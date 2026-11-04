@@ -45,3 +45,4 @@ HELP.md
 .DS_Store
 Thumbs.db
 src/main/resources/application.properties
+src/main/resources/application.properties

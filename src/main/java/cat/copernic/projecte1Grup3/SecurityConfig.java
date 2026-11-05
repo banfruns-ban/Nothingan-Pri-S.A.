@@ -27,9 +27,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                         .requestMatchers("/", "/home", "/login", "/registre").permitAll()
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/agent/**").hasRole("AGENT")
-                        .requestMatchers("/client/**").hasRole("CLIENT")
+                        .requestMatchers("/dashboard/**").hasRole("ADMIN")
+                        .requestMatchers("/dashboard/**").hasRole("AGENT")
                         .anyRequest().authenticated())
                 .formLogin(form -> form
                         .loginPage("/login")

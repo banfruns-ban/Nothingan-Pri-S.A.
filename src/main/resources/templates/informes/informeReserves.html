@@ -18,9 +18,9 @@
         <nav>
             <a class="nav-link" href="#">Dashboard</a>
             <a class="nav-link" href="#">Flota de Vehicles</a>
-            <a class="nav-link" th:href="@{/clients}">Gestió de Clients</a>
-            <a class="nav-link" th:href="@{/reserves}">Reserves</a>
-            <a class="nav-link active" th:href="@{/informes/reserves}" aria-current="page">Informes</a>
+            <a class="nav-link" th:href="@{/dashboard/clients}">Gestió de Clients</a>
+            <a class="nav-link" th:href="@{/dashboard/reserves}">Reserves</a>
+            <a class="nav-link active" th:href="@{/dashboard/informes/reserves}" aria-current="page">Informes</a>
         </nav>
     </aside>
 
@@ -37,7 +37,7 @@
         </div>
 
         <!-- Filtre per client -->
-        <form class="filter-card" id="formInforme" th:action="@{/informes/reserves}" method="get">
+        <form class="filter-card" id="formInforme" th:action="@{/dashboard/informes/reserves}" method="get">
             <label for="dnis">Clients</label>
             <select id="dnis" name="dnis" multiple>
                 <option th:each="c : ${clients}" th:value="${c.dni}" th:text="${c.nom} + ' (' + ${c.dni} + ')'"
@@ -46,7 +46,7 @@
             <span class="help">Ctrl/Cmd + clic per seleccionar-ne més d'un. Sense selecció: tots els clients.</span>
             <div class="filter-actions">
                 <button type="submit" class="btn-generar" id="btnGenerar">Generar informe</button>
-                <a class="btn-secundari" th:href="@{/informes/reserves}">Netejar</a>
+                <a class="btn-secundari" th:href="@{/dashboard/informes/reserves}">Netejar</a>
             </div>
         </form>
 

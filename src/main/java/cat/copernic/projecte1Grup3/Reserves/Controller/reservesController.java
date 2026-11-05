@@ -1,9 +1,5 @@
 package cat.copernic.projecte1Grup3.Reserves.Controller;
 
-import cat.copernic.projecte1Grup3.Reserves.Entity.reservesEntity;
-import cat.copernic.projecte1Grup3.Reserves.Service.reservesService;
-import cat.copernic.projecte1Grup3.Usuaris.Client.Service.clientService;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -19,6 +15,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import cat.copernic.projecte1Grup3.Reserves.Entity.reservesEntity;
+import cat.copernic.projecte1Grup3.Reserves.Service.reservesService;
+import cat.copernic.projecte1Grup3.Usuaris.Client.Service.clientService;
 
 @Controller
 public class reservesController {
@@ -36,7 +36,7 @@ public class reservesController {
         this.clientLogic = clientLogic;
     }
 
-    @GetMapping("/reserves")
+    @GetMapping("/dashboard/reserves")
     public String llistar(
             @RequestParam(required = false) String q,
             @RequestParam(required = false) String dni,
@@ -67,11 +67,10 @@ public class reservesController {
         model.addAttribute("codi", codi);
         model.addAttribute("estat", estat);
 
-        // Apunta a reservas/LlistaReserves.html (L mayúscula)
-        return "reserves/LlistaReserves";
+        return "reserves/llistaReserves";
     }
 
-    @GetMapping("/reserves/nova")
+    @GetMapping("/dashboard/reserves/nova")
     public String mostrarFormulari(
             @RequestParam(required = false) String dni,
             @RequestParam(required = false) String matricula,
@@ -83,7 +82,7 @@ public class reservesController {
 
             if (client.isEmpty()) {
                 ra.addFlashAttribute("error", "Client no trobat");
-                return "redirect:/reserves";
+                return "redirect:/dashboard/reserves";
             }
 
             model.addAttribute("client", client.get());
@@ -103,7 +102,7 @@ public class reservesController {
         return "reserves/altaReserva";
     }
 
-    @PostMapping("/reserves/alta")
+    @PostMapping("/dashboard/reserves/alta")
     public String altaReserva(
             @RequestParam String dni,
             @RequestParam String matricula,
@@ -135,7 +134,7 @@ public class reservesController {
                     + reserva.getCodiReserva() + ")"
             );
 
-            return "redirect:/reserves";
+            return "redirect:/dashboard/reserves";
 
         } catch (IllegalArgumentException e) {
             ra.addFlashAttribute("error", e.getMessage());
@@ -148,10 +147,10 @@ public class reservesController {
             );
         }
 
-        return "redirect:/reserves/nova?dni=" + dni;
+        return "redirect:/dashboard/reserves/nova?dni=" + dni;
     }
 
-    @PostMapping("/reserves/{codi}/eliminar")
+    @PostMapping("/dashboard/reserves/{codi}/eliminar")
     public String eliminar(@PathVariable Long codi, RedirectAttributes ra) {
         try {
             reservesLogic.eliminar(codi);
@@ -162,29 +161,28 @@ public class reservesController {
             log.error("Error eliminant la reserva {}", codi, e);
             ra.addFlashAttribute("error", "No s'ha pogut eliminar la reserva");
         }
-        return "redirect:/reserves";
+        return "redirect:/dashboard/reserves";
     }
 
     // GET: Obrir Screen 9 (Lliurament)
-    @GetMapping("/reserves/{codi}/lliurar")
+    @GetMapping("/dashboard/reserves/{codi}/lliurar")
     public String mostrarFormulariLliurament(@PathVariable Long codi, Model model, RedirectAttributes ra) {
         Optional<reservesEntity> optReserva = reservesLogic.obtenir(codi);
         if (optReserva.isEmpty()) {
             ra.addFlashAttribute("error", "Reserva #" + codi + " no trobada.");
-            return "redirect:/dashboard";
+            return "redirect:/dashboard/reserves";
         }
         reservesEntity r = optReserva.get();
         if (reservesService.EN_CURS.equals(r.getEstat()) || reservesService.FINALITZADA.equals(r.getEstat()) || reservesService.CANCELADA.equals(r.getEstat())) {
             ra.addFlashAttribute("error", "No es pot lliurar una reserva en estat " + r.getEstat());
-            return "redirect:/dashboard";
+            return "redirect:/dashboard/reserves";
         }
         model.addAttribute("reserva", r);
-        // Apunta a reservas/LliurarReserva.html (L mayúscula)
-        return "reservas/LliurarReserva";
+        return "reserves/lliurarReserva";
     }
 
     // POST: Confirmar Lliurament (Screen 9)
-    @PostMapping("/reserves/{codi}/lliurar")
+    @PostMapping("/dashboard/reserves/{codi}/lliurar")
     public String processarLliurament(@PathVariable Long codi,
                                       @RequestParam(required = false, defaultValue = "14850") Integer kmInicials,
                                       @RequestParam(required = false, defaultValue = "100%") String nivellCombustible,
@@ -199,36 +197,35 @@ public class reservesController {
             log.error("Error lliurant la reserva {}", codi, e);
             ra.addFlashAttribute("error", "No s'ha pogut lliurar la reserva #" + codi);
         }
-        return "redirect:/dashboard";
+        return "redirect:/dashboard/reserves";
     }
 
     // GET: Obrir pantalla de Retorn
-    @GetMapping("/reserves/{codi}/retornar")
+    @GetMapping("/dashboard/reserves/{codi}/retornar")
     public String mostrarFormulariRetorn(@PathVariable Long codi, Model model, RedirectAttributes ra) {
         Optional<reservesEntity> optReserva = reservesLogic.obtenir(codi);
         if (optReserva.isEmpty()) {
             ra.addFlashAttribute("error", "Reserva #" + codi + " no trobada.");
-            return "redirect:/dashboard";
+            return "redirect:/dashboard/reserves";
         }
         reservesEntity r = optReserva.get();
         if (!reservesService.EN_CURS.equals(r.getEstat())) {
             ra.addFlashAttribute("error", "Només es poden retornar vehicles de reserves en estat EN_CURS.");
-            return "redirect:/dashboard";
+            return "redirect:/dashboard/reserves";
         }
         model.addAttribute("reserva", r);
         model.addAttribute("dataAvui", LocalDate.now());
         model.addAttribute("horaAvui", LocalTime.now());
-        // Apunta a reservas/retornarReserva.html (r minúscula)
-        return "reservas/retornarReserva";
+        return "reserves/retornarReserva";
     }
     
-    @GetMapping("/reserves/{codi}")
+    @GetMapping("/dashboard/reserves/{codi}")
 public String detall(@PathVariable Long codi, Model model, RedirectAttributes ra) {
     Optional<reservesEntity> reserva = reservesLogic.obtenir(codi);
 
     if (reserva.isEmpty()) {
         ra.addFlashAttribute("error", "Reserva no trobada");
-        return "redirect:/reserves";
+        return "redirect:/dashboard/reserves";
     }
 
     model.addAttribute("reserva", reserva.get());
@@ -236,7 +233,7 @@ public String detall(@PathVariable Long codi, Model model, RedirectAttributes ra
 }
 
     // POST: Confirmar Retorn i Liquidació de Fiança
-    @PostMapping("/reserves/{codi}/retornar")
+    @PostMapping("/dashboard/reserves/{codi}/retornar")
     public String processarRetorn(
             @PathVariable Long codi,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataRetorn,
@@ -256,6 +253,6 @@ public String detall(@PathVariable Long codi, Model model, RedirectAttributes ra
             log.error("Error processant el retorn de la reserva {}", codi, e);
             ra.addFlashAttribute("error", "Error en intentar processar el retorn de la reserva #" + codi);
         }
-        return "redirect:/dashboard";
+        return "redirect:/dashboard/reserves";
     }
 }

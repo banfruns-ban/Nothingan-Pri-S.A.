@@ -23,13 +23,13 @@
                 <a href="#" class="nav-link">
                     <i class="fa-solid fa-border-all"></i> Dashboard
                 </a>
-                <a th:href="@{/vehicles}" class="nav-link">
+                <a th:href="@{/dashboard/vehicles}" class="nav-link">
                     <i class="fa-solid fa-car"></i> Flota de Vehicles
                 </a>
-                <a th:href="@{/agents/llista}" class="nav-link">
+                <a th:href="@{/dashboard/agents/llista}" class="nav-link">
                     <i class="fa-solid fa-user-gear"></i> Gestió d'Agents
                 </a>
-                <a th:href="@{/clients}" class="nav-link active">
+                <a th:href="@{/dashboard/clients}" class="nav-link active">
                     <i class="fa-solid fa-users"></i> Gestió de Clients
                 </a>
                 <a href="#" class="nav-link">
@@ -47,7 +47,7 @@
                     <p class="text-muted small mb-0 mt-1">Edició de les dades del perfil i llicència del client.</p>
                 </div>
                 <div>
-                    <a th:href="@{/clients}" class="btn btn-secondary fw-semibold px-3 py-2" style="border-radius: 8px;">
+                    <a th:href="@{/dashboard/clients}" class="btn btn-secondary fw-semibold px-3 py-2" style="border-radius: 8px;">
                         <i class="fa-solid fa-arrow-left me-1"></i> Cancel·lar
                     </a>
                 </div>
@@ -60,7 +60,7 @@
             </div>
 
             <div class="form-card shadow-sm">
-                <form th:action="@{'/clients/' + ${client.dni} + '/editar'}" th:object="${client}" method="post" enctype="multipart/form-data">
+                <form th:action="@{'/dashboard/clients/' + ${client.dni} + '/editar'}" th:object="${client}" method="post" enctype="multipart/form-data">
 
                     <div class="row g-3 mb-4">
                         <div class="col-md-6">
@@ -126,7 +126,7 @@
                         </div>
                     </div>
                     <div class="d-flex justify-content-end gap-2">
-                        <a th:href="@{/clients}" class="btn btn-light border px-4 fw-semibold" style="border-radius: 8px;">Cancel·lar</a>
+                        <a th:href="@{/dashboard/clients}" class="btn btn-light border px-4 fw-semibold" style="border-radius: 8px;">Cancel·lar</a>
                         <button type="submit" class="btn btn-primary px-4 fw-semibold" style="border-radius: 8px;">
                             <i class="fa-solid fa-floppy-disk me-1"></i> Desar canvis
                         </button>

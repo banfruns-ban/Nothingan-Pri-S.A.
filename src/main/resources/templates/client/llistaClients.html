@@ -23,16 +23,16 @@
             <a th:href="@{/dashboard}" class="nav-link">
                 <i class="fa-solid fa-border-all"></i> Dashboard
             </a>
-            <a th:href="@{/vehicles}" class="nav-link">
+            <a th:href="@{/dashboard/vehicles}" class="nav-link">
                 <i class="fa-solid fa-car"></i> Flota de Vehicles
             </a>
-            <a th:href="@{/agents/llista}" class="nav-link">
+            <a th:href="@{/dashboard/agents/llista}" class="nav-link">
                 <i class="fa-solid fa-user-gear"></i> Gestió d'Agents
             </a>
-            <a th:href="@{/clients}" class="nav-link active">
+            <a th:href="@{/dashboard/clients}" class="nav-link active">
                 <i class="fa-solid fa-users"></i> Gestió de Clients
             </a>
-            <a th:href="@{/reserves}" class="nav-link">
+            <a th:href="@{/dashboard/reserves}" class="nav-link">
                 <i class="fa-regular fa-calendar-check"></i> Reserves Actives
             </a>
         </nav>
@@ -46,7 +46,7 @@
                 <h2 class="fw-bold text-dark m-0">Gestió de Clients</h2>
                 <p class="text-muted small mb-0 mt-1">Consulteu, filtreu i gestioneu tots els clients registrats al sistema.</p>
             </div>
-            <a th:href="@{/clients/altaUsuari}" class="btn btn-primary fw-semibold px-4 py-2" style="border-radius: 8px;">
+            <a th:href="@{/dashboard/clients/altaUsuari}" class="btn btn-primary fw-semibold px-4 py-2" style="border-radius: 8px;">
                 + Afegir nou client
             </a>
         </div>
@@ -65,7 +65,7 @@
 
         <!-- Targeta de Filtres -->
         <div class="filter-card shadow-sm mb-4">
-            <form th:action="@{/clients}" method="get" class="row g-3 align-items-end">
+            <form th:action="@{/dashboard/clients}" method="get" class="row g-3 align-items-end">
                 <div class="col-md-10">
                     <label for="q" class="form-label">Cerca per nom, DNI o correu electrònic</label>
                     <input type="text" id="q" name="q" class="form-control" 
@@ -77,7 +77,7 @@
                         <i class="fa-solid fa-filter me-1"></i> Filtrar
                     </button>
                     <a th:if="${q != null and !#strings.isEmpty(q)}" 
-                       th:href="@{/clients}" 
+                       th:href="@{/dashboard/clients}"
                        class="btn btn-outline-danger" 
                        title="Netejar filtre">
                         <i class="fa-solid fa-xmark"></i>
@@ -102,7 +102,7 @@
                 <tbody>
                     <tr th:each="c : ${clients}">
                         <td>
-                            <a th:href="@{'/clients/detall/' + ${c.dni}}" class="text-decoration-none">
+                            <a th:href="@{'/dashboard/clients/detall/' + ${c.dni}}" class="text-decoration-none">
                                 <p class="agent-title m-0" th:text="${c.nom}">Joan Garcia</p>
                             </a>
                         </td>
@@ -130,13 +130,13 @@
 
                         <td class="text-end">
                             <div class="d-inline-flex gap-1 align-items-center">
-                                <a th:href="@{'/reserves/nova?dni=' + ${c.dni}}" class="btn btn-primary btn-sm fw-semibold me-1" style="border-radius: 6px;" title="Crear reserva per a aquest client">
+                                <a th:href="@{'/dashboard/reserves/nova?dni=' + ${c.dni}}" class="btn btn-primary btn-sm fw-semibold me-1" style="border-radius: 6px;" title="Crear reserva per a aquest client">
                                     <i class="fa-regular fa-calendar-plus me-1"></i> Reserva
                                 </a>
-                                <a th:href="@{'/clients/' + ${c.dni} + '/editar'}" class="btn btn-editar me-1">Editar</a>
-                                <a th:href="@{'/clients/detall/' + ${c.dni}}" class="btn btn-outline-secondary btn-sm me-1 fw-semibold" style="border-radius: 6px; padding: 6px 14px;">Detall</a>
+                                <a th:href="@{'/dashboard/clients/' + ${c.dni} + '/editar'}" class="btn btn-editar me-1">Editar</a>
+                                <a th:href="@{'/dashboard/clients/detall/' + ${c.dni}}" class="btn btn-outline-secondary btn-sm me-1 fw-semibold" style="border-radius: 6px; padding: 6px 14px;">Detall</a>
 
-                                <form th:action="@{'/clients/' + ${c.dni} + '/eliminar'}" method="post" class="d-inline"
+                                <form th:action="@{'/dashboard/clients/' + ${c.dni} + '/eliminar'}" method="post" class="d-inline"
                                       onsubmit="return confirm('Estàs segur de voler eliminar aquest client?');">
                                     <button type="submit" class="btn btn-desactivar">Eliminar</button>
                                 </form>

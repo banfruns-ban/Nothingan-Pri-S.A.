@@ -41,7 +41,7 @@ import java.util.Optional;                  // Resultado que puede existir o no
 @Controller //Indica que la clase es un controlador
 // POR QUÉ: sin esta anotación Spring no registra la clase y las rutas no existen.
 // Hace que lo que devuelven los métodos (un String) se interprete como nombre de plantilla Thymeleaf.
-@RequestMapping("/agents") // Base de las URL de todas las rutas del doc
+@RequestMapping("/dashboard/agents") // Base de les URL de gestió d'agents
 // POR QUÉ: evita escribir "/agents" en cada método. "/alta" aquí pasa a ser "/agents/alta".
 public class AgentController { // public: Spring tiene que poder crearla desde fuera del paquete
 
@@ -152,7 +152,7 @@ public class AgentController { // public: Spring tiene que poder crearla desde f
             agentService.guardarAgent(agent);      // INSERT si es nuevo, UPDATE si el DNI ya existe
             // "redirect:" hace que el navegador pida otra URL (GET). Evita reenviar el formulario al recargar.
             // ?exit: parámetro que la vista puede leer para mostrar un aviso de éxito.
-            return "redirect:/agents/llista?exit"; // Post-Redirect-Get: evita reenviar el formulario al recargar
+            return "redirect:/dashboard/agents/llista?exit"; // Post-Redirect-Get: evita reenviar el formulario al recargar
         } catch (DataIntegrityViolationException e) {
             // La BD rechaza el guardado (por ejemplo, email duplicado)
             model.addAttribute("error", "Ja existeix un usuari amb aquest DNI o correu electrònic.");
@@ -197,7 +197,7 @@ public class AgentController { // public: Spring tiene que poder crearla desde f
             return "agents/detall_agent";
         }
         // POR QUÉ redirigir: si alguien escribe a mano un DNI inexistente, no se rompe la aplicación.
-        return "redirect:/agents/llista"; // Si no existe, vuelve a la lista
+        return "redirect:/dashboard/agents/llista"; // Si no existe, vuelve a la lista
     }
 
     // ============================================================
@@ -216,7 +216,7 @@ public class AgentController { // public: Spring tiene que poder crearla desde f
             // Como el modelo ya lleva un agente con datos, los campos salen rellenos.
             return "agents/alta_agent";               // Reutiliza la misma vista que el alta
         }
-        return "redirect:/agents/llista";
+        return "redirect:/dashboard/agents/llista";
     }
 
     // ============================================================
@@ -244,6 +244,6 @@ public class AgentController { // public: Spring tiene que poder crearla desde f
             // el de IllegalStateException nunca se alcanzaría y Java daría error de compilación.
             redirect.addFlashAttribute("error", "Error en intentar donar de baixa.");
         }
-        return "redirect:/agents/llista"; // Siempre vuelve a la lista
+        return "redirect:/dashboard/agents/llista"; // Siempre vuelve a la lista
     }
 }

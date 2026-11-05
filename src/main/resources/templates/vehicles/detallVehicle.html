@@ -23,16 +23,16 @@
                 <a th:href="@{/dashboard}" class="nav-link">
                     <i class="fa-solid fa-border-all"></i> Dashboard
                 </a>
-                <a th:href="@{/vehicles}" class="nav-link active">
+                <a th:href="@{/dashboard/vehicles}" class="nav-link active">
                     <i class="fa-solid fa-car"></i> Flota de Vehicles
                 </a>
-                <a th:href="@{/agents/llista}" class="nav-link">
+                <a th:href="@{/dashboard/agents/llista}" class="nav-link">
                     <i class="fa-solid fa-user-gear"></i> Gestió d'Agents
                 </a>
-                <a th:href="@{/clients}" class="nav-link">
+                <a th:href="@{/dashboard/clients}" class="nav-link">
                     <i class="fa-solid fa-users"></i> Gestió de Clients
                 </a>
-                <a th:href="@{/reserves}" class="nav-link">
+                <a th:href="@{/dashboard/reserves}" class="nav-link">
                     <i class="fa-regular fa-calendar-check"></i> Reserves Actives
                 </a>
             </nav>
@@ -47,13 +47,13 @@
                     <p class="text-muted small mb-0 mt-1">Especificacions i estat del vehicle de la flota.</p>
                 </div>
                 <div>
-                    <a th:href="@{'/reserves/nova?matricula=' + ${vehicle.matricula}}" class="btn btn-primary me-2 fw-semibold px-3 py-2" style="border-radius: 8px;">
+                    <a th:href="@{'/dashboard/reserves/nova?matricula=' + ${vehicle.matricula}}" class="btn btn-primary me-2 fw-semibold px-3 py-2" style="border-radius: 8px;">
                         <i class="fa-regular fa-calendar-check me-1"></i> Reservar Vehicle
                     </a>
-                    <a th:href="@{'/vehicles/editar/' + ${vehicle.matricula}}" class="btn btn-outline-primary me-2 fw-semibold px-3 py-2" style="border-radius: 8px;">
+                    <a th:href="@{'/dashboard/vehicles/editar/' + ${vehicle.matricula}}" class="btn btn-outline-primary me-2 fw-semibold px-3 py-2" style="border-radius: 8px;">
                         <i class="fa-solid fa-pen-to-square me-1"></i> Editar
                     </a>
-                    <a th:href="@{/vehicles}" class="btn btn-secondary fw-semibold px-3 py-2" style="border-radius: 8px;">
+                    <a th:href="@{/dashboard/vehicles}" class="btn btn-secondary fw-semibold px-3 py-2" style="border-radius: 8px;">
                         <i class="fa-solid fa-arrow-left me-1"></i> Tornar a la flota
                     </a>
                 </div>
@@ -115,7 +115,7 @@
                 <div th:if="${succes}" class="alert alert-success" th:text="${succes}"></div>
 
                 <!-- Formulari nova ressenya -->
-                <form th:action="@{'/vehicles/' + ${vehicle.matricula} + '/resenyes'}" method="post" class="mb-4">
+                <form th:action="@{'/dashboard/vehicles/' + ${vehicle.matricula} + '/resenyes'}" method="post" class="mb-4">
                     <input type="text" name="dni" class="form-control mb-3" placeholder="DNI del client" required>
 
                     <div class="rating mb-2">
@@ -144,8 +144,8 @@
                             <span class="text-muted small ms-2"
                                   th:text="${#temporals.format(r.dataCreacio, 'dd/MM/yyyy')}">01/01/2026</span>
                         </div>
-                        <form th:action="@{'/vehicles/' + ${vehicle.matricula} + '/resenyes/' + ${r.idRessenya} + '/eliminar'}"
-                              method="post" onsubmit="return confirm('Eliminar aquesta ressenya?');">
+                        <form th:action="@{'/dashboard/vehicles/' + ${vehicle.matricula} + '/resenyes/' + ${r.idRessenya} + '/eliminar'}"
+                              method="post" onsubmit="return confirm('Eliminar aquesta ressenya?');">'}"
                       
                             <button type="submit" class="btn btn-sm btn-outline-danger">
                                 <i class="fa-solid fa-trash"></i>

@@ -27,7 +27,7 @@ public class InformeReservesController {
      * Mostra l'informe de reserves per client. Sense paràmetres, tots els clients;
      * amb un o més {@code dnis}, només els seleccionats.
      */
-    @GetMapping("/informes/reserves")
+    @GetMapping("/dashboard/informes/reserves")
     public String informeReserves(@RequestParam(required = false) List<String> dnis,
             Model model) {
         model.addAttribute("clients", clientLogic.llistar(null, null, "VALIDAT", null, null));

@@ -1,5 +1,7 @@
 package cat.copernic.projecte1Grup3;
 
+import java.net.URI;
+
 import org.springframework.boot.security.autoconfigure.web.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,6 +16,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
+import org.springframework.security.web.savedrequest.RequestCache;
+import org.springframework.security.web.savedrequest.SavedRequest;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -28,10 +33,12 @@ public class SecurityConfig {
                         .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                         .requestMatchers("/", "/home", "/login", "/forgot-password", "/registre", "/cataleg").permitAll()
                         .requestMatchers("/dashboard/**").hasAnyRole("ADMIN", "AGENT")
+                        .requestMatchers("/ReservesClient/**").hasRole("CLIENT")
                         .anyRequest().authenticated())
+                .requestCache(cache -> cache.requestCache(requestCache()))
                 .formLogin(form -> form
                         .loginPage("/login")
-                        .successHandler(customSuccessHandler())
+                        .successHandler(customSuccessHandler(requestCache()))
                         .permitAll())
                 .logout(logout -> logout.logoutSuccessUrl("/login?logout").permitAll())
                 .exceptionHandling(exceptions -> exceptions
@@ -47,16 +54,38 @@ public class SecurityConfig {
     }
 
     @Bean
-    AuthenticationSuccessHandler customSuccessHandler() {
+    RequestCache requestCache() {
+        return new HttpSessionRequestCache();
+    }
+
+    @Bean
+    AuthenticationSuccessHandler customSuccessHandler(RequestCache requestCache) {
         return (HttpServletRequest request, HttpServletResponse response, Authentication authentication) -> {
+            String contextPath = request.getContextPath();
             for (GrantedAuthority authority : authentication.getAuthorities()) {
                 String role = authority.getAuthority();
                 if (role.equals("ROLE_ADMIN") || role.equals("ROLE_AGENT")) {
-                    response.sendRedirect("/dashboard");
+                    response.sendRedirect(contextPath + "/dashboard");
                     return;
                 }
             }
-            response.sendRedirect("/cataleg");
+            SavedRequest savedRequest = requestCache.getRequest(request, response);
+            String reservationsPath = contextPath + "/ReservesClient";
+            if (savedRequest != null) {
+                URI savedUri = URI.create(savedRequest.getRedirectUrl());
+                String savedPath = savedUri.getRawPath();
+                if (savedPath.equals(reservationsPath)
+                        || savedPath.startsWith(reservationsPath + "/")) {
+                    String redirectUrl = contextPath + savedPath;
+                    if (savedUri.getRawQuery() != null) {
+                        redirectUrl += "?" + savedUri.getRawQuery();
+                    }
+                    requestCache.removeRequest(request, response);
+                    response.sendRedirect(redirectUrl);
+                    return;
+                }
+            }
+            response.sendRedirect(contextPath + "/cataleg");
         };
     }
 

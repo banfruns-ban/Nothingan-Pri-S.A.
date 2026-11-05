@@ -37,16 +37,4 @@ public class AuthController {
     public String forgotPasswordPage() {
         return "forgot-password";
     }
-
-    // --- Endpoints de destino según el rol seleccionado ---
-
-    @GetMapping("/client/catalog")
-    public String clientCatalog() {
-        return "client/catalog"; // Portal del cliente
-    }
-
-    @GetMapping("/agent/panel")
-    public String agentPanel() {
-        return "agent/panel"; // Panel del agente
-    }
 }

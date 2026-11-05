@@ -116,7 +116,7 @@
                             </div>
                         </div>
 
-                        <a th:href="@{'/ReservesClient/nova?matricula=' + ${v.matricula}}" class="btn-reservar">
+                        <a th:href="@{/ReservesClient/nova(matricula=${v.matricula})}" class="btn-reservar">
                             Reservar vehicle
                         </a>
                     </div>

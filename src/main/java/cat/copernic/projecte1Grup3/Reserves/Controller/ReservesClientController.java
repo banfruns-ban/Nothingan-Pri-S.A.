@@ -3,10 +3,12 @@ package cat.copernic.projecte1Grup3.Reserves.Controller;
 import cat.copernic.projecte1Grup3.Reserves.Entity.reservesEntity;
 import cat.copernic.projecte1Grup3.Reserves.Service.reservesService;
 import cat.copernic.projecte1Grup3.Usuaris.Client.Entity.clientEntity;
+import cat.copernic.projecte1Grup3.Usuaris.Client.Service.clientService;
 import cat.copernic.projecte1Grup3.Vehicles.Entity.VehiclesEntity;
 import cat.copernic.projecte1Grup3.Vehicles.Service.VehiclesService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -20,11 +22,14 @@ public class ReservesClientController {
 
     private final reservesService reservesService;
     private final VehiclesService vehiclesService;
+    private final clientService clientService;
 
     @Autowired
-    public ReservesClientController(reservesService reservesService, VehiclesService vehiclesService) {
+    public ReservesClientController(reservesService reservesService, VehiclesService vehiclesService,
+                                    clientService clientService) {
         this.reservesService = reservesService;
         this.vehiclesService = vehiclesService;
+        this.clientService = clientService;
     }
 
     // Ruta: /ReservesClient (Listado de mis reservas)
@@ -47,19 +52,15 @@ public class ReservesClientController {
     @GetMapping("/nova")
     public String formulariNovaReserva(
             @RequestParam(name = "matricula", required = false) String matricula,
-            HttpSession session,
+            Authentication authentication,
             Model model,
             RedirectAttributes ra) {
 
-        // 1. Control de autenticación
-        clientEntity clientLogueat = (clientEntity) session.getAttribute("clientLogueat");
-        if (clientLogueat == null) {
-            ra.addFlashAttribute("error", "Cal iniciar sessió o registrar-se per reservar un vehicle.");
-            return "redirect:/login";
-        }
-
-        // 2. Control de estado de validación (RF82): Si está PENDENT no puede reservar aún
-        if ("PENDENT".equals(clientLogueat.getEstatValidacio())) {
+        boolean clientPendent = clientService.llistar(null, null, null, authentication.getName(), null)
+                .stream()
+                .filter(client -> authentication.getName().equalsIgnoreCase(client.getEmail()))
+                .anyMatch(client -> "PENDENT".equals(client.getEstatValidacio()));
+        if (clientPendent) {
             ra.addFlashAttribute("error", "El teu compte està pendent de validació per un administrador. No pots realitzar reserves encara.");
             return "redirect:/cataleg";
         }

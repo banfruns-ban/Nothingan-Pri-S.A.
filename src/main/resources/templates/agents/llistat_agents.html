@@ -23,16 +23,16 @@
             <a th:href="@{/dashboard}" class="nav-link">
                 <i class="fa-solid fa-border-all"></i> Dashboard
             </a>
-            <a th:href="@{/vehicles}" class="nav-link">
+            <a th:href="@{/dashboard/vehicles}" class="nav-link">
                 <i class="fa-solid fa-car"></i> Flota de Vehicles
             </a>
-            <a th:href="@{/agents/llista}" class="nav-link active">
+            <a th:href="@{/dashboard/agents/llista}" class="nav-link active">
                 <i class="fa-solid fa-user-gear"></i> Gestió d'Agents
             </a>
-            <a th:href="@{/clients}" class="nav-link">
+            <a th:href="@{/dashboard/clients}" class="nav-link">
                 <i class="fa-solid fa-users"></i> Gestió de Clients
             </a>
-            <a th:href="@{/reserves}" class="nav-link">
+            <a th:href="@{/dashboard/reserves}" class="nav-link">
                 <i class="fa-regular fa-calendar-check"></i> Reserves Actives
             </a>
         </nav>
@@ -46,7 +46,7 @@
                 <h2 class="fw-bold text-dark m-0">Gestió d'Agents</h2>
                 <p class="text-muted small mb-0 mt-1">Consulteu, filtreu i gestioneu tots els empleats i administradors del sistema.</p>
             </div>
-            <a th:href="@{/agents/alta}" class="btn btn-primary fw-semibold px-4 py-2" style="border-radius: 8px;">
+            <a th:href="@{/dashboard/agents/alta}" class="btn btn-primary fw-semibold px-4 py-2" style="border-radius: 8px;">
                 + Afegir nou agent
             </a>
         </div>
@@ -67,7 +67,7 @@
 
         <!-- Targeta de Filtres -->
         <div class="filter-card shadow-sm mb-4">
-            <form th:action="@{/agents/llista}" method="get" class="row g-3">
+            <form th:action="@{/dashboard/agents/llista}" method="get" class="row g-3">
                 <div class="col-md-9">
                     <label for="cerca">Cerca per DNI, nom o correu electrònic</label>
                     <div class="input-group">
@@ -84,7 +84,7 @@
                         <i class="fa-solid fa-filter me-1"></i> Filtrar
                     </button>
                     <a :hreth:if="${param.cerca != null and !#strings.isEmpty(param.cerca)}" 
-                       th:href="@{/agents/llista}" 
+                       th:href="@{/dashboard/agents/llista}"
                        class="btn btn-outline-secondary" 
                        title="Netejar filtre">
                         <i class="fa-solid fa-xmark"></i>
@@ -119,7 +119,7 @@
                                  alt="Foto Default" class="agent-img">
                         </td>
                         <td>
-                            <a th:href="@{/agents/detall/{dni}(dni=${a.dni})}" class="text-decoration-none">
+                            <a th:href="@{/dashboard/agents/detall/{dni}(dni=${a.dni})}" class="text-decoration-none">
                                 <p class="agent-title" th:text="${a.nom}">Joan Garcia i Soler</p>
                             </a>
                             <span class="agent-sub" th:text="'DNI: ' + ${a.dni}">DNI: 12345678Z</span>
@@ -137,9 +137,9 @@
                         </td>
                         <td class="text-end">
                             <div class="d-inline-flex gap-1 align-items-center">
-                                <a th:href="@{'/agents/editar/' + ${a.dni}}" class="btn-editar me-1">Editar</a>
-                                <a th:href="@{'/agents/detall/' + ${a.dni}}" class="btn btn-sm btn-outline-secondary me-1" style="border-radius: 6px;">Detall</a>
-                                <form th:action="@{'/agents/eliminar/' + ${a.dni}}" method="post" class="d-inline"
+                                <a th:href="@{'/dashboard/agents/editar/' + ${a.dni}}" class="btn-editar me-1">Editar</a>
+                                <a th:href="@{'/dashboard/agents/detall/' + ${a.dni}}" class="btn btn-sm btn-outline-secondary me-1" style="border-radius: 6px;">Detall</a>
+                                <form th:action="@{'/dashboard/agents/eliminar/' + ${a.dni}}" method="post" class="d-inline"
                                       onsubmit="return confirm('Estàs segur de voler donar de baixa aquest agent?');">
                                     <button type="submit" class="btn-desactivar">Baixa</button>
                                 </form>

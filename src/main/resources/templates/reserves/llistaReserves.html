@@ -23,16 +23,16 @@
                 <a th:href="@{/dashboard}" class="nav-link">
                     <i class="fa-solid fa-border-all"></i> Dashboard
                 </a>
-                <a th:href="@{/vehicles}" class="nav-link">
+                <a th:href="@{/dashboard/vehicles}" class="nav-link">
                     <i class="fa-solid fa-car"></i> Flota de Vehicles
                 </a>
-                <a th:href="@{/agents/llista}" class="nav-link">
+                <a th:href="@{/dashboard/agents/llista}" class="nav-link">
                     <i class="fa-solid fa-user-gear"></i> Gestió d'Agents
                 </a>
-                <a th:href="@{/clients}" class="nav-link">
+                <a th:href="@{/dashboard/clients}" class="nav-link">
                     <i class="fa-solid fa-users"></i> Gestió de Clients
                 </a>
-                <a th:href="@{/reserves}" class="nav-link active">
+                <a th:href="@{/dashboard/reserves}" class="nav-link active">
                     <i class="fa-regular fa-calendar-check"></i> Reserves Actives
                 </a>
             </nav>
@@ -50,7 +50,7 @@
                     </div>
                     <p class="text-muted small mb-0 mt-1">Consulteu, filtreu i gestió del control de reserves de la flota.</p>
                 </div>
-                <a th:href="@{/reserves/nova}" class="btn btn-primary fw-semibold px-4 py-2" style="border-radius: 8px;">
+                <a th:href="@{/dashboard/reserves/nova}" class="btn btn-primary fw-semibold px-4 py-2" style="border-radius: 8px;">
                     <i class="fa-solid fa-plus me-1"></i> Nova reserva
                 </a>
             </div>
@@ -67,7 +67,7 @@
 
             <!-- Targeta de Filtres -->
             <div class="filter-card shadow-sm mb-4">
-                <form th:action="@{/reserves}" method="get">
+                <form th:action="@{/dashboard/reserves}" method="get">
                     <!-- Cerca principal i estat -->
                     <div class="row g-3 align-items-end mb-3">
                         <div class="col-md-7">
@@ -97,7 +97,7 @@
                                 <i class="fa-solid fa-filter me-1"></i> Filtrar
                             </button>
                             <a th:if="${(q != null and !#strings.isEmpty(q)) or (dni != null and !#strings.isEmpty(dni)) or (email != null and !#strings.isEmpty(email)) or dataReserva != null or (matricula != null and !#strings.isEmpty(matricula)) or (codi != null and !#strings.isEmpty(codi)) or (estat != null and !#strings.isEmpty(estat))}" 
-                               th:href="@{/reserves}" 
+                               th:href="@{/dashboard/reserves}"
                                class="btn btn-outline-danger" 
                                title="Netejar filtres">
                                 <i class="fa-solid fa-xmark"></i>
@@ -146,13 +146,13 @@
                                 <span class="fw-bold text-dark" th:text="'#' + ${r.codiReserva}">#1</span>
                             </td>
                             <td>
-                                <a th:href="@{'/clients/detall/' + ${r.client.dni}}" class="text-decoration-none">
+                                <a th:href="@{'/dashboard/clients/detall/' + ${r.client.dni}}" class="text-decoration-none">
                                     <p class="agent-title" th:text="${r.client.nom}">Nom del client</p>
                                 </a>
                                 <span class="agent-sub" th:text="${r.client.dni}">00000000X</span>
                             </td>
                             <td>
-                                <a th:href="@{'/vehicles/detall/' + ${r.vehicle.matricula}}" class="text-decoration-none">
+                                <a th:href="@{'/dashboard/vehicles/detall/' + ${r.vehicle.matricula}}" class="text-decoration-none">
                                     <p class="agent-title" th:text="${r.vehicle.marca + ' ' + r.vehicle.model}">Marca Model</p>
                                 </a>
                                 <span class="agent-sub" th:text="${r.vehicle.matricula}">0000ABC</span>
@@ -175,14 +175,14 @@
                             </td>
                             <td class="text-end">
                                 <div class="d-inline-flex gap-1 align-items-center">
-                                    <a th:href="@{/reserves/{codi}(codi=${r.codiReserva})}" class="btn btn-sm btn-primary">
+                                    <a th:href="@{/dashboard/reserves/{codi}(codi=${r.codiReserva})}" class="btn btn-sm btn-primary">
                                         Veure detalls
                                     </a>
-                                    <a th:href="@{'/clients/detall/' + ${r.client.dni}}" class="btn btn-outline-secondary btn-sm fw-semibold" style="border-radius: 6px;">
+                                    <a th:href="@{'/dashboard/clients/detall/' + ${r.client.dni}}" class="btn btn-outline-secondary btn-sm fw-semibold" style="border-radius: 6px;">
                                         <i class="fa-solid fa-user me-1"></i> Client
                                     </a>
                                     <form th:if="${r.estat != 'EN_CURS' and r.estat != 'FINALITZADA'}"
-                                          th:action="@{'/reserves/' + ${r.codiReserva} + '/eliminar'}" method="post" class="d-inline"
+                                          th:action="@{'/dashboard/reserves/' + ${r.codiReserva} + '/eliminar'}" method="post" class="d-inline"
                                           onsubmit="return confirm('Segur que vols eliminar aquesta reserva?');">
                                         <button type="submit" class="btn btn-desactivar btn-sm">Eliminar</button>
                                     </form>

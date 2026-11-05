@@ -7,6 +7,7 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
+import org.springframework.format.annotation.DateTimeFormat;
 
 @Entity // Marca la clase como entidad persistente de JPA
 @Table(name = "Clients") // Asocia esta entidad con la tabla "Clients" en la base de datos MySQL
@@ -15,7 +16,8 @@ import java.time.LocalDate;
     referencedColumnName = "dni"
 ) // Mapeo de herencia: comparte la clave primaria 'dni' con la entidad padre usuariEntity
 public class clientEntity extends usuariEntity {
-
+    
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     @Column(name = "data_caducitat_DNI", nullable = false)
     private LocalDate dataCaducitatDNI;
 
@@ -28,7 +30,8 @@ public class clientEntity extends usuariEntity {
     @Column(name = "tipus_llicencia", nullable = false)
     private String tipusLlicencia;
     
-    @Column(name = "data_caducitat_carnet")
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    @Column(name = "data_caducitat_carnet",nullable = false)
     private LocalDate dataCaducitatCarnet;
 
     @Column(name = "premium", nullable = false)
@@ -41,7 +44,8 @@ public class clientEntity extends usuariEntity {
     @Column(name = "telefon")
     private String telefon;
 
-    @Column(name = "data_naixement")
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    @Column(name = "data_naixement",nullable = false)
     private LocalDate dataNaixement;
     
     

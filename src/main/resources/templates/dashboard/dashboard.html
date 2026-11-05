@@ -24,16 +24,16 @@
                 <a th:href="@{/dashboard}" class="nav-link active">
                     <i class="fa-solid fa-border-all"></i> Dashboard
                 </a>
-                <a th:href="@{/vehicles}" class="nav-link">
+                <a th:href="@{/dashboard/vehicles}" class="nav-link">
                     <i class="fa-solid fa-car"></i> Flota de Vehicles
                 </a>
-                <a th:href="@{/agents/llista}" class="nav-link">
+                <a th:href="@{/dashboard/agents/llista}" class="nav-link">
                     <i class="fa-solid fa-user-gear"></i> Gestió d'Agents
                 </a>
-                <a th:href="@{/clients}" class="nav-link">
+                <a th:href="@{/dashboard/clients}" class="nav-link">
                     <i class="fa-solid fa-users"></i> Gestió de Clients
                 </a>
-                <a th:href="@{/reserves}" class="nav-link">
+                <a th:href="@{/dashboard/reserves}" class="nav-link">
                     <i class="fa-regular fa-calendar-check"></i> Reserves Actives
                 </a>
             </nav>
@@ -136,14 +136,14 @@
                                     <div class="d-inline-flex gap-2">
                                         <!-- Botó Lliurar (si la reserva està pendent o confirmada) -->
                                         <a th:if="${r.estat == 'PENDENT' or r.estat == 'CONFIRMADA' or r.estat == null}" 
-                                           th:href="@{'/reserves/' + ${r.codiReserva} + '/lliurar'}" 
+                                           th:href="@{'/dashboard/reserves/' + ${r.codiReserva} + '/lliurar'}"
                                            class="btn btn-primary btn-sm px-3 fw-semibold style-btn-lliurar">
                                             Lliurar
                                         </a>
 
                                         <!-- Botó Retornar (si el vehicle ja està lliurat / EN_CURS) -->
                                         <a th:if="${r.estat == 'EN_CURS' or r.estat == 'LLIURAT'}" 
-                                           th:href="@{'/reserves/' + ${r.codiReserva} + '/retornar'}" 
+                                           th:href="@{'/dashboard/reserves/' + ${r.codiReserva} + '/retornar'}"
                                            class="btn btn-warning btn-sm px-3 fw-semibold text-dark">
                                             <i class="fa-solid fa-arrow-rotate-left me-1"></i> Retornar
                                         </a>

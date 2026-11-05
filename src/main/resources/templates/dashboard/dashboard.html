@@ -117,6 +117,7 @@
                             </tr>
                         </thead>
                         <tbody>
+                            <!-- Llistat dinàmic de la base de dades -->
                             <tr th:each="r : ${propersLliuraments}">
                                 <td>
                                     <strong th:text="${'RES-' + r.codiReserva}">RES-8921</strong>
@@ -129,20 +130,33 @@
                                     <span th:if="${r.estat == 'PENDENT' or r.estat == null}" class="badge-pending-sign">Pendent de signar</span>
                                     <span th:if="${r.estat == 'EN_CURS' or r.estat == 'LLIURAT'}" class="badge-delivered-status">Lliurat</span>
                                     <span th:if="${r.estat == 'CONFIRMADA'}" class="badge-confirmed-status">Confirmada</span>
+                                    <span th:if="${r.estat == 'FINALITZADA'}" class="badge bg-secondary">Finalitzada</span>
                                 </td>
                                 <td class="text-end">
-                                    <a th:if="${r.estat == 'PENDENT' or r.estat == 'CONFIRMADA' or r.estat == null}" 
-                                       th:href="@{'/reserves/' + ${r.codiReserva != null ? r.codiReserva : 8921} + '/lliurar'}" 
-                                       class="btn btn-primary btn-sm px-3 fw-semibold style-btn-lliurar">
-                                        Lliurar
-                                    </a>
-                                    <a th:if="${r.estat == 'EN_CURS' or r.estat == 'LLIURAT'}" 
-                                       th:href="@{'/reserves/' + ${r.codiReserva != null ? r.codiReserva : 8922} + '/lliurar'}" 
-                                       class="btn btn-outline-secondary btn-sm px-3 fw-semibold style-btn-lliurar-done">
-                                        Lliurar
-                                    </a>
+                                    <div class="d-inline-flex gap-2">
+                                        <!-- Botó Lliurar (si la reserva està pendent) -->
+                                        <a th:if="${r.estat == 'PENDENT' or r.estat == 'CONFIRMADA' or r.estat == null}" 
+                                           th:href="@{'/reserves/' + ${r.codiReserva != null ? r.codiReserva : 8921} + '/lliurar'}" 
+                                           class="btn btn-primary btn-sm px-3 fw-semibold style-btn-lliurar">
+                                            Lliurar
+                                        </a>
+
+                                        <!-- Botó Retornar (si el vehicle ja està lliurat / EN_CURS) -->
+                                        <a th:if="${r.estat == 'EN_CURS' or r.estat == 'LLIURAT'}" 
+                                           th:href="@{'/reserves/' + ${r.codiReserva != null ? r.codiReserva : 8922} + '/retornar'}" 
+                                           class="btn btn-warning btn-sm px-3 fw-semibold text-dark">
+                                            <i class="fa-solid fa-arrow-rotate-left me-1"></i> Retornar
+                                        </a>
+
+                                        <!-- Badge de completat si ja està finalitzada -->
+                                        <span th:if="${r.estat == 'FINALITZADA'}" class="badge bg-secondary py-2 px-3">
+                                            Completat
+                                        </span>
+                                    </div>
                                 </td>
                             </tr>
+
+                            <!-- Files estàtiques de prova quan no hi ha dades a la BD -->
                             <tr th:if="${#lists.isEmpty(propersLliuraments)}">
                                 <td><strong>RES-8921</strong></td>
                                 <td>Marta Rius</td>
@@ -151,7 +165,14 @@
                                 <td>Avui, 10:30h</td>
                                 <td><span class="badge-pending-sign">Pendent de signar</span></td>
                                 <td class="text-end">
-                                    <a th:href="@{/dashboard}" class="btn btn-primary btn-sm px-3 fw-semibold style-btn-lliurar">Lliurar</a>
+                                    <div class="d-inline-flex gap-2">
+                                        <a th:href="@{/reserves/8921/lliurar}" class="btn btn-primary btn-sm px-3 fw-semibold style-btn-lliurar">
+                                            Lliurar
+                                        </a>
+                                        <a th:href="@{/reserves/8921/retornar}" class="btn btn-warning btn-sm px-3 fw-semibold text-dark">
+                                            <i class="fa-solid fa-arrow-rotate-left me-1"></i> Retornar
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
                             <tr th:if="${#lists.isEmpty(propersLliuraments)}">
@@ -162,7 +183,11 @@
                                 <td>Avui, 12:00h</td>
                                 <td><span class="badge-delivered-status">Lliurat</span></td>
                                 <td class="text-end">
-                                    <a th:href="@{/dashboard}" class="btn btn-outline-secondary btn-sm px-3 fw-semibold style-btn-lliurar-done">Lliurar</a>
+                                    <div class="d-inline-flex gap-2">
+                                        <a th:href="@{/reserves/8922/retornar}" class="btn btn-warning btn-sm px-3 fw-semibold text-dark">
+                                            <i class="fa-solid fa-arrow-rotate-left me-1"></i> Retornar
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
                         </tbody>

@@ -48,7 +48,7 @@
                 <p class="text-muted">Registre d'estat inicial, km i observacions abans d'entregar les claus al client.</p>
             </div>
 
-            <form th:action="@{'/reserves/' + ${reserva.codiReserva} + '/lliurar'}" method="post" enctype="multipart/form-data">
+            <form th:action="@{'/dashboard/reserves/' + ${reserva.codiReserva} + '/lliurar'}" method="post" enctype="multipart/form-data">
 
                 <!-- Targeta d'Informació de la Reserva -->
                 <div class="card border-0 shadow-sm mb-4">

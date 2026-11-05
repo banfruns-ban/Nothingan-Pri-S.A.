@@ -33,7 +33,15 @@ public class SecurityConfig {
                         .loginPage("/login")
                         .successHandler(customSuccessHandler())
                         .permitAll())
-                .logout(logout -> logout.logoutSuccessUrl("/login?logout").permitAll());
+                .logout(logout -> logout.logoutSuccessUrl("/login?logout").permitAll())
+                .exceptionHandling(exceptions -> exceptions
+                        .accessDeniedHandler((request, response, exception) -> {
+                            if (request.getRequestURI().startsWith(request.getContextPath() + "/dashboard")) {
+                                response.sendRedirect(request.getContextPath() + "/");
+                            } else {
+                                response.sendError(HttpServletResponse.SC_FORBIDDEN);
+                            }
+                        }));
 
         return http.build();
     }

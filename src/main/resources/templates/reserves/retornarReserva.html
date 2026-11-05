@@ -21,16 +21,16 @@
             <a th:href="@{/dashboard}" class="nav-link active">
                 <i class="fa-solid fa-border-all"></i> Dashboard
             </a>
-            <a th:href="@{/vehicles}" class="nav-link">
+            <a th:href="@{/dashboard/vehicles}" class="nav-link">
                 <i class="fa-solid fa-car"></i> Flota de Vehicles
             </a>
-            <a th:href="@{/agents/llista}" class="nav-link">
+            <a th:href="@{/dashboard/agents/llista}" class="nav-link">
                 <i class="fa-solid fa-user-gear"></i> Gestió d'Agents
             </a>
-            <a th:href="@{/clients}" class="nav-link">
+            <a th:href="@{/dashboard/clients}" class="nav-link">
                 <i class="fa-solid fa-users"></i> Gestió de Clients
             </a>
-            <a th:href="@{/reserves}" class="nav-link">
+            <a th:href="@{/dashboard/reserves}" class="nav-link">
                 <i class="fa-regular fa-calendar-check"></i> Reserves Actives
             </a>
         </nav>
@@ -45,7 +45,7 @@
             <p class="text-muted">Registre de l'estat en devolució, càlcul de danys, i liquidació de la fiança dipositada.</p>
         </div>
 
-        <form th:action="@{'/reserves/' + ${reserva.codiReserva} + '/retornar'}" method="post">
+        <form th:action="@{'/dashboard/reserves/' + ${reserva.codiReserva} + '/retornar'}" method="post">
             
             <!-- Targeta d'Informació de la Reserva -->
             <div class="card border-0 shadow-sm mb-4">

@@ -1,17 +1,5 @@
 package cat.copernic.projecte1Grup3.Vehicles.Controller;
 
-import cat.copernic.projecte1Grup3.Ressenya.Service.ressenyaService;
-import cat.copernic.projecte1Grup3.Vehicles.Entity.VehiclesEntity;
-import cat.copernic.projecte1Grup3.Vehicles.Service.VehiclesService;
-import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -20,10 +8,27 @@ import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Optional;
 
-@Controller // Indica que la classe es un controlador **
-@RequestMapping("/vehicles") // Base de las url de todas las rutas del doc
-public class VehiclesController {
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import cat.copernic.projecte1Grup3.Ressenya.Service.ressenyaService;
+import cat.copernic.projecte1Grup3.Vehicles.Entity.VehiclesEntity;
+import cat.copernic.projecte1Grup3.Vehicles.Service.VehiclesService;
+import jakarta.validation.Valid;
+
+@Controller // Indica que la classe es un controlador **
+@RequestMapping("/dashboard/vehicles") // Base de las url de todas las rutas del doc
+public class VehiclesController {
     private final VehiclesService vehiclesService;
     private final ressenyaService ressenyaLogic;
     @Autowired
@@ -58,7 +63,7 @@ public class VehiclesController {
             return "vehicles/detallVehicle";
         }
         redirect.addFlashAttribute("error", "El vehicle amb matrícula " + matricula + " no existeix.");
-        return "redirect:/vehicles";
+        return "redirect:/dashboard/vehicles";
     }
 
     @GetMapping("/nou")
@@ -75,7 +80,7 @@ public class VehiclesController {
             return "vehicles/editarVehicle";
         }
         redirect.addFlashAttribute("error", "No s'ha trobat el vehicle per editar.");
-        return "redirect:/vehicles";
+        return "redirect:/dashboard/vehicles";
     }
 
     @PostMapping("/guardar")//Protocolo http que ejecuta la orden POST (Modificar,Guardar,Eliminar,etc..)
@@ -125,7 +130,7 @@ public class VehiclesController {
 
         vehiclesService.guardarVehicle(vehicle);
         redirect.addFlashAttribute("succes", "Vehicle desat correctament.");
-        return "redirect:/vehicles";
+        return "redirect:/dashboard/vehicles";
     }
 
     @PostMapping("/canviar-estat/{matricula}")
@@ -139,7 +144,7 @@ public class VehiclesController {
         } catch (Exception e) {
             redirect.addFlashAttribute("error", "Error en canviar l'estat del vehicle.");
         }
-        return "redirect:/vehicles";
+        return "redirect:/dashboard/vehicles";
     }
 
     @PostMapping("/eliminar/{matricula}")
@@ -152,6 +157,6 @@ public class VehiclesController {
         } catch (Exception e) {
             redirect.addFlashAttribute("error", "Error en intentar eliminar el vehicle.");
         }
-        return "redirect:/vehicles";
+        return "redirect:/dashboard/vehicles";
     }
 }

@@ -23,16 +23,16 @@
             <a th:href="@{/dashboard}" class="nav-link">
                 <i class="fa-solid fa-border-all"></i> Dashboard
             </a>
-            <a th:href="@{/vehicles}" class="nav-link active">
+            <a th:href="@{/dashboard/vehicles}" class="nav-link active">
                 <i class="fa-solid fa-car"></i> Flota de Vehicles
             </a>
-            <a th:href="@{/agents/llista}" class="nav-link">
+            <a th:href="@{/dashboard/agents/llista}" class="nav-link">
                 <i class="fa-solid fa-user-gear"></i> Gestió d'Agents
             </a>
-            <a th:href="@{/clients}" class="nav-link">
+            <a th:href="@{/dashboard/clients}" class="nav-link">
                 <i class="fa-solid fa-users"></i> Gestió de Clients
             </a>
-            <a th:href="@{/reserves}" class="nav-link">
+            <a th:href="@{/dashboard/reserves}" class="nav-link">
                 <i class="fa-regular fa-calendar-check"></i> Reserves Actives
             </a>
         </nav>
@@ -46,7 +46,7 @@
                 <h2 class="fw-bold text-dark m-0">Flota de Vehicles</h2>
                 <p class="text-muted small mb-0 mt-1">Consulteu, filtreu i gestioneu tots els vehicles disponibles per al lloguer.</p>
             </div>
-            <a th:href="@{/vehicles/nou}" class="btn btn-primary fw-semibold px-4 py-2" style="border-radius: 8px;">
+            <a th:href="@{/dashboard/vehicles/nou}" class="btn btn-primary fw-semibold px-4 py-2" style="border-radius: 8px;">
                 + Afegir nou vehicle
             </a>
         </div>
@@ -63,7 +63,7 @@
 
         <!-- Targeta de Filtres -->
         <div class="filter-card shadow-sm">
-            <form th:action="@{/vehicles}" method="get" class="row g-3 align-items-end">
+            <form th:action="@{/dashboard/vehicles}" method="get" class="row g-3 align-items-end">
                 
                 <div class="col-md-5">
                     <label for="cerca">Cerca per model o matrícula</label>
@@ -97,7 +97,7 @@
                         <i class="fa-solid fa-filter"></i>
                     </button>
                     <a th:if="${(cerca != null and !#strings.isEmpty(cerca)) or (tipus != null and !#strings.isEmpty(tipus)) or estat != null}" 
-                       th:href="@{/vehicles}" 
+                       th:href="@{/dashboard/vehicles}"
                        class="btn btn-outline-danger" 
                        title="Netejar filtre">
                         <i class="fa-solid fa-xmark"></i>
@@ -136,7 +136,7 @@
                             </div>
                         </td>
                         <td>
-                            <a th:href="@{'/vehicles/detall/' + ${v.matricula}}" class="text-decoration-none">
+                            <a th:href="@{'/dashboard/vehicles/detall/' + ${v.matricula}}" class="text-decoration-none">
                                 <p class="agent-title" th:text="${v.marca + ' ' + v.model}">Toyota Yaris Hybrid</p>
                             </a>
                             <span class="agent-sub" th:text="'ID: ' + ${v.matricula}">ID: 4823KLP</span>
@@ -149,7 +149,7 @@
                         <td th:text="${#numbers.formatDecimal(v.preuHora, 1, 2) + ' €'}">45.00 €</td>
                         <td th:text="${#numbers.formatDecimal(v.fianca, 1, 2) + ' €'}">300.00 €</td>
                         <td>
-                            <form th:action="@{'/vehicles/canviar-estat/' + ${v.matricula}}" method="post" class="d-inline">
+                            <form th:action="@{'/dashboard/vehicles/canviar-estat/' + ${v.matricula}}" method="post" class="d-inline">
                                 <select name="actiu" onchange="this.form.submit()" 
                                         class="form-select form-select-sm border-0 fw-semibold"
                                         th:classappend="${v.actiu ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger'}"
@@ -162,9 +162,9 @@
                         
                         <td class="text-end">
                             <div class="d-inline-flex gap-1 align-items-center">
-                                <a th:href="@{'/vehicles/editar/' + ${v.matricula}}" class="btn btn-editar">Editar</a>
-                                <a th:href="@{'/vehicles/detall/' + ${v.matricula}}" class="btn btn-outline-secondary btn-sm me-1 fw-semibold" style="border-radius: 6px; padding: 6px 14px;">Detall</a>
-                                <form th:action="@{'/vehicles/eliminar/' + ${v.matricula}}" method="post" class="d-inline"
+                                <a th:href="@{'/dashboard/vehicles/editar/' + ${v.matricula}}" class="btn btn-editar">Editar</a>
+                                <a th:href="@{'/dashboard/vehicles/detall/' + ${v.matricula}}" class="btn btn-outline-secondary btn-sm me-1 fw-semibold" style="border-radius: 6px; padding: 6px 14px;">Detall</a>
+                                <form th:action="@{'/dashboard/vehicles/eliminar/' + ${v.matricula}}" method="post" class="d-inline"
                                       onsubmit="return confirm('Estàs segur de voler eliminar aquest vehicle?');">
                                     <button type="submit" class="btn btn-desactivar">Desactivar</button>
                                 </form>

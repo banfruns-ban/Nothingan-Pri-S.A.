@@ -32,7 +32,7 @@ public class clientController {
     // ALTA DE CLIENTE
     // =====================================================
 
-    @GetMapping({"/clients/alta", "/clients/altaUsuari", "/clients/nou"})
+    @GetMapping({"/dashboard/clients/alta", "/dashboard/clients/altaUsuari", "/dashboard/clients/nou"})
     public String mostrarFormulari(Model model) {
         if (!model.containsAttribute("client")) {
             model.addAttribute("client", new clientEntity());
@@ -40,7 +40,7 @@ public class clientController {
         return "client/altaUsuari";
     }
 
-    @PostMapping({"/clients/alta", "/clients/altaUsuari"})
+    @PostMapping({"/dashboard/clients/alta", "/dashboard/clients/altaUsuari"})
     public String altaClient(
             @ModelAttribute("client") clientEntity client,
             @RequestParam("fotoDniFrontal") MultipartFile fotoDniFrontal,
@@ -50,21 +50,21 @@ public class clientController {
         try {
             clientLogic.alta(client, fotoDniFrontal, fotoDniPosterior, fotoCarnet);
             ra.addFlashAttribute("missatge", "Client donat d'alta correctament!");
-            return "redirect:/clients";
+            return "redirect:/dashboard/clients";
         } catch (IllegalArgumentException e) {
             ra.addFlashAttribute("error", e.getMessage());
         } catch (Exception e) {
             log.error("Error en l'alta del client", e);
             ra.addFlashAttribute("error", "No s'ha pogut completar el registre");
         }
-        return "redirect:/clients/alta";
+        return "redirect:/dashboard/clients/alta";
     }
 
     // =====================================================
     // LISTADO Y DETALLE
     // =====================================================
 
-    @GetMapping("/clients")
+    @GetMapping("/dashboard/clients")
     public String llistar(@RequestParam(required = false) String q,
                           @RequestParam(required = false) String dni,
                           @RequestParam(required = false) String estat,
@@ -82,18 +82,18 @@ public class clientController {
     }
 
     // Acepta tanto /clients/{dni} como /clients/detall/{dni} para evitar errores 404
-    @GetMapping({"/clients/{dni}", "/clients/detall/{dni}"})
+    @GetMapping({"/dashboard/clients/{dni}", "/dashboard/clients/detall/{dni}"})
     public String detall(@PathVariable String dni, Model model, RedirectAttributes ra) {
         return clientLogic.obtenir(dni).map(c -> {
             model.addAttribute("client", c);
             return "client/detallClient";
         }).orElseGet(() -> {
             ra.addFlashAttribute("error", "Client no trobat");
-            return "redirect:/clients";
+            return "redirect:/dashboard/clients";
         });
     }
 
-    @GetMapping("/clients/{dni}/imatge/{tipus}")
+    @GetMapping("/dashboard/clients/{dni}/imatge/{tipus}")
     @ResponseBody
     public ResponseEntity<byte[]> imatge(@PathVariable String dni, @PathVariable String tipus) {
         Optional<clientDocuments> docs = clientLogic.obtenirDocuments(dni);
@@ -134,18 +134,18 @@ public class clientController {
     // EDICIÓN Y ELIMINACIÓN
     // =====================================================
 
-    @GetMapping("/clients/{dni}/editar")
+    @GetMapping("/dashboard/clients/{dni}/editar")
     public String formulariEditar(@PathVariable String dni, Model model, RedirectAttributes ra) {
         return clientLogic.obtenir(dni).map(c -> {
             model.addAttribute("client", c);
             return "client/editarClient";
         }).orElseGet(() -> {
             ra.addFlashAttribute("error", "Client no trobat");
-            return "redirect:/clients";
+            return "redirect:/dashboard/clients";
         });
     }
 
-   @PostMapping("/clients/{dni}/editar")
+   @PostMapping("/dashboard/clients/{dni}/editar")
 public String editar(@PathVariable String dni,
                      @ModelAttribute("client") clientEntity dades,
                      @RequestParam String estatValidacio,
@@ -170,10 +170,10 @@ public String editar(@PathVariable String dni,
         log.error("Error llegint les imatges del client {}", dni, e);
         ra.addFlashAttribute("error", "No s'han pogut llegir les imatges");
     }
-    return "redirect:/clients";
+    return "redirect:/dashboard/clients";
 }
 
-    @PostMapping("/clients/{dni}/eliminar")
+    @PostMapping("/dashboard/clients/{dni}/eliminar")
     public String eliminar(@PathVariable String dni, RedirectAttributes ra) {
         try {
             clientLogic.eliminar(dni);
@@ -183,25 +183,25 @@ public String editar(@PathVariable String dni,
         } catch (DataIntegrityViolationException e) {
             ra.addFlashAttribute("error", "No es pot eliminar: el client té reserves associades");
         }
-        return "redirect:/clients";
+        return "redirect:/dashboard/clients";
     }
 
     // =====================================================
     // VALIDACIÓN Y ESTADO (RF82)
     // =====================================================
 
-    @PostMapping("/clients/{dni}/validacio")
+    @PostMapping("/dashboard/clients/{dni}/validacio")
     public String validar(@PathVariable String dni, @RequestParam String estat, RedirectAttributes ra) {
         clientLogic.canviarEstat(dni, estat);
         ra.addFlashAttribute("missatge", "Estat actualitzat a " + estat);
-        return "redirect:/clients";
+        return "redirect:/dashboard/clients";
     }
 
-    @PostMapping("/clients/{dni}/premium")
+    @PostMapping("/dashboard/clients/{dni}/premium")
     public String premium(@PathVariable String dni, @RequestParam boolean premium, RedirectAttributes ra) {
         clientLogic.canviarPremium(dni, premium);
         ra.addFlashAttribute("missatge", "Estat premium actualitzat");
-        return "redirect:/clients";
+        return "redirect:/dashboard/clients";
     }
     // =====================================================
     // REGISTRE DES DEL PORTAL CLIENT (RF81)
@@ -212,7 +212,7 @@ public String editar(@PathVariable String dni,
         if (!model.containsAttribute("client")) {
             model.addAttribute("client", new clientEntity());
         }
-        return "client/registre"; // Plantilla HTML pública
+        return "registre"; // Plantilla HTML pública
     }
 
     @PostMapping("/registre")

@@ -1,5 +1,6 @@
 package cat.copernic.projecte1Grup3;
 
+import org.springframework.boot.security.autoconfigure.web.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -24,12 +25,8 @@ public class SecurityConfig {
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        // Se permite acceso público a todos los CSS en la raíz (/*.css) y
-                        // subdirectorios de estáticos
-                        .requestMatchers(
-                                "/", "/home", "/login", "/register", "/forgot-password",
-                                "/*.css", "/css/**", "/js/**", "/images/**", "/uploads/**")
-                        .permitAll()
+                        .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
+                        .requestMatchers("/", "/home", "/login", "/registre").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/agent/**").hasRole("AGENT")
                         .requestMatchers("/client/**").hasRole("CLIENT")

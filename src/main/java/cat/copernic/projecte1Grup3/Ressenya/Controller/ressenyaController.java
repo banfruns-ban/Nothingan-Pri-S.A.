@@ -4,7 +4,6 @@
  */
 package cat.copernic.projecte1Grup3.Ressenya.Controller;
 
-import cat.copernic.projecte1Grup3.Ressenya.Service.ressenyaService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -12,6 +11,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import cat.copernic.projecte1Grup3.Ressenya.Service.ressenyaService;
 
 @Controller
 public class ressenyaController {
@@ -24,7 +25,7 @@ public class ressenyaController {
         this.resenyesLogic = resenyesLogic;
     }
 
-    @PostMapping("/vehicles/{matricula}/resenyes")
+    @PostMapping("/dashboard/vehicles/{matricula}/resenyes")
     public String alta(@PathVariable String matricula,
                        @RequestParam String dni,
                        @RequestParam int puntuacio,
@@ -41,10 +42,10 @@ public class ressenyaController {
             ra.addFlashAttribute("error", "Error: " + e.getMessage());
             ra.addFlashAttribute("error", "No s'ha pogut crear la ressenya");
         }
-        return "redirect:/vehicles/detall/" + matricula;
+        return "redirect:/dashboard/vehicles/detall/" + matricula;
     }
 
-    @PostMapping("/vehicles/{matricula}/resenyes/{codi}/eliminar")
+    @PostMapping("/dashboard/vehicles/{matricula}/resenyes/{codi}/eliminar")
     public String eliminar(@PathVariable String matricula,
                            @PathVariable Long codi,
                            RedirectAttributes ra) {
@@ -57,6 +58,6 @@ public class ressenyaController {
             log.error("Error eliminant la ressenya {}", codi, e);
             ra.addFlashAttribute("error", "No s'ha pogut eliminar la ressenya");
         }
-       return "redirect:/vehicles/detall/" + matricula;
+       return "redirect:/dashboard/vehicles/detall/" + matricula;
     }
 }

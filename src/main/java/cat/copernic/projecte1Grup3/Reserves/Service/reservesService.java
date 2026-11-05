@@ -7,8 +7,14 @@ import cat.copernic.projecte1Grup3.Usuaris.Client.Repository.clientRepository;
 import cat.copernic.projecte1Grup3.Vehicles.Entity.VehiclesEntity;
 import cat.copernic.projecte1Grup3.Vehicles.Repository.VehiclesRepository;
 
+import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -19,6 +25,7 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class reservesService {
@@ -56,12 +63,12 @@ public class reservesService {
             String text = q.trim().toLowerCase();
             reserves = reserves.stream()
                     .filter(r -> conte(String.valueOf(r.getCodiReserva()), text)
-                            || (r.getClient() != null
-                            && (conte(r.getClient().getNom(), text) || conte(r.getClient().getDni(), text)))
-                            || (r.getVehicle() != null
-                            && (conte(r.getVehicle().getMatricula(), text)
-                            || conte(r.getVehicle().getMarca(), text)
-                            || conte(r.getVehicle().getModel(), text))))
+                    || (r.getClient() != null
+                    && (conte(r.getClient().getNom(), text) || conte(r.getClient().getDni(), text)))
+                    || (r.getVehicle() != null
+                    && (conte(r.getVehicle().getMatricula(), text)
+                    || conte(r.getVehicle().getMarca(), text)
+                    || conte(r.getVehicle().getModel(), text))))
                     .toList();
         }
 
@@ -82,8 +89,8 @@ public class reservesService {
         if (dataReserva != null) {
             reserves = reserves.stream()
                     .filter(r -> r.getDataInici() != null && r.getDataFi() != null
-                            && !dataReserva.isBefore(r.getDataInici())
-                            && !dataReserva.isAfter(r.getDataFi()))
+                    && !dataReserva.isBefore(r.getDataInici())
+                    && !dataReserva.isAfter(r.getDataFi()))
                     .toList();
         }
 
@@ -102,10 +109,9 @@ public class reservesService {
         }
 
         if (estat != null && !estat.isBlank()) {
+            String e = estat.trim();
             reserves = reserves.stream()
-                    .filter(r -> r.getClient() != null
-                            && r.getClient().getDni() != null
-                            && r.getClient().getDni().toUpperCase().contains(q))
+                    .filter(r -> e.equalsIgnoreCase(r.getEstat()))
                     .toList();
         }
 
@@ -214,10 +220,41 @@ public class reservesService {
         reservesRepository.delete(r);
     }
 
-    // LLIURAMENT DEL VEHICLE (PANTALLA 9)
+    // Emmagatzematge físic de fotografies a uploads/vehicles/
+    public String guardarFotos(Long codiReserva, MultipartFile[] fotos, String prefix) {
+        if (fotos == null || fotos.length == 0) {
+            return "";
+        }
+        StringBuilder rutes = new StringBuilder();
+        Path uploadPath = Paths.get("uploads", "vehicles").toAbsolutePath();
+        File dir = uploadPath.toFile();
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+
+        for (int i = 0; i < fotos.length; i++) {
+            MultipartFile foto = fotos[i];
+            if (foto != null && !foto.isEmpty()) {
+                try {
+                    String originalFilename = foto.getOriginalFilename();
+                    String ext = (originalFilename != null && originalFilename.contains("."))
+                            ? originalFilename.substring(originalFilename.lastIndexOf(".")) : ".jpg";
+                    String filename = prefix + "_" + codiReserva + "_" + System.currentTimeMillis() + "_" + (i + 1) + ext;
+                    Path filePath = uploadPath.resolve(filename);
+                    Files.copy(foto.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+                    rutes.append("/uploads/vehicles/").append(filename).append(" ");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return rutes.toString().trim();
+    }
+
     @Transactional
     public reservesEntity lliurar(Long codi, LocalDate dataLliurament, LocalTime horaLliurament,
-                                   Integer kmInicials, String nivellCombustible, String novesObservacions) {
+            Integer kmInicials, String nivellCombustible, String novesObservacions,
+            MultipartFile[] fotos) {
         reservesEntity r = reservesRepository.findById(codi)
                 .orElseThrow(() -> new IllegalArgumentException("Reserva no trobada: #" + codi));
 
@@ -229,13 +266,22 @@ public class reservesService {
         r.setHoraLliurament(horaLliurament != null ? horaLliurament : LocalTime.now());
         r.setEstat(EN_CURS);
 
+        String rutesFotos = guardarFotos(codi, fotos, "lliurament");
+
         StringBuilder obs = new StringBuilder();
         if (r.getObservacions() != null && !r.getObservacions().isBlank()) {
             obs.append(r.getObservacions()).append("\n");
         }
         obs.append("[Lliurament ").append(r.getDataLliurament()).append("]: ");
-        if (kmInicials != null) obs.append("Km inicials: ").append(kmInicials).append(" km. ");
-        if (nivellCombustible != null && !nivellCombustible.isBlank()) obs.append("Combustible: ").append(nivellCombustible).append(". ");
+        if (kmInicials != null) {
+            obs.append("Km inicials: ").append(kmInicials).append(" km. ");
+        }
+        if (nivellCombustible != null && !nivellCombustible.isBlank()) {
+            obs.append("Combustible: ").append(nivellCombustible).append(". ");
+        }
+        if (!rutesFotos.isBlank()) {
+            obs.append("Fotos lliurament: ").append(rutesFotos).append(". ");
+        }
         if (novesObservacions != null && !novesObservacions.isBlank()) {
             obs.append("Notes: ").append(novesObservacions.trim());
         }
@@ -244,12 +290,11 @@ public class reservesService {
         return reservesRepository.save(r);
     }
 
-    // RETORN DEL VEHICLE I LIQUIDACIÓ DE FIANÇA
     @Transactional
     public reservesEntity retornar(Long codi, LocalDate dataRetorn, LocalTime horaRetorn,
-                                    boolean teDesperfectes, boolean desperfectesImputables,
-                                    BigDecimal importDanys, BigDecimal deduccioCarburant,
-                                    String novesObservacions) {
+            boolean teDesperfectes, boolean desperfectesImputables,
+            BigDecimal importDanys, BigDecimal deduccioCarburant,
+            String novesObservacions, MultipartFile[] fotos) {
         reservesEntity r = reservesRepository.findById(codi)
                 .orElseThrow(() -> new IllegalArgumentException("Reserva no trobada: #" + codi));
 
@@ -262,7 +307,6 @@ public class reservesService {
 
         r.setDataRetorn(dataTornada);
 
-        // 1. Càlcul de retard
         LocalDateTime previst = LocalDateTime.of(r.getDataFi(), r.getHoraFi());
         LocalDateTime real = LocalDateTime.of(dataTornada, horaTornada);
 
@@ -276,7 +320,6 @@ public class reservesService {
             penalitzacioRetard = preuHora.multiply(BigDecimal.valueOf(horesRetard));
         }
 
-        // 2. Resum econòmic i devolució de fiança
         BigDecimal fiancaOriginal = (r.getFianca() != null) ? r.getFianca() : BigDecimal.ZERO;
         BigDecimal carrecDanys = (teDesperfectes && desperfectesImputables && importDanys != null) ? importDanys : BigDecimal.ZERO;
         BigDecimal carrecCombustible = (deduccioCarburant != null) ? deduccioCarburant : BigDecimal.ZERO;
@@ -286,6 +329,8 @@ public class reservesService {
         if (fiancaARetornar.compareTo(BigDecimal.ZERO) < 0) {
             fiancaARetornar = BigDecimal.ZERO;
         }
+
+        String rutesFotos = guardarFotos(codi, fotos, "retorn");
 
         StringBuilder obs = new StringBuilder();
         if (r.getObservacions() != null && !r.getObservacions().isBlank()) {
@@ -307,6 +352,9 @@ public class reservesService {
             obs.append("Carburant no retornat complet (-").append(carrecCombustible).append("€). ");
         }
 
+        if (!rutesFotos.isBlank()) {
+            obs.append("Fotos retorn: ").append(rutesFotos).append(". ");
+        }
         obs.append("Resum fiança: ").append(fiancaOriginal).append("€ | Deduccions: ").append(totalDeduccions).append("€ | Retorn final: ").append(fiancaARetornar).append("€. ");
 
         if (novesObservacions != null && !novesObservacions.isBlank()) {

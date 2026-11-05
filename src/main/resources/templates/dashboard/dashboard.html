@@ -62,7 +62,7 @@
                         <div class="d-flex justify-content-between align-items-start">
                             <span class="kpi-title">Reserves pendents lliurament</span>
                         </div>
-                        <div class="kpi-number" th:text="${pendentsLliurament != null ? pendentsLliurament : 4}">4</div>
+                        <div class="kpi-number" th:text="${pendentsLliurament != null ? pendentsLliurament : 0}">0</div>
                     </div>
                 </div>
 
@@ -72,7 +72,7 @@
                         <div class="d-flex justify-content-between align-items-start">
                             <span class="kpi-title">Reserves pendents de retorn</span>
                         </div>
-                        <div class="kpi-number" th:text="${pendentsRetorn != null ? pendentsRetorn : 6}">6</div>
+                        <div class="kpi-number" th:text="${pendentsRetorn != null ? pendentsRetorn : 0}">0</div>
                     </div>
                 </div>
 
@@ -83,7 +83,7 @@
                             <span class="kpi-title">Vehicles en servei actiu</span>
                             <i class="fa-solid fa-car text-muted opacity-50"></i>
                         </div>
-                        <div class="kpi-number" th:text="${vehiclesActius != null ? vehiclesActius : 18}">18</div>
+                        <div class="kpi-number" th:text="${vehiclesActius != null ? vehiclesActius : 0}">0</div>
                     </div>
                 </div>
 
@@ -94,7 +94,7 @@
                             <span class="kpi-title">Clients totals registrats</span>
                             <i class="fa-solid fa-users text-muted opacity-50"></i>
                         </div>
-                        <div class="kpi-number" th:text="${clientsTotals != null ? clientsTotals : 248}">248</div>
+                        <div class="kpi-number" th:text="${clientsTotals != null ? clientsTotals : 0}">0</div>
                     </div>
                 </div>
             </div>
@@ -120,12 +120,12 @@
                             <!-- Llistat dinàmic de la base de dades -->
                             <tr th:each="r : ${propersLliuraments}">
                                 <td>
-                                    <strong th:text="${'RES-' + r.codiReserva}">RES-8921</strong>
+                                    <strong th:text="${'RES-' + r.codiReserva}">RES-0000</strong>
                                 </td>
-                                <td th:text="${r.client != null ? r.client.nom : 'Marta Rius'}">Marta Rius</td>
-                                <td th:text="${r.vehicle != null ? (r.vehicle.marca + ' ' + r.vehicle.model) : 'Toyota Yaris'}">Toyota Yaris</td>
-                                <td th:text="${r.vehicle != null ? r.vehicle.matricula : '4823-LKF'}">4823-LKF</td>
-                                <td th:text="${r.dataInici != null ? (#temporals.format(r.dataInici, 'dd/MM/yyyy') + ', ' + r.horaInici + 'h') : 'Avui, 10:30h'}">Avui, 10:30h</td>
+                                <td th:text="${r.client != null ? r.client.nom : 'Sense Client'}">Nom Client</td>
+                                <td th:text="${r.vehicle != null ? (r.vehicle.marca + ' ' + r.vehicle.model) : 'Sense Vehicle'}">Vehicle</td>
+                                <td th:text="${r.vehicle != null ? r.vehicle.matricula : '---'}">Matrícula</td>
+                                <td th:text="${r.dataInici != null ? (#temporals.format(r.dataInici, 'dd/MM/yyyy') + (r.horaInici != null ? ', ' + r.horaInici + 'h' : '')) : '---'}">Data</td>
                                 <td>
                                     <span th:if="${r.estat == 'PENDENT' or r.estat == null}" class="badge-pending-sign">Pendent de signar</span>
                                     <span th:if="${r.estat == 'EN_CURS' or r.estat == 'LLIURAT'}" class="badge-delivered-status">Lliurat</span>
@@ -134,21 +134,21 @@
                                 </td>
                                 <td class="text-end">
                                     <div class="d-inline-flex gap-2">
-                                        <!-- Botó Lliurar (si la reserva està pendent) -->
+                                        <!-- Botó Lliurar (si la reserva està pendent o confirmada) -->
                                         <a th:if="${r.estat == 'PENDENT' or r.estat == 'CONFIRMADA' or r.estat == null}" 
-                                           th:href="@{'/reserves/' + ${r.codiReserva != null ? r.codiReserva : 8921} + '/lliurar'}" 
+                                           th:href="@{'/reserves/' + ${r.codiReserva} + '/lliurar'}" 
                                            class="btn btn-primary btn-sm px-3 fw-semibold style-btn-lliurar">
                                             Lliurar
                                         </a>
 
                                         <!-- Botó Retornar (si el vehicle ja està lliurat / EN_CURS) -->
                                         <a th:if="${r.estat == 'EN_CURS' or r.estat == 'LLIURAT'}" 
-                                           th:href="@{'/reserves/' + ${r.codiReserva != null ? r.codiReserva : 8922} + '/retornar'}" 
+                                           th:href="@{'/reserves/' + ${r.codiReserva} + '/retornar'}" 
                                            class="btn btn-warning btn-sm px-3 fw-semibold text-dark">
                                             <i class="fa-solid fa-arrow-rotate-left me-1"></i> Retornar
                                         </a>
 
-                                        <!-- Badge de completat si ja està finalitzada -->
+                                        <!-- Badge de completat si la reserva ja ha finalitzat -->
                                         <span th:if="${r.estat == 'FINALITZADA'}" class="badge bg-secondary py-2 px-3">
                                             Completat
                                         </span>
@@ -156,38 +156,11 @@
                                 </td>
                             </tr>
 
-                            <!-- Files estàtiques de prova quan no hi ha dades a la BD -->
-                            <tr th:if="${#lists.isEmpty(propersLliuraments)}">
-                                <td><strong>RES-8921</strong></td>
-                                <td>Marta Rius</td>
-                                <td>Toyota Yaris</td>
-                                <td>4823-LKF</td>
-                                <td>Avui, 10:30h</td>
-                                <td><span class="badge-pending-sign">Pendent de signar</span></td>
-                                <td class="text-end">
-                                    <div class="d-inline-flex gap-2">
-                                        <a th:href="@{/reserves/8921/lliurar}" class="btn btn-primary btn-sm px-3 fw-semibold style-btn-lliurar">
-                                            Lliurar
-                                        </a>
-                                        <a th:href="@{/reserves/8921/retornar}" class="btn btn-warning btn-sm px-3 fw-semibold text-dark">
-                                            <i class="fa-solid fa-arrow-rotate-left me-1"></i> Retornar
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr th:if="${#lists.isEmpty(propersLliuraments)}">
-                                <td><strong>RES-8922</strong></td>
-                                <td>Pere Sanchez</td>
-                                <td>Renault Trafic</td>
-                                <td>1122-KML</td>
-                                <td>Avui, 12:00h</td>
-                                <td><span class="badge-delivered-status">Lliurat</span></td>
-                                <td class="text-end">
-                                    <div class="d-inline-flex gap-2">
-                                        <a th:href="@{/reserves/8922/retornar}" class="btn btn-warning btn-sm px-3 fw-semibold text-dark">
-                                            <i class="fa-solid fa-arrow-rotate-left me-1"></i> Retornar
-                                        </a>
-                                    </div>
+                            <!-- Missatge quan no hi ha cap reserva creada a la BD -->
+                            <tr th:if="${propersLliuraments == null or #lists.isEmpty(propersLliuraments)}">
+                                <td colspan="7" class="text-center text-muted py-4">
+                                    <i class="fa-regular fa-folder-open fs-3 d-block mb-2"></i>
+                                    No hi ha lliuraments ni reserves pendents actualment.
                                 </td>
                             </tr>
                         </tbody>

@@ -34,23 +34,28 @@ public class ressenyaService {
     public List<ressenyaEntity> llistarPerVehicle(String matricula) {
     return resenyaRepo.findByVehicleMatriculaOrderByDataCreacioDesc(matricula);
 }
-      public void crear(String matricula, String dni, int puntuacio, String comentari) {
-        var vehicle = vehicleRepo.findById(matricula)
-                .orElseThrow(() -> new IllegalArgumentException("Vehicle no trobat"));
-        var client = clientRepo.findById(dni.trim().toUpperCase())
-                .orElseThrow(() -> new IllegalArgumentException("Client no trobat"));
+     @Transactional
+    public void crear(String matricula, String dni, int puntuacio, String comentari) {
+    var vehicle = vehicleRepo.findById(matricula)
+            .orElseThrow(() -> new IllegalArgumentException("Vehicle no trobat"));
+    var client = clientRepo.findById(dni.trim().toUpperCase())
+            .orElseThrow(() -> new IllegalArgumentException("Client no trobat"));
 
-        if (puntuacio < 1 || puntuacio > 5)
-            throw new IllegalArgumentException("La puntuació ha de ser entre 1 i 5");
+    if (puntuacio < 1 || puntuacio > 5)
+        throw new IllegalArgumentException("La puntuació ha de ser entre 1 i 5");
 
-        ressenyaEntity r = new ressenyaEntity();
-        r.setVehicle(vehicle);
-        r.setClient(client);
-        r.setPuntuacio(puntuacio);
-        r.setComentari(comentari);
-        r.setDataCreacio(LocalDateTime.now());
-        resenyaRepo.save(r);
-    }
+    String text = (comentari == null || comentari.isBlank()) ? null : comentari.trim();
+    if (text != null && text.length() > 500)
+        throw new IllegalArgumentException("El comentari no pot superar els 500 caràcters");
+
+    ressenyaEntity r = new ressenyaEntity();
+    r.setVehicle(vehicle);
+    r.setClient(client);
+    r.setPuntuacio(puntuacio);
+    r.setComentari(text);
+    r.setDataCreacio(LocalDateTime.now());
+    resenyaRepo.save(r);
+}
 
     @Transactional
     public void eliminar(Long codi) {

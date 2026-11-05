@@ -145,7 +145,7 @@
                                   th:text="${#temporals.format(r.dataCreacio, 'dd/MM/yyyy')}">01/01/2026</span>
                         </div>
                         <form th:action="@{'/vehicles/' + ${vehicle.matricula} + '/resenyes/' + ${r.idRessenya} + '/eliminar'}"
-                              method="post" onsubmit="return confirm('Eliminar aquesta ressenya?');">'}"
+                              method="post" onsubmit="return confirm('Eliminar aquesta ressenya?');">
                       
                             <button type="submit" class="btn btn-sm btn-outline-danger">
                                 <i class="fa-solid fa-trash"></i>

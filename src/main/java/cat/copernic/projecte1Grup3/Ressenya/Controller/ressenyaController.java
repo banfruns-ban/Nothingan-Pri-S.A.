@@ -57,6 +57,7 @@ public class ressenyaController {
                              Authentication auth,
                              RedirectAttributes ra) {
         try {
+            log.info("Reseña: auth.getName() = '{}'", auth.getName());
             clientEntity client = clientRepository.findByEmailIgnoreCase(auth.getName())
                     .orElseThrow(() -> new IllegalArgumentException("Cal iniciar sessió com a client"));
             resenyesLogic.crear(matricula, client.getDni(), puntuacio, comentari);

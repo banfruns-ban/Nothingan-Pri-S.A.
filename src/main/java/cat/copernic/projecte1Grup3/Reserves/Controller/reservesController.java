@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import cat.copernic.projecte1Grup3.Reserves.Entity.reservesEntity;
@@ -98,7 +99,6 @@ public class reservesController {
 
         model.addAttribute("vehicles", reservesLogic.vehiclesActius());
 
-        // Apunta a reservas/altaReserva.html (a minúscula)
         return "reserves/altaReserva";
     }
 
@@ -164,7 +164,7 @@ public class reservesController {
         return "redirect:/dashboard/reserves";
     }
 
-    // GET: Obrir Screen 9 (Lliurament)
+    // GET: Obrir pantalla de lliurament
     @GetMapping("/dashboard/reserves/{codi}/lliurar")
     public String mostrarFormulariLliurament(@PathVariable Long codi, Model model, RedirectAttributes ra) {
         Optional<reservesEntity> optReserva = reservesLogic.obtenir(codi);
@@ -181,15 +181,16 @@ public class reservesController {
         return "reserves/lliurarReserva";
     }
 
-    // POST: Confirmar Lliurament (Screen 9)
+    // POST: Confirmar lliurament amb recepció d'imatges
     @PostMapping("/dashboard/reserves/{codi}/lliurar")
     public String processarLliurament(@PathVariable Long codi,
-                                      @RequestParam(required = false, defaultValue = "14850") Integer kmInicials,
-                                      @RequestParam(required = false, defaultValue = "100%") String nivellCombustible,
-                                      @RequestParam(required = false) String observacions,
-                                      RedirectAttributes ra) {
+            @RequestParam(required = false, defaultValue = "14850") Integer kmInicials,
+            @RequestParam(required = false, defaultValue = "100%") String nivellCombustible,
+            @RequestParam(required = false) String observacions,
+            @RequestParam(value = "fotos", required = false) MultipartFile[] fotos,
+            RedirectAttributes ra) {
         try {
-            reservesLogic.lliurar(codi, LocalDate.now(), LocalTime.now(), kmInicials, nivellCombustible, observacions);
+            reservesLogic.lliurar(codi, LocalDate.now(), LocalTime.now(), kmInicials, nivellCombustible, observacions, fotos);
             ra.addFlashAttribute("succes", "Reserva #" + codi + " lliurada correctament. Estat canviat a EN_CURS.");
         } catch (IllegalArgumentException e) {
             ra.addFlashAttribute("error", e.getMessage());
@@ -200,7 +201,7 @@ public class reservesController {
         return "redirect:/dashboard/reserves";
     }
 
-    // GET: Obrir pantalla de Retorn
+    // GET: Obrir pantalla de retorn
     @GetMapping("/dashboard/reserves/{codi}/retornar")
     public String mostrarFormulariRetorn(@PathVariable Long codi, Model model, RedirectAttributes ra) {
         Optional<reservesEntity> optReserva = reservesLogic.obtenir(codi);
@@ -218,21 +219,21 @@ public class reservesController {
         model.addAttribute("horaAvui", LocalTime.now());
         return "reserves/retornarReserva";
     }
-    
-    @GetMapping("/dashboard/reserves/{codi}")
-public String detall(@PathVariable Long codi, Model model, RedirectAttributes ra) {
-    Optional<reservesEntity> reserva = reservesLogic.obtenir(codi);
 
-    if (reserva.isEmpty()) {
-        ra.addFlashAttribute("error", "Reserva no trobada");
-        return "redirect:/dashboard/reserves";
+    @GetMapping("/dashboard/reserves/{codi}")
+    public String detall(@PathVariable Long codi, Model model, RedirectAttributes ra) {
+        Optional<reservesEntity> reserva = reservesLogic.obtenir(codi);
+
+        if (reserva.isEmpty()) {
+            ra.addFlashAttribute("error", "Reserva no trobada");
+            return "redirect:/dashboard/reserves";
+        }
+
+        model.addAttribute("reserva", reserva.get());
+        return "reserves/detallReserva";
     }
 
-    model.addAttribute("reserva", reserva.get());
-    return "reserves/detallReserva";
-}
-
-    // POST: Confirmar Retorn i Liquidació de Fiança
+    // POST: Confirmar retorn i liquidació de fiança amb recepció d'imatges
     @PostMapping("/dashboard/reserves/{codi}/retornar")
     public String processarRetorn(
             @PathVariable Long codi,
@@ -243,9 +244,10 @@ public String detall(@PathVariable Long codi, Model model, RedirectAttributes ra
             @RequestParam(required = false, defaultValue = "0") BigDecimal gravetat,
             @RequestParam(required = false, defaultValue = "0") BigDecimal deduccioCarburant,
             @RequestParam(required = false) String observacions,
+            @RequestParam(value = "fotos", required = false) MultipartFile[] fotos,
             RedirectAttributes ra) {
         try {
-            reservesLogic.retornar(codi, dataRetorn, horaRetorn, teDesperfectes, desperfectesImputables, gravetat, deduccioCarburant, observacions);
+            reservesLogic.retornar(codi, dataRetorn, horaRetorn, teDesperfectes, desperfectesImputables, gravetat, deduccioCarburant, observacions, fotos);
             ra.addFlashAttribute("succes", "Vehicle de la reserva #" + codi + " retornat correctament i contracte tancat (FINALITZADA).");
         } catch (IllegalArgumentException e) {
             ra.addFlashAttribute("error", e.getMessage());

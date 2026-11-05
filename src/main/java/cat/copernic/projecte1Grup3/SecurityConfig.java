@@ -31,6 +31,7 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
+                        .requestMatchers("/*.css", "/**/*.css").permitAll()
                         .requestMatchers("/", "/home", "/login", "/forgot-password", "/registre", "/cataleg").permitAll()
                         .requestMatchers("/dashboard/**").hasAnyRole("ADMIN", "AGENT")
                         .requestMatchers("/ReservesClient/**").hasRole("CLIENT")

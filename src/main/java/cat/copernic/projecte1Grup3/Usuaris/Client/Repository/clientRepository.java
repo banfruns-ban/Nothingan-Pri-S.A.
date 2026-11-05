@@ -2,6 +2,7 @@ package cat.copernic.projecte1Grup3.Usuaris.Client.Repository;
 
 import cat.copernic.projecte1Grup3.Usuaris.Client.Entity.clientEntity;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
@@ -11,6 +12,7 @@ public interface clientRepository extends JpaRepository<clientEntity, String>,
 
     // Método derivado automático de Spring Data: busca coincidencias por Nombre o DNI ignorando mayúsculas/minúsculas
     List<clientEntity> findByNomContainingIgnoreCaseOrDniContainingIgnoreCase(String nom, String dni);
+    Optional<clientEntity> findByEmailIgnoreCase(String email);
     // Devuelve true si OTRO cliente (distinto DNI) ya usa ese email
     boolean existsByEmailIgnoreCaseAndDniNot(String email, String dni);
 }

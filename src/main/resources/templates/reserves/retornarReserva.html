@@ -48,7 +48,7 @@
             <p class="text-muted">Registre de l'estat en devolució, càlcul de danys, i liquidació de la fiança dipositada.</p>
         </div>
 
-        <form th:action="@{'/reserves/' + ${reserva.codiReserva} + '/retornar'}" method="post" enctype="multipart/form-data">
+        <form th:action="@{'/dashboard/reserves/' + ${reserva.codiReserva} + '/retornar'}" method="post" enctype="multipart/form-data">
             
             <!-- Targeta d'Informació de la Reserva -->
             <div class="card border-0 shadow-sm mb-4">

@@ -17,7 +17,7 @@ import java.time.LocalDate;
 public class clientEntity extends usuariEntity {
 
     @Column(name = "data_caducitat_DNI", nullable = false)
-    private String dataCaducitatDNI;
+    private LocalDate dataCaducitatDNI;
 
     @Column(name = "nacionalitat", nullable = false)
     private String nacionalitat;
@@ -63,7 +63,7 @@ public class clientEntity extends usuariEntity {
     }
 
     // Constructor completo que inicializa también la superclase (usuariEntity)
-    public clientEntity(String dataCaducitatDNI,
+    public clientEntity(LocalDate dataCaducitatDNI,
                         String nacionalitat,
                         String adreca,
                         String tipusLlicencia,
@@ -84,8 +84,8 @@ public class clientEntity extends usuariEntity {
     }
 
     // Getters y Setters
-    public String getDataCaducitatDNI() { return dataCaducitatDNI; }
-    public void setDataCaducitatDNI(String dataCaducitatDNI) { this.dataCaducitatDNI = dataCaducitatDNI; }
+    public LocalDate getDataCaducitatDNI() { return dataCaducitatDNI; }
+    public void setDataCaducitatDNI(LocalDate dataCaducitatDNI) { this.dataCaducitatDNI = dataCaducitatDNI; }
 
     public String getNacionalitat() { return nacionalitat; }
     public void setNacionalitat(String nacionalitat) { this.nacionalitat = nacionalitat; }

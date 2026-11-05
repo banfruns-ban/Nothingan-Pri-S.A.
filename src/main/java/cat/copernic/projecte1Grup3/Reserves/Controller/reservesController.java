@@ -68,7 +68,7 @@ public class reservesController {
         model.addAttribute("estat", estat);
 
         // Apunta a reservas/LlistaReserves.html (L mayúscula)
-        return "reservas/LlistaReserves";
+        return "reserves/LlistaReserves";
     }
 
     @GetMapping("/reserves/nova")
@@ -100,7 +100,7 @@ public class reservesController {
         model.addAttribute("vehicles", reservesLogic.vehiclesActius());
 
         // Apunta a reservas/altaReserva.html (a minúscula)
-        return "reservas/altaReserva";
+        return "reserves/altaReserva";
     }
 
     @PostMapping("/reserves/alta")

@@ -34,7 +34,7 @@ public class SecurityConfig {
                         .requestMatchers("/*.css", "/**/*.css").permitAll()
                         .requestMatchers("/", "/home", "/login", "/forgot-password", "/registre", "/cataleg").permitAll()
                         .requestMatchers("/dashboard/**").hasAnyRole("ADMIN", "AGENT")
-                        .requestMatchers("/ReservesClient/**").hasRole("CLIENT")
+                        .requestMatchers("/reserves-client/**").hasRole("CLIENT")
                         .anyRequest().authenticated())
                 .requestCache(cache -> cache.requestCache(requestCache()))
                 .formLogin(form -> form
@@ -71,7 +71,7 @@ public class SecurityConfig {
                 }
             }
             SavedRequest savedRequest = requestCache.getRequest(request, response);
-            String reservationsPath = contextPath + "/ReservesClient";
+            String reservationsPath = contextPath + "/reserves-client";
             if (savedRequest != null) {
                 URI savedUri = URI.create(savedRequest.getRedirectUrl());
                 String savedPath = savedUri.getRawPath();

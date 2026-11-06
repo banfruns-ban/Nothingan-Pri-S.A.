@@ -7,7 +7,7 @@
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" th:href="@{/cataleg.css}">
-    <link rel="stylesheet" th:href="@{/reservesClient.css}">
+    <link rel="stylesheet" th:href="@{/reserves-client.css}">
 </head>
 <body>
 
@@ -23,7 +23,7 @@
 
         <div class="nav-header">
             <a th:href="@{/cataleg}">Catàleg</a>
-            <a th:href="@{/ReservesClient}" class="active">Les meves reserves</a>
+            <a th:href="@{/reserves-client}" class="active">Les meves reserves</a>
             
             <div class="accés-usuaris">
                 <a th:href="@{/login}" class="btn btn-login">
@@ -97,7 +97,7 @@
                         </td>
                         <td>
                             <form th:if="${r.estat != 'ANULLADA' and r.estat != 'FINALITZADA'}" 
-                                  th:action="@{'/ReservesClient/anular/' + ${r.codiReserva}}" 
+                                  th:action="@{'/reserves-client/anular/' + ${r.codiReserva}}" 
                                   method="post" 
                                   onsubmit="return confirm('Estàs segur que vols anul·lar aquesta reserva?');">
                                 <button type="submit" class="btn-anular">

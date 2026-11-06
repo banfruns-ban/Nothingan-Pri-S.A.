@@ -23,7 +23,7 @@ public class DadesVehicles {
                  "Furgoneta", 250, "25.00", "700.00", 2, 30, "MANTENIMENT", false, "Pendent canvi de frens");
 
             crea(repo, "3456JKL", "Tesla", "Model 3", 2023, "Elèctric amb gran autonomia",
-                 "Elèctric", 500, "35.00", "1000.00", 1, 10, "DISPONIBLE", true, null);
+                 "Compacte", 500, "35.00", "1000.00", 1, 10, "DISPONIBLE", true, null);
         };
     }
 

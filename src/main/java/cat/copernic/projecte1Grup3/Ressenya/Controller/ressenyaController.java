@@ -50,7 +50,7 @@ public class ressenyaController {
     }
 
     // ---------- CLIENT (portal): el DNI surt de la sessió ----------
-    @PostMapping("/ReservesClient/vehicle/{matricula}/resenyes")
+    @PostMapping("/reserves-client/vehicle/{matricula}/resenyes")
     public String altaClient(@PathVariable String matricula,
                              @RequestParam int puntuacio,
                              @RequestParam(required = false) String comentari,
@@ -68,7 +68,7 @@ public class ressenyaController {
             log.error("Error creant la ressenya del client", e);
             ra.addFlashAttribute("error", "No s'ha pogut crear la ressenya");
         }
-        return "redirect:/ReservesClient/nova?matricula=" + matricula;
+        return "redirect:/reserves-client/nova?matricula=" + matricula;
     }
 
     @PostMapping("/dashboard/vehicles/{matricula}/resenyes/{codi}/eliminar")

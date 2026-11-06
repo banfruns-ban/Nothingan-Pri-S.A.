@@ -1,5 +1,19 @@
 package cat.copernic.projecte1Grup3.Reserves.Controller;
 
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
 import cat.copernic.projecte1Grup3.Reserves.Entity.reservesEntity;
 import cat.copernic.projecte1Grup3.Reserves.Service.reservesService;
 import cat.copernic.projecte1Grup3.Usuaris.Client.Entity.clientEntity;
@@ -7,34 +21,26 @@ import cat.copernic.projecte1Grup3.Usuaris.Client.Service.clientService;
 import cat.copernic.projecte1Grup3.Vehicles.Entity.VehiclesEntity;
 import cat.copernic.projecte1Grup3.Vehicles.Service.VehiclesService;
 import jakarta.servlet.http.HttpSession;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
-import java.util.Optional;
 
 @Controller
-@RequestMapping("/ReservesClient")
-public class ReservesClientController {
+@RequestMapping("/reserves-client")
+public class reserves {
 
     private final reservesService reservesService;
     private final VehiclesService vehiclesService;
     private final clientService clientService;
 
     @Autowired
-    public ReservesClientController(reservesService reservesService, VehiclesService vehiclesService,
-                                    clientService clientService) {
+    public reserves(reservesService reservesService, VehiclesService vehiclesService,
+                    clientService clientService) {
         this.reservesService = reservesService;
         this.vehiclesService = vehiclesService;
         this.clientService = clientService;
     }
 
-    // Ruta: /ReservesClient (Listado de mis reservas)
+    // Ruta: /reserves-client (Listado de mis reservas)
     @GetMapping
-    public String llistarReservesClient(HttpSession session, Model model, RedirectAttributes ra) {
+    public String llistarReserves(HttpSession session, Model model, RedirectAttributes ra) {
         // Control de autenticación: si no hay cliente en sesión, redirige al login
         clientEntity clientLogueat = (clientEntity) session.getAttribute("clientLogueat");
         if (clientLogueat == null) {
@@ -48,7 +54,7 @@ public class ReservesClientController {
         return "reserves/lesMevesReserves";
     }
 
-    // Ruta: /ReservesClient/nova (Formulario de reserva)
+    // Ruta: /reserves-client/nova (Formulario de reserva)
     @GetMapping("/nova")
     public String formulariNovaReserva(
             @RequestParam(name = "matricula", required = false) String matricula,
@@ -83,7 +89,7 @@ public class ReservesClientController {
         return "reserves/crearReservaClient";
     }
 
-    // Ruta: POST /ReservesClient/guardar
+    // Ruta: POST /reserves-client/guardar
     @PostMapping("/guardar")
     public String guardarReservaClient(
             @ModelAttribute("reserva") reservesEntity reserva,
@@ -102,14 +108,14 @@ public class ReservesClientController {
             // reservesService.guardarReservaClient(reserva);
 
             ra.addFlashAttribute("missatge", "Reserva realitzada amb èxit!");
-            return "redirect:/ReservesClient";
+            return "redirect:/reserves-client";
         } catch (Exception e) {
             ra.addFlashAttribute("error", "No s'ha pogut realitzar la reserva: " + e.getMessage());
-            return "redirect:/ReservesClient/nova?matricula=" + (reserva.getVehicle() != null ? reserva.getVehicle().getMatricula() : "");
+            return "redirect:/reserves-client/nova?matricula=" + (reserva.getVehicle() != null ? reserva.getVehicle().getMatricula() : "");
         }
     }
 
-    // Ruta: POST /ReservesClient/anular/{codiReserva}
+    // Ruta: POST /reserves-client/anular/{codiReserva}
     @PostMapping("/anular/{codiReserva}")
     public String anularReservaClient(
             @PathVariable("codiReserva") Long codiReserva,
@@ -126,6 +132,6 @@ public class ReservesClientController {
         } catch (Exception e) {
             ra.addFlashAttribute("error", "No s'ha pogut anul·lar la reserva: " + e.getMessage());
         }
-        return "redirect:/ReservesClient";
+        return "redirect:/reserves-client";
     }
 }

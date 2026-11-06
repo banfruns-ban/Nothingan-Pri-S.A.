@@ -23,7 +23,7 @@
 
         <div class="nav-header">
             <a th:href="@{/cataleg}">Catàleg</a>
-            <a th:href="@{/ReservesClient}">Les meves reserves</a>
+            <a th:href="@{/reserves-client}">Les meves reserves</a>
             
             <div style="display: flex; gap: 10px; align-items: center; margin-left: 12px;">
                 <a th:href="@{/login}" class="btn" style="background: transparent; color: #fff; border: 1px solid #334155; padding: 6px 14px; border-radius: 6px; font-weight: 600; font-size: 12px;">
@@ -64,7 +64,7 @@
             </div>
         </div>
 
-        <form th:action="@{/ReservesClient/guardar}" th:object="${reserva}" method="post" class="form-grid">
+        <form th:action="@{/reserves-client/guardar}" th:object="${reserva}" method="post" class="form-grid">
             
             <!-- Guardem la matrícula del vehicle -->
             <input type="hidden" name="vehicle.matricula" th:value="${vehicleSeleccionat != null ? vehicleSeleccionat.matricula : ''}">
@@ -115,7 +115,7 @@
         <span th:text="${succes}"></span>
     </div>
 
-    <form th:action="@{'/ReservesClient/vehicle/' + ${vehicleSeleccionat.matricula} + '/resenyes'}"
+    <form th:action="@{'/reserves-client/vehicle/' + ${vehicleSeleccionat.matricula} + '/resenyes'}"
           method="post" class="ressenya-form">
 
         <div class="rating">

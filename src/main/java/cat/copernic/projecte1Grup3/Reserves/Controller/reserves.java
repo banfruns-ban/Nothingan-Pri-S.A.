@@ -1,5 +1,19 @@
 package cat.copernic.projecte1Grup3.Reserves.Controller;
 
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
 import cat.copernic.projecte1Grup3.Reserves.Entity.reservesEntity;
 import cat.copernic.projecte1Grup3.Reserves.Service.reservesService;
 import cat.copernic.projecte1Grup3.Usuaris.Client.Entity.clientEntity;
@@ -7,26 +21,18 @@ import cat.copernic.projecte1Grup3.Usuaris.Client.Service.clientService;
 import cat.copernic.projecte1Grup3.Vehicles.Entity.VehiclesEntity;
 import cat.copernic.projecte1Grup3.Vehicles.Service.VehiclesService;
 import jakarta.servlet.http.HttpSession;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
-import java.util.Optional;
 
 @Controller
 @RequestMapping("/reserves-client")
-public class reserves-clientController {
+public class reserves {
 
     private final reservesService reservesService;
     private final VehiclesService vehiclesService;
     private final clientService clientService;
 
     @Autowired
-    public reserves-clientController(reservesService reservesService, VehiclesService vehiclesService,
-                                    clientService clientService) {
+    public reserves(reservesService reservesService, VehiclesService vehiclesService,
+                    clientService clientService) {
         this.reservesService = reservesService;
         this.vehiclesService = vehiclesService;
         this.clientService = clientService;
@@ -34,7 +40,7 @@ public class reserves-clientController {
 
     // Ruta: /reserves-client (Listado de mis reservas)
     @GetMapping
-    public String llistarreserves-client(HttpSession session, Model model, RedirectAttributes ra) {
+    public String llistarReserves(HttpSession session, Model model, RedirectAttributes ra) {
         // Control de autenticación: si no hay cliente en sesión, redirige al login
         clientEntity clientLogueat = (clientEntity) session.getAttribute("clientLogueat");
         if (clientLogueat == null) {

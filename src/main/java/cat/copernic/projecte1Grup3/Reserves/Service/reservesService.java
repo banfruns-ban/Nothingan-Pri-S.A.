@@ -23,12 +23,16 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class reservesService {
+
+    private static final Logger log = LoggerFactory.getLogger(reservesService.class);
 
     public static final String PENDENT = "PENDENT";
     public static final String CONFIRMADA = "CONFIRMADA";
@@ -205,7 +209,10 @@ public class reservesService {
         reserva.setObservacions(observacions == null || observacions.isBlank()
                 ? null : observacions.trim());
 
-        return reservesRepository.save(reserva);
+        reservesEntity guardada = reservesRepository.save(reserva);
+        log.info("Reserva #{} creada: client {} i vehicle {} ({} -> {})",
+                guardada.getCodiReserva(), client.getDni(), matricula, inici, fi);
+        return guardada;
     }
 
     @Transactional
@@ -218,6 +225,7 @@ public class reservesService {
                     "No es pot eliminar una reserva en curs o finalitzada");
         }
         reservesRepository.delete(r);
+        log.warn("Reserva #{} eliminada (estat: {})", codi, r.getEstat());
     }
 
     // Emmagatzematge físic de fotografies a uploads/vehicles/
@@ -244,7 +252,7 @@ public class reservesService {
                     Files.copy(foto.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
                     rutes.append("/uploads/vehicles/").append(filename).append(" ");
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    log.error("Error guardant la foto {} de la reserva #{}", i + 1, codiReserva, e);
                 }
             }
         }
@@ -287,7 +295,10 @@ public class reservesService {
         }
 
         r.setObservacions(obs.toString());
-        return reservesRepository.save(r);
+        reservesEntity guardada = reservesRepository.save(r);
+        log.info("Reserva #{} lliurada: vehicle {} a client {}",
+                codi, r.getVehicle().getMatricula(), r.getClient().getDni());
+        return guardada;
     }
 
     @Transactional
@@ -340,6 +351,8 @@ public class reservesService {
 
         if (horesRetard > 0) {
             obs.append("Retard: ").append(horesRetard).append("h (-").append(penalitzacioRetard).append("€). ");
+            log.warn("Reserva #{} retornada amb {}h de retard (penalització {}€)",
+                    codi, horesRetard, penalitzacioRetard);
         }
         if (teDesperfectes) {
             if (desperfectesImputables) {
@@ -347,6 +360,8 @@ public class reservesService {
             } else {
                 obs.append("Danys no imputables (avaria/tercers, 0€ càrrec). ");
             }
+            log.warn("Reserva #{} retornada amb desperfectes (imputables: {}, import: {}€)",
+                    codi, desperfectesImputables, carrecDanys);
         }
         if (carrecCombustible.compareTo(BigDecimal.ZERO) > 0) {
             obs.append("Carburant no retornat complet (-").append(carrecCombustible).append("€). ");
@@ -355,7 +370,8 @@ public class reservesService {
         if (!rutesFotos.isBlank()) {
             obs.append("Fotos retorn: ").append(rutesFotos).append(". ");
         }
-        obs.append("Resum fiança: ").append(fiancaOriginal).append("€ | Deduccions: ").append(totalDeduccions).append("€ | Retorn final: ").append(fiancaARetornar).append("€. ");
+        obs.append("Resum fiança: ").append(fiancaOriginal).append("€ | Deduccions: ")
+                .append(totalDeduccions).append("€ | Retorn final: ").append(fiancaARetornar).append("€. ");
 
         if (novesObservacions != null && !novesObservacions.isBlank()) {
             obs.append("Descripció: ").append(novesObservacions.trim());
@@ -364,7 +380,9 @@ public class reservesService {
         r.setObservacions(obs.toString());
         r.setEstat(FINALITZADA);
 
-        return reservesRepository.save(r);
+        reservesEntity guardada = reservesRepository.save(r);
+        log.info("Reserva #{} finalitzada. Fiança retornada: {}€", codi, fiancaARetornar);
+        return guardada;
     }
 
     public long comptarPendentsLliurament() {

@@ -1,7 +1,5 @@
 package cat.copernic.projecte1Grup3;
 
-import java.net.URI;
-
 import org.springframework.boot.security.autoconfigure.web.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,7 +16,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.savedrequest.RequestCache;
-import org.springframework.security.web.savedrequest.SavedRequest;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -34,7 +31,7 @@ public class SecurityConfig {
                         .requestMatchers("/*.css", "/**/*.css").permitAll()
                         .requestMatchers("/", "/home", "/login", "/forgot-password", "/registre", "/cataleg").permitAll()
                         .requestMatchers("/dashboard/**").hasAnyRole("ADMIN", "AGENT")
-                        .requestMatchers("/ReservesClient/**").hasRole("CLIENT")
+                        .requestMatchers("/reserves-client/**").hasRole("CLIENT")
                         .anyRequest().authenticated())
                 .requestCache(cache -> cache.requestCache(requestCache()))
                 .formLogin(form -> form
@@ -70,22 +67,7 @@ public class SecurityConfig {
                     return;
                 }
             }
-            SavedRequest savedRequest = requestCache.getRequest(request, response);
-            String reservationsPath = contextPath + "/ReservesClient";
-            if (savedRequest != null) {
-                URI savedUri = URI.create(savedRequest.getRedirectUrl());
-                String savedPath = savedUri.getRawPath();
-                if (savedPath.equals(reservationsPath)
-                        || savedPath.startsWith(reservationsPath + "/")) {
-                    String redirectUrl = contextPath + savedPath;
-                    if (savedUri.getRawQuery() != null) {
-                        redirectUrl += "?" + savedUri.getRawQuery();
-                    }
-                    requestCache.removeRequest(request, response);
-                    response.sendRedirect(redirectUrl);
-                    return;
-                }
-            }
+            
             response.sendRedirect(contextPath + "/cataleg");
         };
     }

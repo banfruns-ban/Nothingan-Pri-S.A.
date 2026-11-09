@@ -22,7 +22,7 @@
 
         <div class="nav-header">
             <a th:href="@{/cataleg}" class="active">Catàleg</a>
-            <a th:href="@{/ReservesClient}">Les meves reserves</a>
+            <a th:href="@{/reserves-client}">Les meves reserves</a>
             
             <div class="accés-usuaris">
                 <a th:href="@{/login}" class="btn btn-login">
@@ -124,7 +124,7 @@
                             </div>
                         </div>
 
-                        <a th:href="@{/ReservesClient/nova(matricula=${v.matricula}, dataInici=${dataInici}, dataFi=${dataFi})}" class="btn-reservar">
+                        <a th:href="@{/reserves-client/nova(matricula=${v.matricula})}" class="btn-reservar">
                             Reservar vehicle
                         </a>
                     </div>

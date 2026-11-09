@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Repositori JPA per a l'entitat AgentEntity.
@@ -21,4 +22,5 @@ public interface AgentRepository extends JpaRepository<AgentEntity, String> {
             + "LOWER(CAST(a.rol AS string)) LIKE LOWER(CONCAT('%', :cerca, '%')) OR "
             + "LOWER(a.email) LIKE LOWER(CONCAT('%', :cerca, '%'))")
     List<AgentEntity> cercarPerDniNomEmail(@Param("cerca") String cerca);
+    Optional<AgentEntity> findByEmailIgnoreCase(String email);
 }

@@ -1,4 +1,4 @@
-package cat.copernic.projecte1Grup3;
+package cat.copernic.projecte1Grup3.Security;
 
 import org.springframework.boot.security.autoconfigure.web.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
@@ -6,12 +6,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
@@ -75,28 +71,5 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
-    }
-
-    @Bean
-    public UserDetailsService userDetailsService(PasswordEncoder encoder) {
-        UserDetails client = User.builder()
-                .username("client@correu.cat")
-                .password(encoder.encode("grup3"))
-                .roles("CLIENT")
-                .build();
-
-        UserDetails agent = User.builder()
-                .username("agent@correu.cat")
-                .password(encoder.encode("grup3"))
-                .roles("AGENT")
-                .build();
-
-        UserDetails admin = User.builder()
-                .username("admin@correu.cat")
-                .password(encoder.encode("grup3"))
-                .roles("ADMIN")
-                .build();
-
-        return new InMemoryUserDetailsManager(client, agent, admin);
     }
 }

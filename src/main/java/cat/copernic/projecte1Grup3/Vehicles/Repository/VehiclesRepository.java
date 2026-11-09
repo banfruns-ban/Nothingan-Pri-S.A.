@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -33,8 +34,25 @@ public interface VehiclesRepository extends JpaRepository<VehiclesEntity, String
             @Param("cerca") String cerca, 
             @Param("tipus") String tipus, 
             @Param("actiu") Boolean actiu);
-    // Método a añadir en VehiclesRepository.java
+
     List<VehiclesEntity> findByActiuTrue();
     List<VehiclesEntity> findByActiuTrueAndTipusVehicle(String tipusVehicle);
-    
+
+    /**
+     * Cerca els vehicles actius disponibles excloent aquells que tenen reserves solapades.
+     * Si no s'especifiquen dates, la subconsulta s'omple i no s'exclou cap vehicle per reserva.
+     */
+    @Query("SELECT v FROM VehiclesEntity v WHERE v.actiu = true " +
+           "AND (:tipus IS NULL OR :tipus = '' OR v.tipusVehicle = :tipus) " +
+           "AND (" +
+           "   :dataInici IS NULL OR :dataFi IS NULL OR v.matricula NOT IN (" +
+           "       SELECT r.vehicle.matricula FROM reservesEntity r " +
+           "       WHERE r.estat NOT IN ('CANCELADA', 'ANULLADA', 'FINALITZADA') " +
+           "       AND (CAST(r.dataInici AS timestamp) < :dataFi AND CAST(r.dataFi AS timestamp) > :dataInici)" +
+           "   )" +
+           ")")
+    List<VehiclesEntity> llistarDisponiblesPerDatesYTipus(
+            @Param("dataInici") LocalDateTime dataInici,
+            @Param("dataFi") LocalDateTime dataFi,
+            @Param("tipus") String tipus);
 }

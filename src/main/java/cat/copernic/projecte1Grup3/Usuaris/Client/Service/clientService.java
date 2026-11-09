@@ -1,5 +1,6 @@
 package cat.copernic.projecte1Grup3.Usuaris.Client.Service;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import cat.copernic.projecte1Grup3.Usuaris.Client.Documents.clientDocuments;
 import cat.copernic.projecte1Grup3.Usuaris.Client.Entity.clientEntity;
 import cat.copernic.projecte1Grup3.Usuaris.Client.Repository.clientRepository;
@@ -15,10 +16,12 @@ import org.springframework.web.multipart.MultipartFile;
 @Service // Marca la clase como Capa de Servicio (Lógica de Negocio)
 public class clientService {
 
+    private static final Logger log = LoggerFactory.getLogger(clientService.class);
     // Constantes de estado para el cumplimiento del RF82
     public static final String PENDENT = "PENDENT";
     public static final String VALIDAT = "VALIDAT";
     public static final String REBUTJAT = "REBUTJAT";
+    
 
     private final clientRepository clientRepository;
     private final clientRepositoryMongo clientRepositoryMongo;
@@ -134,6 +137,7 @@ public class clientService {
             doc.setTipusFotoCarnet(fotoCarnet.getContentType());
         }
         clientRepositoryMongo.save(doc); // Guarda en MongoDB
+        log.info("Client donat d'alta: {}", dni);
     }
 
     public Optional<clientEntity> obtenir(String dni) {
@@ -189,6 +193,7 @@ public void actualitzar(String dni, clientEntity dades, String estat, boolean pr
     c.setPremium(premium);
 
     clientRepository.saveAndFlush(c);
+    log.info("Client actualitzat: {}", dni);
 
     // Actualiza los archivos en MongoDB solo si se adjuntaron imágenes nuevas
     if (hiHa(fotoDniFrontal) || hiHa(fotoDniPosterior) || hiHa(fotoCarnet)) {
@@ -239,6 +244,7 @@ private boolean hiHa(MultipartFile f) {
         clientRepository.flush(); // Si el cliente tiene reservas asociadas, salta la excepción aquí y cancela el borrado
 
         clientRepositoryMongo.deleteById(dni); // Elimina de MongoDB solo tras confirmar el éxito en MySQL
+        log.warn("Client eliminat: {}", dni);
     }
 
     // ---------- CAMBIO DE ESTADO DE VALIDACIÓN (RF82) ----------

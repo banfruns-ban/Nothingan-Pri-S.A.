@@ -40,7 +40,7 @@ public class clientService {
                          PasswordEncoder passwordEncoder) {
         this.clientRepository = clientRepository;
         this.clientRepositoryMongo = clientRepositoryMongo;
-        this.passwordEncoder = passwordEncoder;
+        this.passwordEncoder = passwordEncoder != null ? passwordEncoder : new BCryptPasswordEncoder();
     }
 
     // ---------- LISTAR Y FILTRAR ----------

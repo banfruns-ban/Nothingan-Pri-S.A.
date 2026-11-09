@@ -6,6 +6,8 @@ package cat.copernic.projecte1Grup3.Usuaris.Agent.Service;
 
 // Los imports existen porque Java solo ve por defecto lo que está en su propio paquete.
 // Cada import está porque se usa más abajo; si no se importa, no compila.
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import cat.copernic.projecte1Grup3.Usuaris.Agent.Entity.AgentEntity;         // Entidad con la que trabaja el servicio
 import org.springframework.beans.factory.annotation.Autowired;               // Inyección automática de dependencias
 import org.springframework.stereotype.Service;                               // Marca la clase como servicio
@@ -20,7 +22,7 @@ import cat.copernic.projecte1Grup3.Usuaris.Agent.Repository.AgentRepository;
 // POR QUÉ: Spring crea UNA instancia y la guarda para entregársela a quien la pida (el controlador).
 // También deja claro que esta capa contiene la lógica de negocio.
 public class AgentService { // public: el controlador (otro paquete) tiene que poder usarla
-
+    private static final Logger log = LoggerFactory.getLogger(AgentService.class);
     @Autowired // Inyecta la dependencia de la clase repository (pom y lo de arriba)
     // POR QUÉ: Spring busca un objeto del tipo AgentRepository y lo asigna aquí. Tú nunca haces "new",
     // lo que desacopla las clases.
@@ -40,6 +42,7 @@ public class AgentService { // public: el controlador (otro paquete) tiene que p
     // public: el controlador tiene que poder llamarlo.
     public void guardarAgent(AgentEntity agent) {
         agentRepository.save(agent); 
+        log.info("Agent donat d'alta: {}", agent);
         // Guarda o actualiza un registro en la base de datos, en un metodo de JPARepository
     }
 
@@ -70,6 +73,7 @@ public class AgentService { // public: el controlador (otro paquete) tiene que p
     // que el controlador ya captura. Ahora mismo el servicio no la lanza.
     public void eliminarAgent(String dni) {
         agentRepository.deleteById(dni); // Borra por clave primaria (DNI)
+        log.warn("Agent eliminat: {}", dni);
     }
 
     // ============================================================

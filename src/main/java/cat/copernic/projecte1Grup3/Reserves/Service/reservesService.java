@@ -23,12 +23,16 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class reservesService {
+
+    private static final Logger log = LoggerFactory.getLogger(reservesService.class);
 
     public static final String PENDENT = "PENDENT";
     public static final String CONFIRMADA = "CONFIRMADA";
@@ -205,7 +209,10 @@ public class reservesService {
         reserva.setObservacions(observacions == null || observacions.isBlank()
                 ? null : observacions.trim());
 
-        return reservesRepository.save(reserva);
+        reservesEntity guardada = reservesRepository.save(reserva);
+        log.info("Reserva #{} creada: client {} i vehicle {} ({} -> {})",
+                guardada.getCodiReserva(), client.getDni(), matricula, inici, fi);
+        return guardada;
     }
 
     @Transactional
@@ -218,19 +225,34 @@ public class reservesService {
                     "No es pot eliminar una reserva en curs o finalitzada");
         }
         reservesRepository.delete(r);
+        log.warn("Reserva #{} eliminada (estat: {})", codi, r.getEstat());
     }
 
-    // Emmagatzematge físic de fotografies a uploads/vehicles/
-    public String guardarFotos(Long codiReserva, MultipartFile[] fotos, String prefix) {
+    // Emmagatzematge físic a: uploads/vehicles/(MATRICULA_MARCA_MODEL)/(lliurar|retornar)/
+    public String guardarFotos(reservesEntity reserva, MultipartFile[] fotos, String accio) {
         if (fotos == null || fotos.length == 0) {
             return "";
         }
         StringBuilder rutes = new StringBuilder();
-        Path uploadPath = Paths.get("uploads", "vehicles").toAbsolutePath();
+
+        // Construcció del nom de la carpeta del vehicle
+        String carpetaVehicle = "vehicle_desconegut";
+        if (reserva != null && reserva.getVehicle() != null) {
+            String matricula = (reserva.getVehicle().getMatricula() != null) 
+                    ? reserva.getVehicle().getMatricula() : "S-MATRICULA";
+            String marcaModel = (reserva.getVehicle().getMarca() + "_" + reserva.getVehicle().getModel())
+                    .replaceAll("[^a-zA-Z0-9_-]", "_");
+            carpetaVehicle = matricula + "_" + marcaModel;
+        }
+
+        // Ruta completa: uploads/vehicles/1234ABC_Seat_Ibiza/lliurar/
+        Path uploadPath = Paths.get("uploads", "vehicles", carpetaVehicle, accio).toAbsolutePath();
         File dir = uploadPath.toFile();
         if (!dir.exists()) {
             dir.mkdirs();
         }
+
+        String[] costats = {"frontal", "posterior", "lateral_esquerre", "lateral_dret"};
 
         for (int i = 0; i < fotos.length; i++) {
             MultipartFile foto = fotos[i];
@@ -239,13 +261,21 @@ public class reservesService {
                     String originalFilename = foto.getOriginalFilename();
                     String ext = (originalFilename != null && originalFilename.contains("."))
                             ? originalFilename.substring(originalFilename.lastIndexOf(".")) : ".jpg";
-                    String filename = prefix + "_" + codiReserva + "_" + System.currentTimeMillis() + "_" + (i + 1) + ext;
+
+                    String costat = (i < costats.length) ? costats[i] : "foto_" + (i + 1);
+                    String filename = accio + "_" + costat + "_" + System.currentTimeMillis() + ext;
+
                     Path filePath = uploadPath.resolve(filename);
                     Files.copy(foto.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-                    rutes.append("/uploads/vehicles/").append(filename).append(" ");
+
+                    rutes.append("/uploads/vehicles/")
+                         .append(carpetaVehicle).append("/")
+                         .append(accio).append("/")
+                         .append(filename).append(" ");
                 } catch (IOException e) {
-                    e.printStackTrace();
-                }
+    log.error("Error guardant la foto {} de la reserva #{}",
+            i + 1, reserva != null ? reserva.getCodiReserva() : null, e);
+}
             }
         }
         return rutes.toString().trim();
@@ -266,7 +296,7 @@ public class reservesService {
         r.setHoraLliurament(horaLliurament != null ? horaLliurament : LocalTime.now());
         r.setEstat(EN_CURS);
 
-        String rutesFotos = guardarFotos(codi, fotos, "lliurament");
+        String rutesFotos = guardarFotos(r, fotos, "lliurar");
 
         StringBuilder obs = new StringBuilder();
         if (r.getObservacions() != null && !r.getObservacions().isBlank()) {
@@ -287,7 +317,10 @@ public class reservesService {
         }
 
         r.setObservacions(obs.toString());
-        return reservesRepository.save(r);
+        reservesEntity guardada = reservesRepository.save(r);
+        log.info("Reserva #{} lliurada: vehicle {} a client {}",
+                codi, r.getVehicle().getMatricula(), r.getClient().getDni());
+        return guardada;
     }
 
     @Transactional
@@ -330,7 +363,7 @@ public class reservesService {
             fiancaARetornar = BigDecimal.ZERO;
         }
 
-        String rutesFotos = guardarFotos(codi, fotos, "retorn");
+        String rutesFotos = guardarFotos(r, fotos, "retornar");
 
         StringBuilder obs = new StringBuilder();
         if (r.getObservacions() != null && !r.getObservacions().isBlank()) {
@@ -340,6 +373,8 @@ public class reservesService {
 
         if (horesRetard > 0) {
             obs.append("Retard: ").append(horesRetard).append("h (-").append(penalitzacioRetard).append("€). ");
+            log.warn("Reserva #{} retornada amb {}h de retard (penalització {}€)",
+                    codi, horesRetard, penalitzacioRetard);
         }
         if (teDesperfectes) {
             if (desperfectesImputables) {
@@ -347,6 +382,8 @@ public class reservesService {
             } else {
                 obs.append("Danys no imputables (avaria/tercers, 0€ càrrec). ");
             }
+            log.warn("Reserva #{} retornada amb desperfectes (imputables: {}, import: {}€)",
+                    codi, desperfectesImputables, carrecDanys);
         }
         if (carrecCombustible.compareTo(BigDecimal.ZERO) > 0) {
             obs.append("Carburant no retornat complet (-").append(carrecCombustible).append("€). ");
@@ -355,7 +392,8 @@ public class reservesService {
         if (!rutesFotos.isBlank()) {
             obs.append("Fotos retorn: ").append(rutesFotos).append(". ");
         }
-        obs.append("Resum fiança: ").append(fiancaOriginal).append("€ | Deduccions: ").append(totalDeduccions).append("€ | Retorn final: ").append(fiancaARetornar).append("€. ");
+        obs.append("Resum fiança: ").append(fiancaOriginal).append("€ | Deduccions: ")
+                .append(totalDeduccions).append("€ | Retorn final: ").append(fiancaARetornar).append("€. ");
 
         if (novesObservacions != null && !novesObservacions.isBlank()) {
             obs.append("Descripció: ").append(novesObservacions.trim());
@@ -364,7 +402,9 @@ public class reservesService {
         r.setObservacions(obs.toString());
         r.setEstat(FINALITZADA);
 
-        return reservesRepository.save(r);
+        reservesEntity guardada = reservesRepository.save(r);
+        log.info("Reserva #{} finalitzada. Fiança retornada: {}€", codi, fiancaARetornar);
+        return guardada;
     }
 
     public long comptarPendentsLliurament() {

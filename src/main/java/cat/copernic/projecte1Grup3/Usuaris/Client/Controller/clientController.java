@@ -235,4 +235,5 @@ public String editar(@PathVariable String dni,
         }
         return "redirect:/registre";
     }
+    
 }

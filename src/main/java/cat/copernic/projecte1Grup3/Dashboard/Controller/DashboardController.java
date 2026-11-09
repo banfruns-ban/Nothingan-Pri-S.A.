@@ -11,6 +11,7 @@ import cat.copernic.projecte1Grup3.Vehicles.Service.VehiclesService;
 @Controller
 public class DashboardController {
 
+    //referencias
     private final reservesService reservesLogic;
     private final clientService clientLogic;
     private final VehiclesService vehiclesLogic;
@@ -25,10 +26,11 @@ public class DashboardController {
 
     @GetMapping({"/dashboard"})
     public String mostrarDashboard(Model model) {
-        long pendentsLliurament = reservesLogic.comptarPendentsLliurament();
-        long pendentsRetorn = reservesLogic.comptarPendentsRetorn();
-        long vehiclesActius = reservesLogic.vehiclesActius().size();
-        long clientsTotals = clientLogic.llistar(null, null, null, null, null).size();
+        long pendentsLliurament = reservesLogic.comptarPendentsLliurament();  // PENDENT o CONFIRMADA
+        long pendentsRetorn = reservesLogic.comptarPendentsRetorn();          // EN CURS
+        long vehiclesActius = reservesLogic.vehiclesActius().size();          // Total llista vehicles
+        long clientsTotals = clientLogic.llistar(null, null, null, null, null).size(); 
+        // Llista clients sense filtres
 
         model.addAttribute("pendentsLliurament", pendentsLliurament);
         model.addAttribute("pendentsRetorn", pendentsRetorn);
@@ -36,8 +38,9 @@ public class DashboardController {
         model.addAttribute("clientsTotals", clientsTotals);
 
         model.addAttribute("propersLliuraments", reservesLogic.llistarPropersLliuraments());
-
-        // Apunta a templates/dashboard/dashboard.html
+        // Llista proximes 10 entregues (limit 10) que no sean ni CANCELADA ni FINALITZADA
+        // Retorna el que están EN CURS i els PENDENTS O CONFIRMATS mes propers
         return "dashboard/dashboard";
+        // Apunta a templates/dashboard/dashboard.html
     }
 }

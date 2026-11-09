@@ -2,10 +2,10 @@ package cat.copernic.projecte1Grup3.Vehicles.Service;
 
 import cat.copernic.projecte1Grup3.Vehicles.Entity.VehiclesEntity;
 import cat.copernic.projecte1Grup3.Vehicles.Repository.VehiclesRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -72,7 +72,6 @@ public class VehiclesService {
         vehiclesRepository.deleteById(matricula);
     }
     
-        // Métodos a añadir en VehiclesService.java
     @Transactional(readOnly = true)
     public List<VehiclesEntity> llistarActius() {
         return vehiclesRepository.findByActiuTrue();
@@ -84,5 +83,17 @@ public class VehiclesService {
             return llistarActius();
         }
         return vehiclesRepository.findByActiuTrueAndTipusVehicle(tipus);
+    }
+
+    /**
+     * Retorna els vehicles disponibles tenint en compte les dates de la reserva i el tipus.
+     * Si les dates són nul·les, es mostren tots els vehicles actius per defecte.
+     */
+    @Transactional(readOnly = true)
+    public List<VehiclesEntity> llistarDisponibles(LocalDateTime dataInici, LocalDateTime dataFi, String tipus) {
+        if (dataInici == null || dataFi == null) {
+            return llistarActiusPerTipus(tipus);
+        }
+        return vehiclesRepository.llistarDisponiblesPerDatesYTipus(dataInici, dataFi, tipus);
     }
 }

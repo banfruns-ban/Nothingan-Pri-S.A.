@@ -59,13 +59,16 @@
         <div class="detail-card shadow-sm">
             <div class="row align-items-center pb-4 mb-4 border-bottom">
                 <div class="col-auto">
-                    <img th:if="${agent.foto != null and !agent.foto.isBlank()}" 
-                         th:src="@{'/uploads/agents/' + ${agent.foto}}" 
-                         alt="Foto Agent" class="profile-img-large"
-                         onerror="this.src='https://via.placeholder.com/110?text=User';">
-                    <img th:unless="${agent.foto != null and !agent.foto.isBlank()}" 
-                         src="https://via.placeholder.com/110?text=User" 
-                         alt="Foto Default" class="profile-img-large">
+                    <!-- Foto redona circular -->
+                    <img th:if="${agent.foto != null and !agent.foto.isBlank()}"
+                         th:src="@{'/uploads/agents/' + ${agent.foto}}"
+                         alt="Foto Agent" class="rounded-circle border shadow-sm" 
+                         style="width: 90px; height: 90px; object-fit: cover;">
+                    <div th:unless="${agent.foto != null and !agent.foto.isBlank()}" 
+                         class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold fs-3 shadow-sm" 
+                         style="width: 90px; height: 90px;">
+                        <span th:text="${agent.nom != null and !#strings.isEmpty(agent.nom) ? #strings.substring(agent.nom, 0, 1) : 'A'}">A</span>
+                    </div>
                 </div>
                 <div class="col">
                     <h3 class="fw-bold text-dark m-0" th:text="${agent.nom}">Joan Garcia i Soler</h3>

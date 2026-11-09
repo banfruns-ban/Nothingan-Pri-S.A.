@@ -273,8 +273,9 @@ public class reservesService {
                          .append(accio).append("/")
                          .append(filename).append(" ");
                 } catch (IOException e) {
-                    log.error("Error guardant la foto {} de la reserva #{}", i + 1, codiReserva, e);
-                }
+    log.error("Error guardant la foto {} de la reserva #{}",
+            i + 1, reserva != null ? reserva.getCodiReserva() : null, e);
+}
             }
         }
         return rutes.toString().trim();

@@ -7,7 +7,8 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Optional;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -29,6 +30,7 @@ import jakarta.validation.Valid;
 @Controller // Indica que la classe es un controlador **
 @RequestMapping("/dashboard/vehicles") // Base de las url de todas las rutas del doc
 public class VehiclesController {
+    private static final Logger log = LoggerFactory.getLogger(VehiclesController.class);
     private final VehiclesService vehiclesService;
     private final ressenyaService ressenyaLogic;
     @Autowired
@@ -121,6 +123,7 @@ public class VehiclesController {
                 Files.copy(file.getInputStream(), uploadPath.resolve(fileName), StandardCopyOption.REPLACE_EXISTING);
                 vehicle.setFoto(fileName);
             } catch (IOException e) {
+                log.error("Error pujant la foto del vehicle {}", vehicle.getMatricula(), e);
                 redirect.addFlashAttribute("error", "Error en carregar la imatge del vehicle.");
             }
         } else if (existeixBDD) {
@@ -129,8 +132,10 @@ public class VehiclesController {
         }
 
         vehiclesService.guardarVehicle(vehicle);
+        log.info("Vehicle {}: {}", existeixBDD ? "actualitzat" : "donat d'alta", vehicle.getMatricula());
         redirect.addFlashAttribute("succes", "Vehicle desat correctament.");
         return "redirect:/dashboard/vehicles";
+        
     }
 
     @PostMapping("/canviar-estat/{matricula}")
@@ -140,8 +145,11 @@ public class VehiclesController {
             RedirectAttributes redirect) {
         try {
             vehiclesService.canviarEstatActiu(matricula, actiu);
+            log.info("Vehicle {} marcat com a {}", matricula, actiu ? "actiu" : "inactiu");
+            
             redirect.addFlashAttribute("succes", "L'estat del vehicle s'ha actualitzat correctament.");
         } catch (Exception e) {
+              log.error("Error canviant l'estat del vehicle {}", matricula, e);
             redirect.addFlashAttribute("error", "Error en canviar l'estat del vehicle.");
         }
         return "redirect:/dashboard/vehicles";
@@ -151,10 +159,13 @@ public class VehiclesController {
     public String eliminarVehicle(@PathVariable("matricula") String matricula, RedirectAttributes redirect) {
         try {
             vehiclesService.eliminarVehicle(matricula);
+            log.warn("Vehicle eliminat: {}", matricula);
             redirect.addFlashAttribute("succes", "Vehicle eliminat amb èxit.");
         } catch (IllegalStateException e) {
+            log.warn("No s'ha pogut eliminar el vehicle {}: {}", matricula, e.getMessage());
             redirect.addFlashAttribute("error", e.getMessage());
         } catch (Exception e) {
+             log.error("Error eliminant el vehicle {}", matricula, e);
             redirect.addFlashAttribute("error", "Error en intentar eliminar el vehicle.");
         }
         return "redirect:/dashboard/vehicles";

@@ -9,6 +9,7 @@ package cat.copernic.projecte1Grup3.Usuaris.Agent.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import cat.copernic.projecte1Grup3.Usuaris.Agent.Entity.AgentEntity;         // Entidad con la que trabaja el servicio
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.beans.factory.annotation.Autowired;               // Inyección automática de dependencias
 import org.springframework.stereotype.Service;                               // Marca la clase como servicio
 import java.util.List;                                                       // Los métodos de listado devuelven varios agentes
@@ -23,6 +24,12 @@ import cat.copernic.projecte1Grup3.Usuaris.Agent.Repository.AgentRepository;
 // También deja claro que esta capa contiene la lógica de negocio.
 public class AgentService { // public: el controlador (otro paquete) tiene que poder usarla
     private static final Logger log = LoggerFactory.getLogger(AgentService.class);
+    private final PasswordEncoder passwordEncoder;
+
+    public AgentService(PasswordEncoder passwordEncoder) {
+        this.passwordEncoder = passwordEncoder;
+    }
+
     @Autowired // Inyecta la dependencia de la clase repository (pom y lo de arriba)
     // POR QUÉ: Spring busca un objeto del tipo AgentRepository y lo asigna aquí. Tú nunca haces "new",
     // lo que desacopla las clases.
@@ -41,6 +48,20 @@ public class AgentService { // public: el controlador (otro paquete) tiene que p
     // void: no devuelve nada, solo ejecuta. El parámetro es el agente a guardar.
     // public: el controlador tiene que poder llamarlo.
     public void guardarAgent(AgentEntity agent) {
+        Optional<AgentEntity> existent = agentRepository.findById(agent.getDni());
+        if (existent.isPresent()) {
+            String passwordGuardada = existent.get().getPassword();
+            String passwordRebuda = agent.getPassword();
+            if (passwordRebuda == null || passwordRebuda.isBlank()
+                    || passwordRebuda.equals(passwordGuardada)) {
+                agent.setPassword(passwordGuardada);
+            } else {
+                agent.setPassword(passwordEncoder.encode(passwordRebuda));
+            }
+        } else if (agent.getPassword() != null && !agent.getPassword().isBlank()) {
+            agent.setPassword(passwordEncoder.encode(agent.getPassword()));
+        }
+
         agentRepository.save(agent); 
         log.info("Agent donat d'alta: {}", agent);
         // Guarda o actualiza un registro en la base de datos, en un metodo de JPARepository

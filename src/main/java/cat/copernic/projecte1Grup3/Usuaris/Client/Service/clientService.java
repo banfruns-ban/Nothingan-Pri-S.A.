@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,12 +27,20 @@ public class clientService {
 
     private final clientRepository clientRepository;
     private final clientRepositoryMongo clientRepositoryMongo;
+    private final PasswordEncoder passwordEncoder;
 
     // Inyección de dependencias por constructor de ambos repositorios (Relacional + NoSQL)
     public clientService(clientRepository clientRepository,
                          clientRepositoryMongo clientRepositoryMongo) {
+        this(clientRepository, clientRepositoryMongo, new BCryptPasswordEncoder());
+    }
+
+    public clientService(clientRepository clientRepository,
+                         clientRepositoryMongo clientRepositoryMongo,
+                         PasswordEncoder passwordEncoder) {
         this.clientRepository = clientRepository;
         this.clientRepositoryMongo = clientRepositoryMongo;
+        this.passwordEncoder = passwordEncoder;
     }
 
     // ---------- LISTAR Y FILTRAR ----------
@@ -100,9 +110,11 @@ public class clientService {
         if (clientRepository.existsById(dni)) {
             throw new IllegalArgumentException("Ja existeix un client amb aquest DNI");
         }
-        if (client.getPassword() == null || client.getPassword().length() < 8) {
+        String password = client.getPassword();
+        if (password == null || password.length() < 8) {
             throw new IllegalArgumentException("La contrasenya ha de tenir com a mínim 8 caràcters");
         }
+        client.setPassword(passwordEncoder.encode(password));
         if (!hiHa(fotoDniFrontal) || !hiHa(fotoDniPosterior) || !hiHa(fotoCarnet)) {
             throw new IllegalArgumentException("Cal pujar les 3 imatges (PNG o JPG, màxim 5MB)");
         }
@@ -173,6 +185,9 @@ public void actualitzar(String dni, clientEntity dades, String estat, boolean pr
 
     c.setNom(dades.getNom());
     c.setEmail(email);
+    if (dades.getPassword() != null && !dades.getPassword().isBlank()) {
+        c.setPassword(passwordEncoder.encode(dades.getPassword()));
+    }
     c.setTelefon(dades.getTelefon());
     c.setNacionalitat(dades.getNacionalitat());
     c.setAdreca(dades.getAdreca());

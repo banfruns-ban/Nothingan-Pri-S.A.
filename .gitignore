@@ -7,6 +7,10 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
+# Logs del sistema (Archivos y carpeta de logs)
+logs/
+*.log
+
 # Archivos de configuración con contraseñas y datos sensibles
 src/main/resources/application.properties
 src/main/resources/application-*.properties
@@ -40,10 +44,8 @@ HELP.md
 /dist/
 /nbdist/
 /.nb-gradle/
+/nbproject/
 
 # Archivos del sistema operativo
 .DS_Store
 Thumbs.db
-src/main/resources/application.properties
-src/main/resources/application.properties
-/nbproject/

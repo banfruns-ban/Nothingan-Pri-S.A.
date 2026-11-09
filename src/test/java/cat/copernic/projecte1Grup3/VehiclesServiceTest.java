@@ -1,7 +1,8 @@
-package cat.copernic.projecte1Grup3.Vehicles.Service;
+package cat.copernic.projecte1Grup3;
 
 import cat.copernic.projecte1Grup3.Vehicles.Entity.VehiclesEntity;
 import cat.copernic.projecte1Grup3.Vehicles.Repository.VehiclesRepository;
+import cat.copernic.projecte1Grup3.Vehicles.Service.VehiclesService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nova Reserva - NOTHINGAN PRI S.A.</title>
     <!-- FontAwesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" th:href="@{/cataleg.css}">
     <link rel="stylesheet" th:href="@{/registre.css}">
+    <link rel="stylesheet" th:href="@{/ressenyes.css}">
 </head>
 <body>
 
@@ -23,7 +23,7 @@
 
         <div class="nav-header">
             <a th:href="@{/cataleg}">Catàleg</a>
-            <a th:href="@{/ReservesClient}">Les meves reserves</a>
+            <a th:href="@{/reserves-client}">Les meves reserves</a>
             
             <div style="display: flex; gap: 10px; align-items: center; margin-left: 12px;">
                 <a th:href="@{/login}" class="btn" style="background: transparent; color: #fff; border: 1px solid #334155; padding: 6px 14px; border-radius: 6px; font-weight: 600; font-size: 12px;">
@@ -64,7 +64,7 @@
             </div>
         </div>
 
-        <form th:action="@{/ReservesClient/guardar}" th:object="${reserva}" method="post" class="form-grid">
+        <form th:action="@{/reserves-client/guardar}" th:object="${reserva}" method="post" class="form-grid">
             
             <!-- Guardem la matrícula del vehicle -->
             <input type="hidden" name="vehicle.matricula" th:value="${vehicleSeleccionat != null ? vehicleSeleccionat.matricula : ''}">
@@ -107,6 +107,47 @@
                 </button>
             </div>
         </form>
+        <!-- ===================== RESSENYES ===================== -->
+<div th:if="${vehicleSeleccionat != null}" class="ressenyes-seccio">
+    <h3>Ressenyes d'aquest vehicle</h3>
+
+    <div th:if="${succes}" class="ressenya-succes">
+        <span th:text="${succes}"></span>
+    </div>
+
+    <form th:action="@{'/reserves-client/vehicle/' + ${vehicleSeleccionat.matricula} + '/resenyes'}"
+          method="post" class="ressenya-form">
+
+        <div class="rating">
+            <div class="rating">
+    <input type="radio" id="star5" name="puntuacio" value="5" required><label for="star5" title="5 estrelles">★</label>
+    <input type="radio" id="star4" name="puntuacio" value="4"><label for="star4" title="4 estrelles">★</label>
+    <input type="radio" id="star3" name="puntuacio" value="3"><label for="star3" title="3 estrelles">★</label>
+    <input type="radio" id="star2" name="puntuacio" value="2"><label for="star2" title="2 estrelles">★</label>
+    <input type="radio" id="star1" name="puntuacio" value="1"><label for="star1" title="1 estrella">★</label>
+</div>
+        </div>
+
+        <textarea name="comentari" rows="3" maxlength="500"
+                  placeholder="Explica la teva experiència (opcional)"></textarea>
+
+        <button type="submit" class="btn-enviar-registre">Publicar ressenya</button>
+    </form>
+
+    <p class="ressenya-buida" th:if="${resenyes == null or #lists.isEmpty(resenyes)}">Encara no hi ha ressenyes.</p>
+
+    <div th:each="r : ${resenyes}" class="ressenya-item">
+        <div class="ressenya-cap">
+            <strong th:text="${r.client.nom}">Client</strong>
+            <span class="ressenya-data" th:text="${#temporals.format(r.dataCreacio, 'dd/MM/yyyy')}">01/01/2026</span>
+        </div>
+        <div class="ressenya-estrelles">
+            <i th:each="i : ${#numbers.sequence(1, 5)}"
+               th:class="${i <= r.puntuacio} ? 'fa-solid fa-star' : 'fa-regular fa-star'"></i>
+        </div>
+        <p class="ressenya-text" th:if="${r.comentari != null}" th:text="${r.comentari}"></p>
+    </div>
+</div>
     </div>
 
 </body>

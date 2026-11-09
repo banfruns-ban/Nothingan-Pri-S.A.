@@ -22,7 +22,7 @@
 
         <div class="nav-header">
             <a th:href="@{/cataleg}" class="active">Catàleg</a>
-            <a th:href="@{/ReservesClient}">Les meves reserves</a>
+            <a th:href="@{/reserves-client}">Les meves reserves</a>
             
             <div class="accés-usuaris">
                 <a th:href="@{/login}" class="btn btn-login">
@@ -40,12 +40,14 @@
         <form th:action="@{/cataleg}" method="get" class="form-filtres">
             <div class="grup-filtre">
                 <label>Data inici</label>
-                <input type="datetime-local" name="dataInici" th:value="${dataInici}">
+                <input type="datetime-local" name="dataInici" 
+                       th:value="${dataInici != null ? #temporals.format(dataInici, 'yyyy-MM-dd''T''HH:mm') : ''}">
             </div>
 
             <div class="grup-filtre">
                 <label>Data fi</label>
-                <input type="datetime-local" name="dataFi" th:value="${dataFi}">
+                <input type="datetime-local" name="dataFi" 
+                       th:value="${dataFi != null ? #temporals.format(dataFi, 'yyyy-MM-dd''T''HH:mm') : ''}">
             </div>
 
             <div class="grup-filtre">
@@ -59,7 +61,10 @@
                 </select>
             </div>
 
-            <button type="submit" class="btn-cercar">Cercar disponibles</button>
+            <div class="grup-botons-filtre">
+                <button type="submit" class="btn-cercar">Cercar disponibles</button>
+                <a th:href="@{/cataleg}" class="btn-netejar">Netejar filtres</a>
+            </div>
         </form>
     </div>
 
@@ -75,13 +80,13 @@
 
             <div class="bloc-recollida">
                 <small>Recollida</small>
-                <p th:text="${dataInici != null ? dataInici : '-'}"></p>
+                <p th:text="${dataInici != null ? #temporals.format(dataInici, 'dd/MM/yyyy HH:mm') : '-'}"></p>
                 <span>Oficina Terrassa Centre</span>
             </div>
 
             <div class="bloc-recollida">
                 <small>Retorn</small>
-                <p th:text="${dataFi != null ? dataFi : '-'}"></p>
+                <p th:text="${dataFi != null ? #temporals.format(dataFi, 'dd/MM/yyyy HH:mm') : '-'}"></p>
                 <span>Oficina Terrassa Centre</span>
             </div>
         </aside>
@@ -119,7 +124,7 @@
                             </div>
                         </div>
 
-                        <a th:href="@{/ReservesClient/nova(matricula=${v.matricula})}" class="btn-reservar">
+                        <a th:href="@{/reserves-client/nova(matricula=${v.matricula})}" class="btn-reservar">
                             Reservar vehicle
                         </a>
                     </div>

@@ -238,7 +238,7 @@ public class reservesService {
         // Construcció del nom de la carpeta del vehicle
         String carpetaVehicle = "vehicle_desconegut";
         if (reserva != null && reserva.getVehicle() != null) {
-            String matricula = (reserva.getVehicle().getMatricula() != null) 
+            String matricula = (reserva.getVehicle().getMatricula() != null)
                     ? reserva.getVehicle().getMatricula() : "S-MATRICULA";
             String marcaModel = (reserva.getVehicle().getMarca() + "_" + reserva.getVehicle().getModel())
                     .replaceAll("[^a-zA-Z0-9_-]", "_");
@@ -269,13 +269,13 @@ public class reservesService {
                     Files.copy(foto.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
                     rutes.append("/uploads/vehicles/")
-                         .append(carpetaVehicle).append("/")
-                         .append(accio).append("/")
-                         .append(filename).append(" ");
+                            .append(carpetaVehicle).append("/")
+                            .append(accio).append("/")
+                            .append(filename).append(" ");
                 } catch (IOException e) {
-    log.error("Error guardant la foto {} de la reserva #{}",
-            i + 1, reserva != null ? reserva.getCodiReserva() : null, e);
-}
+                    log.error("Error guardant la foto {} de la reserva #{}",
+                            i + 1, reserva != null ? reserva.getCodiReserva() : null, e);
+                }
             }
         }
         return rutes.toString().trim();
@@ -428,5 +428,31 @@ public class reservesService {
                         .thenComparing(reservesEntity::getHoraInici))
                 .limit(10)
                 .toList();
+    }
+
+    // ============================================================
+    // RF91: MÈTODE PER FILTRAR RESERVES PER CLIENTS
+    // ============================================================
+    /**
+     * Retorna la llista de reserves filtrades per una llista de DNIs de
+     * clients. Si la llista de DNIs és null o està buida, retorna totes les
+     * reserves de l'històric.
+     */
+    public List<reservesEntity> llistarReservesPerClients(List<String> dnisClients) {
+        if (dnisClients == null || dnisClients.isEmpty()) {
+            return reservesRepository.findAll();
+        }
+
+        // Filtrem entrades buides o espais en blanc i converteix a majúscules/trim
+        List<String> dnisNets = dnisClients.stream()
+                .filter(dni -> dni != null && !dni.isBlank())
+                .map(String::trim)
+                .toList();
+
+        if (dnisNets.isEmpty()) {
+            return reservesRepository.findAll();
+        }
+
+        return reservesRepository.findByClientDniIn(dnisNets);
     }
 }

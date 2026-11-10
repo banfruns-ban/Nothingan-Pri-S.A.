@@ -161,7 +161,7 @@ public class reservesController {
             log.error("Error eliminant la reserva {}", codi, e);
             ra.addFlashAttribute("error", "No s'ha pogut eliminar la reserva");
         }
-        return "redirect:/dashboard/reserves";
+        return "redirect:/dashboard";
     }
 
     // GET: Obrir pantalla de lliurament
@@ -170,12 +170,12 @@ public class reservesController {
         Optional<reservesEntity> optReserva = reservesLogic.obtenir(codi);
         if (optReserva.isEmpty()) {
             ra.addFlashAttribute("error", "Reserva #" + codi + " no trobada.");
-            return "redirect:/dashboard/reserves";
+            return "redirect:/dashboard";
         }
         reservesEntity r = optReserva.get();
         if (reservesService.EN_CURS.equals(r.getEstat()) || reservesService.FINALITZADA.equals(r.getEstat()) || reservesService.CANCELADA.equals(r.getEstat())) {
             ra.addFlashAttribute("error", "No es pot lliurar una reserva en estat " + r.getEstat());
-            return "redirect:/dashboard/reserves";
+            return "redirect:/dashboard";
         }
         model.addAttribute("reserva", r);
         return "reserves/lliurarReserva";
@@ -198,7 +198,7 @@ public class reservesController {
             log.error("Error lliurant la reserva {}", codi, e);
             ra.addFlashAttribute("error", "No s'ha pogut lliurar la reserva #" + codi);
         }
-        return "redirect:/dashboard/reserves";
+        return "redirect:/dashboard";
     }
 
     // GET: Obrir pantalla de retorn
@@ -207,12 +207,12 @@ public class reservesController {
         Optional<reservesEntity> optReserva = reservesLogic.obtenir(codi);
         if (optReserva.isEmpty()) {
             ra.addFlashAttribute("error", "Reserva #" + codi + " no trobada.");
-            return "redirect:/dashboard/reserves";
+            return "redirect:/dashboard";
         }
         reservesEntity r = optReserva.get();
         if (!reservesService.EN_CURS.equals(r.getEstat())) {
             ra.addFlashAttribute("error", "Només es poden retornar vehicles de reserves en estat EN_CURS.");
-            return "redirect:/dashboard/reserves";
+            return "redirect:/dashboard";
         }
         model.addAttribute("reserva", r);
         model.addAttribute("dataAvui", LocalDate.now());
@@ -255,6 +255,6 @@ public class reservesController {
             log.error("Error processant el retorn de la reserva {}", codi, e);
             ra.addFlashAttribute("error", "Error en intentar processar el retorn de la reserva #" + codi);
         }
-        return "redirect:/dashboard/reserves";
+        return "redirect:/dashboard";
     }
 }

@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Informe de reserves per client</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" th:href="@{/informes.css}">
 </head>
 
@@ -16,11 +17,11 @@
             <span>PANEL DE CONTROL AGENT</span>
         </div>
         <nav>
-            <a class="nav-link" th:href="@{/dashboard}">Dashboard</a>
-            <a class="nav-link" th:href="@{/dashboard/vehicles}">Flota de Vehicles</a>
-            <a class="nav-link" th:href="@{/dashboard/clients}">Gestió de Clients</a>
-            <a class="nav-link" th:href="@{/dashboard/reserves}">Reserves</a>
-            <a class="nav-link active" th:href="@{/dashboard/informes/reserves}" aria-current="page">Informes</a>
+            <a class="nav-link" th:href="@{/dashboard}"><i class="fa-solid fa-border-all"></i> Dashboard</a>
+            <a class="nav-link" th:href="@{/dashboard/vehicles}"><i class="fa-solid fa-car"></i> Flota de Vehicles</a>
+            <a class="nav-link" th:href="@{/dashboard/clients}"><i class="fa-solid fa-users"></i> Gestió de Clients</a>
+            <a class="nav-link" th:href="@{/dashboard/reserves}"><i class="fa-regular fa-calendar-check"></i> Reserves</a>
+            <a class="nav-link active" th:href="@{/dashboard/informes/reserves}" aria-current="page"><i class="fa-solid fa-chart-line"></i> Informes</a>
         </nav>
     </aside>
 
@@ -45,8 +46,8 @@
             </select>
             <span class="help">Ctrl/Cmd + clic per seleccionar-ne més d'un. Sense selecció: tots els clients.</span>
             <div class="filter-actions">
-                <button type="submit" class="btn-generar" id="btnGenerar">Generar informe</button>
-                <a class="btn-secundari" th:href="@{/dashboard/informes/reserves}">Netejar</a>
+                <button type="submit" class="btn-generar" id="btnGenerar"><i class="fa-solid fa-chart-column"></i> Generar informe</button>
+                <a class="btn-secundari" th:href="@{/dashboard/informes/reserves}"><i class="fa-solid fa-rotate-left"></i> Netejar</a>
             </div>
         </form>
 

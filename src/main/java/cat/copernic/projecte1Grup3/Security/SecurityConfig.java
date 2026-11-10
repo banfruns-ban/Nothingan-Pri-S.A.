@@ -12,9 +12,11 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.savedrequest.RequestCache;
+import org.springframework.security.web.savedrequest.SavedRequest;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 @Configuration
 public class SecurityConfig {
@@ -56,6 +58,8 @@ public class SecurityConfig {
     AuthenticationSuccessHandler customSuccessHandler(RequestCache requestCache) {
         return (HttpServletRequest request, HttpServletResponse response, Authentication authentication) -> {
             String contextPath = request.getContextPath();
+            
+            // Comproveu si l'usuari és ADMIN o AGENT per enviar-lo al dashboard
             for (GrantedAuthority authority : authentication.getAuthorities()) {
                 String role = authority.getAuthority();
                 if (role.equals("ROLE_ADMIN") || role.equals("ROLE_AGENT")) {
@@ -64,7 +68,16 @@ public class SecurityConfig {
                 }
             }
             
-            response.sendRedirect(contextPath + "/cataleg");
+            // Per a clients: recuperem la URL prèvia que intentava visitar (si existeix)
+            SavedRequest savedRequest = requestCache.getRequest(request, response);
+            if (savedRequest != null) {
+                String targetUrl = savedRequest.getRedirectUrl();
+                response.sendRedirect(targetUrl);
+                return;
+            }
+            
+            // Per defecte si no venia de cap lloc específic, va al catàleg
+            response.sendRedirect(contextPath + "/home");
         };
     }
 

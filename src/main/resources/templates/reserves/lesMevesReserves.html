@@ -7,7 +7,7 @@
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" th:href="@{/cataleg.css}">
-    <link rel="stylesheet" th:href="@{/reserves-client.css}">
+    <link rel="stylesheet" th:href="@{/reservesClient.css}">
 </head>
 <body>
 
@@ -26,12 +26,12 @@
             <a th:href="@{/reserves-client}" class="active">Les meves reserves</a>
             
             <div class="accés-usuaris">
-                <a th:href="@{/login}" class="btn btn-login">
-                    Iniciar sessió
-                </a>
-                <a th:href="@{/registre}" class="btn btn-registre">
-                    Registrar-se
-                </a>
+                <!-- Botó de Tancar Sessió (Formulari POST compatible amb Spring Security) -->
+                <form th:action="@{/logout}" method="post" style="display: inline;">
+                    <button type="submit" class="btn btn-login" style="cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                        <i class="fa-solid fa-right-from-bracket"></i> Tancar sessió
+                    </button>
+                </form>
             </div>
         </div>
     </header>
@@ -68,13 +68,13 @@
                 </thead>
                 <tbody>
                     <tr th:if="${reserves == null or #lists.isEmpty(reserves)}">
-                        <td colspan="7" class="sense-reserves-msg">
-                            No tens cap reserva realitzada actualment. <a th:href="@{/cataleg}">Explorar el catàleg</a>
+                        <td colspan="7" class="text-center py-4">
+                            No tens cap reserva realitzada actualment. <a th:href="@{/cataleg}" class="fw-bold">Explorar el catàleg</a>
                         </td>
                     </tr>
 
                     <tr th:each="r : ${reserves}">
-                        <td class="codi-reserva" th:text="${'#' + r.codiReserva}"></td>
+                        <td class="codi-reserva fw-bold" th:text="${'#' + r.codiReserva}"></td>
                         <td>
                             <div class="vehicle-info">
                                 <strong th:text="${r.vehicle != null ? (r.vehicle.marca + ' ' + r.vehicle.model) : '-'}"></strong>
@@ -88,7 +88,7 @@
                                 <span th:text="${#temporals.format(r.dataFi, 'dd/MM/yyyy')} + ' (' + ${r.horaFi} + ')'"></span>
                             </div>
                         </td>
-                        <td class="preu-total" th:text="${#numbers.formatDecimal(r.costTotal, 1, 2) + ' €'}"></td>
+                        <td class="preu-total fw-bold" th:text="${#numbers.formatDecimal(r.costTotal, 1, 2) + ' €'}"></td>
                         <td th:text="${#numbers.formatDecimal(r.fianca, 1, 2) + ' €'}"></td>
                         <td>
                             <span class="badge-estat" 

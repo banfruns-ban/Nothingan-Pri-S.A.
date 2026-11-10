@@ -15,32 +15,7 @@
     <body class="bg-light">
 
         <!-- Sidebar Lateral -->
-        <aside class="sidebar">
-            <div class="brand">
-                NOTHINGAN PRI S.A
-                <span>PANEL DE CONTROL AGENT</span>
-            </div>
-            <nav class="mt-3">
-                <a th:href="@{/dashboard}" class="nav-link">
-                    <i class="fa-solid fa-border-all"></i> Dashboard
-                </a>
-                <a th:href="@{/dashboard/vehicles}" class="nav-link">
-                    <i class="fa-solid fa-car"></i> Flota de Vehicles
-                </a>
-                <a th:href="@{/dashboard/agents/llista}" class="nav-link">
-                    <i class="fa-solid fa-user-gear"></i> Gestió d'Agents
-                </a>
-                <a th:href="@{/dashboard/clients}" class="nav-link">
-                    <i class="fa-solid fa-users"></i> Gestió de Clients
-                </a>
-                <a th:href="@{/dashboard/reserves}" class="nav-link active">
-                    <i class="fa-regular fa-calendar-check"></i> Reserves Actives
-                </a>
-                <a th:href="@{/dashboard/informes/reserves}" class="nav-link">
-                    <i class="fa-solid fa-chart-line"></i> Informes de Reserves
-                </a>
-            </nav>
-        </aside>
+        <div th:replace="~{fragments/sidebar :: sidebar}"></div>
 
         <!-- Main Content -->
         <main class="main-content p-4">

@@ -1,7 +1,9 @@
-package cat.copernic.projecte1Grup3.Usuaris.Agent.Service;
+package cat.copernic.projecte1Grup3;
 
 import cat.copernic.projecte1Grup3.Usuaris.Agent.Entity.AgentEntity;
 import cat.copernic.projecte1Grup3.Usuaris.Agent.Repository.AgentRepository;
+import cat.copernic.projecte1Grup3.Usuaris.Agent.Service.AgentService;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

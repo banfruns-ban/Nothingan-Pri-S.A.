@@ -17,10 +17,23 @@ body {
     background-color: var(--sidebar-bg);
     color: #9ca3af;
     min-height: 100vh;
+    display: flex;
+    flex-direction: column;
     position: fixed;
     top: 0;
     left: 0;
     z-index: 100;
+}
+
+.sidebar nav {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+}
+
+.sidebar nav form {
+    margin-top: auto;
+    padding-bottom: 12px;
 }
 
 .sidebar .brand {

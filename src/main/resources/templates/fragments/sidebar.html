@@ -27,6 +27,11 @@
             <a th:href="@{/dashboard/informes/reserves}" class="nav-link">
                 <i class="fa-solid fa-chart-line"></i> Informes de Reserves
             </a>
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" class="nav-link nav-link-button">
+                    <i class="fa-solid fa-right-from-bracket"></i> Tancar sessió
+                </button>
+            </form>
         </nav>
     </aside>
 

@@ -43,11 +43,10 @@ body {
 .sidebar .brand span {
     display: block;
     font-size: 0.75rem;
-    color: #9ca3af;
+    color: #6b7280;
     font-weight: 400;
     margin-top: 2px;
 }
-.sidebar nav { padding-top: 8px; }
 .sidebar .nav-link {
     color: #9ca3af;
     padding: 12px 20px;
@@ -103,37 +102,16 @@ body {
     font-size: 0.85rem;
     font-weight: 600;
     color: #374151;
-    margin-bottom: 6px;
+    margin-bottom: 0.5rem;
 }
 .filter-card select {
     width: 100%;
     max-width: 480px;
     height: 130px;
-    padding: 6px;
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
-    font: inherit;
-    font-size: 0.9rem;
 }
-.filter-card .help { display: block; margin-top: 6px; font-size: 0.8rem; color: var(--text-muted); }
-.filter-actions { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
-
-.btn-generar, .btn-secundari {
-    font: inherit;
-    font-size: 0.9rem;
-    font-weight: 600;
-    padding: 9px 18px;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    text-decoration: none;
-    display: inline-block;
-}
-.btn-generar { background: var(--sidebar-active); color: #ffffff; }
-.btn-generar:hover { background: #1e40af; }
-.btn-generar:disabled { opacity: .6; cursor: wait; }
-.btn-secundari { background: #f3f4f6; color: #374151; }
-.btn-secundari:hover { background: #e5e7eb; }
+.filter-card .help { display: block; margin-top: 0.25rem; font-size: 0.8rem; color: var(--text-muted); }
+.filter-actions { display: flex; gap: 0.5rem; margin-top: 1rem; flex-wrap: wrap; }
+#btnGenerar:disabled { cursor: wait; }
 
 a:focus-visible, button:focus-visible, select:focus-visible {
     outline: 3px solid #93c5fd;
@@ -237,7 +215,3 @@ tr.cancelled td.struck { text-decoration: line-through; color: #9ca3af; }
     .custom-table-card { overflow-x: auto; }
     .table { min-width: 640px; }
 }
-
-/* ---------- Icones FontAwesome dins dels botons ---------- */
-.btn-generar i, .btn-secundari i { margin-right: 8px; }
-.sidebar .nav-link i { width: 18px; text-align: center; }

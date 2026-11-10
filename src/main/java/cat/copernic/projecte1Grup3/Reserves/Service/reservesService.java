@@ -38,7 +38,7 @@ public class reservesService {
     public static final String CONFIRMADA = "CONFIRMADA";
     public static final String EN_CURS = "EN_CURS";
     public static final String FINALITZADA = "FINALITZADA";
-    public static final String CANCELADA = "CANCELADA";
+    public static final String CANCELADA = "CANCELADA"; // O "ANULLADA" segons la teva base de dades
 
     private final reservesRepository reservesRepository;
     private final clientRepository clientRepository;
@@ -245,7 +245,6 @@ public class reservesService {
             carpetaVehicle = matricula + "_" + marcaModel;
         }
 
-        // Ruta completa: uploads/vehicles/1234ABC_Seat_Ibiza/lliurar/
         Path uploadPath = Paths.get("uploads", "vehicles", carpetaVehicle, accio).toAbsolutePath();
         File dir = uploadPath.toFile();
         if (!dir.exists()) {
@@ -431,19 +430,13 @@ public class reservesService {
     }
 
     // ============================================================
-    // RF91: MÈTODE PER FILTRAR RESERVES PER CLIENTS
+    // MÈTODE PER FILTRAR RESERVES PER CLIENTS (DNI)
     // ============================================================
-    /**
-     * Retorna la llista de reserves filtrades per una llista de DNIs de
-     * clients. Si la llista de DNIs és null o està buida, retorna totes les
-     * reserves de l'històric.
-     */
     public List<reservesEntity> llistarReservesPerClients(List<String> dnisClients) {
         if (dnisClients == null || dnisClients.isEmpty()) {
             return reservesRepository.findAll();
         }
 
-        // Filtrem entrades buides o espais en blanc i converteix a majúscules/trim
         List<String> dnisNets = dnisClients.stream()
                 .filter(dni -> dni != null && !dni.isBlank())
                 .map(String::trim)
@@ -454,5 +447,58 @@ public class reservesService {
         }
 
         return reservesRepository.findByClientDniIn(dnisNets);
+    }
+
+    // ============================================================
+    // MÈTODE PER CERCAR LES RESERVES D'UN CLIENT ESPECÍFIC
+    // ============================================================
+    public List<reservesEntity> buscarPerClient(String dni) {
+        if (dni == null || dni.isBlank()) {
+            return List.of();
+        }
+        return reservesRepository.findAll().stream()
+                .filter(r -> r.getClient() != null && dni.equalsIgnoreCase(r.getClient().getDni()))
+                .sorted(Comparator.comparing(reservesEntity::getCodiReserva).reversed())
+                .toList();
+    }
+
+    // ============================================================
+    // MÈTODE PER ANUL·LAR UNA RESERVA DES DE LA VISTA DE CLIENT
+    // ============================================================
+    @Transactional
+    public void anularReserva(Long codiReserva) {
+        reservesEntity r = reservesRepository.findById(codiReserva)
+                .orElseThrow(() -> new IllegalArgumentException("Reserva no trobada: #" + codiReserva));
+
+        if (FINALITZADA.equals(r.getEstat()) || EN_CURS.equals(r.getEstat()) || CANCELADA.equals(r.getEstat())) {
+            throw new IllegalArgumentException("Aquesta reserva ja no es pot anul·lar.");
+        }
+
+        r.setEstat(CANCELADA);
+        reservesRepository.save(r);
+        log.info("Reserva #{} anul·lada correctament.", codiReserva);
+    }
+
+    // ============================================================
+    // MÈTODE PER GUARDAR LA RESERVA DES DEL CLIENT
+    // ============================================================
+    @Transactional
+    public reservesEntity guardarReservaClient(reservesEntity reserva) {
+        if (reserva == null) {
+            throw new IllegalArgumentException("La reserva no pot ser nul·la");
+        }
+        
+        String dni = (reserva.getClient() != null) ? reserva.getClient().getDni() : null;
+        String matricula = (reserva.getVehicle() != null) ? reserva.getVehicle().getMatricula() : null;
+        
+        return crear(
+                dni,
+                matricula,
+                reserva.getDataInici(),
+                reserva.getHoraInici(),
+                reserva.getDataFi(),
+                reserva.getHoraFi(),
+                reserva.getObservacions()
+        );
     }
 }

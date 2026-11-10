@@ -25,12 +25,12 @@
             <a th:href="@{/reserves-client}">Les meves reserves</a>
             
             <div class="accés-usuaris">
-                <a th:href="@{/login}" class="btn btn-login">
-                    Iniciar sessió
-                </a>
-                <a th:href="@{/registre}" class="btn btn-registre">
-                    Registrar-se
-                </a>
+                <!-- Botó de Tancar Sessió (Formulari POST compatible amb Spring Security) -->
+                <form th:action="@{/logout}" method="post" style="display: inline;">
+                    <button type="submit" class="btn btn-login" style="cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                        <i class="fa-solid fa-right-from-bracket"></i> Tancar sessió
+                    </button>
+                </form>
             </div>
         </div>
     </header>

@@ -38,23 +38,38 @@ public class reserves {
         this.clientService = clientService;
     }
 
-    // Ruta: /reserves-client (Listado de mis reservas)
+    // Ruta: /reserves-client (Llistat de les meves reserves)
+    // Ruta: /reserves-client (Llistat de les meves reserves)
     @GetMapping
-    public String llistarReserves(HttpSession session, Model model, RedirectAttributes ra) {
-        // Control de autenticación: si no hay cliente en sesión, redirige al login
-        clientEntity clientLogueat = (clientEntity) session.getAttribute("clientLogueat");
-        if (clientLogueat == null) {
-            ra.addFlashAttribute("error", "Ha de iniciar sessió per veure les meves reserves.");
+    public String llistarReserves(Authentication authentication, Model model, RedirectAttributes ra) {
+        // Control d'autenticació amb Spring Security
+        if (authentication == null || !authentication.isAuthenticated()) {
+            ra.addFlashAttribute("error", "Heu d'iniciar sessió per veure les reserves.");
             return "redirect:/login";
         }
 
-        // Cargar solo las reservas del cliente autenticado
-        // model.addAttribute("reserves", reservesService.buscarPerClient(clientLogueat.getDni()));
+        // Obtenim l'email del client loguejat a través de Spring Security
+        String email = authentication.getName();
+
+        // Busquem el client corresponent a aquest email
+        clientEntity clientLogueat = clientService.llistar(null, null, null, email, null)
+                .stream()
+                .filter(client -> email.equalsIgnoreCase(client.getEmail()))
+                .findFirst()
+                .orElse(null);
+
+        if (clientLogueat == null) {
+            ra.addFlashAttribute("error", "No s'ha trobat el perfil del client.");
+            return "redirect:/login";
+        }
+
+        // Carregar les reserves del client autenticat pel seu DNI
+        model.addAttribute("reserves", reservesService.buscarPerClient(clientLogueat.getDni()));
 
         return "reserves/lesMevesReserves";
     }
 
-    // Ruta: /reserves-client/nova (Formulario de reserva)
+    // Ruta: /reserves-client/nova (Formulari de reserva)
     @GetMapping("/nova")
     public String formulariNovaReserva(
             @RequestParam(name = "matricula", required = false) String matricula,
@@ -66,12 +81,13 @@ public class reserves {
                 .stream()
                 .filter(client -> authentication.getName().equalsIgnoreCase(client.getEmail()))
                 .anyMatch(client -> "PENDENT".equals(client.getEstatValidacio()));
+        
         if (clientPendent) {
             ra.addFlashAttribute("error", "El teu compte està pendent de validació per un administrador. No pots realitzar reserves encara.");
             return "redirect:/cataleg";
         }
 
-        // Carga de vehicle seleccionat
+        // Càrrega del vehicle seleccionat
         if (matricula != null && !matricula.isBlank()) {
             Optional<VehiclesEntity> vehicleOpt = vehiclesService.buscarPerMatricula(matricula);
             if (vehicleOpt.isPresent()) {
@@ -103,15 +119,16 @@ public class reserves {
         }
 
         try {
-            // Asignar el cliente logueado a la reserva antes de guardar
-            // reserva.setClient(clientLogueat);
-            // reservesService.guardarReservaClient(reserva);
+            // Assignar el client logueat i guardar
+            reserva.setClient(clientLogueat);
+            reservesService.guardarReservaClient(reserva);
 
             ra.addFlashAttribute("missatge", "Reserva realitzada amb èxit!");
             return "redirect:/reserves-client";
         } catch (Exception e) {
             ra.addFlashAttribute("error", "No s'ha pogut realitzar la reserva: " + e.getMessage());
-            return "redirect:/reserves-client/nova?matricula=" + (reserva.getVehicle() != null ? reserva.getVehicle().getMatricula() : "");
+            String matriculaParam = (reserva.getVehicle() != null) ? reserva.getVehicle().getMatricula() : "";
+            return "redirect:/reserves-client/nova?matricula=" + matriculaParam;
         }
     }
 
@@ -128,6 +145,8 @@ public class reserves {
         }
 
         try {
+            // Afegida la lògica per gestionar l'anul·lació a través del servei
+            reservesService.anularReserva(codiReserva);
             ra.addFlashAttribute("missatge", "La reserva #" + codiReserva + " s'ha anul·lat correctament.");
         } catch (Exception e) {
             ra.addFlashAttribute("error", "No s'ha pogut anul·lar la reserva: " + e.getMessage());

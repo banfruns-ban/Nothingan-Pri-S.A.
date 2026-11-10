@@ -75,5 +75,3 @@ public class AgentEntity extends usuariEntity { // Un agente ES un usuario: here
         this.rol = rol;
     }
 }
-
-// guardar en minuscula, nombres de las clases, repasar arquitectura4<<<<<<<<<<<<<<<<<QWW

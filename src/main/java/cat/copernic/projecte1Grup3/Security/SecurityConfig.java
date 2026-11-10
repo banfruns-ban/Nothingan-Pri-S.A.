@@ -73,7 +73,7 @@ public class SecurityConfig {
                     return;
                 }
             }
-<<<<<<< Updated upstream
+
             
             // Per a clients: recuperem la URL prèvia que intentava visitar (si existeix)
             SavedRequest savedRequest = requestCache.getRequest(request, response);
@@ -84,11 +84,9 @@ public class SecurityConfig {
             }
             
             // Per defecte si no venia de cap lloc específic, va al catàleg
-            response.sendRedirect(contextPath + "/home");
-=======
-
             response.sendRedirect(contextPath + "/cataleg");
->>>>>>> Stashed changes
+
+           
         };
     }
 

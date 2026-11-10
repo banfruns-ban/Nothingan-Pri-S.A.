@@ -42,7 +42,7 @@ public class SecurityConfig {
                 .loginPage("/login")
                 .successHandler(customSuccessHandler(requestCache()))
                 .permitAll())
-                .logout(logout -> logout.logoutSuccessUrl("/login?logout").permitAll())
+                .logout(logout -> logout.logoutSuccessUrl("/home").permitAll())
                 .exceptionHandling(exceptions -> exceptions
                 .accessDeniedHandler((request, response, exception) -> {
                     if (request.getRequestURI().startsWith(request.getContextPath() + "/dashboard")) {

@@ -1,11 +1,8 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package cat.copernic.projecte1Grup3.Ressenya.Controller;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,7 +12,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import cat.copernic.projecte1Grup3.Ressenya.Service.ressenyaService;
 import cat.copernic.projecte1Grup3.Usuaris.Client.Entity.clientEntity;
 import cat.copernic.projecte1Grup3.Usuaris.Client.Repository.clientRepository;
-import org.springframework.security.core.Authentication;
 
 @Controller
 public class ressenyaController {
@@ -54,12 +50,20 @@ public class ressenyaController {
     public String altaClient(@PathVariable String matricula,
                              @RequestParam int puntuacio,
                              @RequestParam(required = false) String comentari,
+                             @RequestParam(required = false) Long codiReserva,
                              Authentication auth,
                              RedirectAttributes ra) {
         try {
-            log.info("Reseña: auth.getName() = '{}'", auth.getName());
-            clientEntity client = clientRepository.findByEmailIgnoreCase(auth.getName())
+            if (auth == null || !auth.isAuthenticated()) {
+                throw new IllegalArgumentException("Cal iniciar sessió com a client");
+            }
+            String id = auth.getName().trim();
+
+            // El login pot ser l'email o el DNI
+            clientEntity client = clientRepository.findByEmailIgnoreCase(id)
+                    .or(() -> clientRepository.findById(id.toUpperCase()))
                     .orElseThrow(() -> new IllegalArgumentException("Cal iniciar sessió com a client"));
+
             resenyesLogic.crear(matricula, client.getDni(), puntuacio, comentari);
             ra.addFlashAttribute("succes", "Gràcies per la teva ressenya");
         } catch (IllegalArgumentException e) {
@@ -68,7 +72,11 @@ public class ressenyaController {
             log.error("Error creant la ressenya del client", e);
             ra.addFlashAttribute("error", "No s'ha pogut crear la ressenya");
         }
-        return "redirect:/reserves-client/nova?matricula=" + matricula;
+
+        // Torna a la fitxa de valorar si venim d'allà; si no, al formulari de reserva
+        return codiReserva != null
+                ? "redirect:/reserves-client/valorar/" + codiReserva
+                : "redirect:/reserves-client/nova?matricula=" + matricula;
     }
 
     @PostMapping("/dashboard/vehicles/{matricula}/resenyes/{codi}/eliminar")

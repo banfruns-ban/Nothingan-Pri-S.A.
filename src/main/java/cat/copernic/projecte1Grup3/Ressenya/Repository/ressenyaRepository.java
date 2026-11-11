@@ -15,6 +15,6 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface ressenyaRepository extends JpaRepository<ressenyaEntity, Long> {
-
+boolean existsByVehicleMatriculaAndClientDni(String matricula, String dni);
     List<ressenyaEntity> findByVehicleMatriculaOrderByDataCreacioDesc(String matricula);
 }

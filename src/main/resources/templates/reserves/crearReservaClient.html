@@ -8,6 +8,7 @@
     <link rel="stylesheet" th:href="@{/cataleg.css}">
     <link rel="stylesheet" th:href="@{/registre.css}">
     <link rel="stylesheet" th:href="@{/ressenyes.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 
@@ -115,24 +116,7 @@
         <span th:text="${succes}"></span>
     </div>
 
-    <form th:action="@{'/reserves-client/vehicle/' + ${vehicleSeleccionat.matricula} + '/resenyes'}"
-          method="post" class="ressenya-form">
-
-        <div class="rating">
-            <div class="rating">
-    <input type="radio" id="star5" name="puntuacio" value="5" required><label for="star5" title="5 estrelles">★</label>
-    <input type="radio" id="star4" name="puntuacio" value="4"><label for="star4" title="4 estrelles">★</label>
-    <input type="radio" id="star3" name="puntuacio" value="3"><label for="star3" title="3 estrelles">★</label>
-    <input type="radio" id="star2" name="puntuacio" value="2"><label for="star2" title="2 estrelles">★</label>
-    <input type="radio" id="star1" name="puntuacio" value="1"><label for="star1" title="1 estrella">★</label>
-</div>
-        </div>
-
-        <textarea name="comentari" rows="3" maxlength="500"
-                  placeholder="Explica la teva experiència (opcional)"></textarea>
-
-        <button type="submit" class="btn-enviar-registre">Publicar ressenya</button>
-    </form>
+   
 
     <p class="ressenya-buida" th:if="${resenyes == null or #lists.isEmpty(resenyes)}">Encara no hi ha ressenyes.</p>
 

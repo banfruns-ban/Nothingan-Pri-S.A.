@@ -85,19 +85,23 @@
                 <div class="row g-3 mb-3">
                     <div class="col-md-6">
                         <label for="dataInici" class="form-label">Data d'inici</label>
-                        <input type="date" id="dataInici" name="dataInici" class="form-control" required>
+                        <input type="date" id="dataInici" name="dataInici" class="form-control" required
+                               th:value="${dataInici != null ? #temporals.format(dataInici, 'yyyy-MM-dd') : ''}">
                     </div>
                     <div class="col-md-6">
                         <label for="horaInici" class="form-label">Hora d'inici</label>
-                        <input type="time" id="horaInici" name="horaInici" class="form-control" required>
+                        <input type="time" id="horaInici" name="horaInici" class="form-control" required
+                               th:value="${horaInici != null ? #temporals.format(horaInici, 'HH:mm') : ''}">
                     </div>
                     <div class="col-md-6">
                         <label for="dataFi" class="form-label">Data de fi</label>
-                        <input type="date" id="dataFi" name="dataFi" class="form-control" required>
+                        <input type="date" id="dataFi" name="dataFi" class="form-control" required
+                               th:value="${dataFi != null ? #temporals.format(dataFi, 'yyyy-MM-dd') : ''}">
                     </div>
                     <div class="col-md-6">
                         <label for="horaFi" class="form-label">Hora de fi</label>
-                        <input type="time" id="horaFi" name="horaFi" class="form-control" required>
+                        <input type="time" id="horaFi" name="horaFi" class="form-control" required
+                               th:value="${horaFi != null ? #temporals.format(horaFi, 'HH:mm') : ''}">
                     </div>
                 </div>
 
@@ -121,7 +125,8 @@
                 <div class="mb-4">
                     <label for="observacions" class="form-label">Observacions de la reserva (opcional)</label>
                     <textarea id="observacions" name="observacions" class="form-control" rows="3" 
-                              placeholder="Ex: El client recollirà el vehicle a l'oficina central..."></textarea>
+                              placeholder="Ex: El client recollirà el vehicle a l'oficina central..."
+                              th:text="${observacions}"></textarea>
                 </div>
 
                 <!-- Botons -->

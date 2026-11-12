@@ -147,7 +147,14 @@ public class reservesController {
             );
         }
 
-        return "redirect:/dashboard/reserves/nova?dni=" + dni;
+        ra.addFlashAttribute("dataInici", dataInici);
+        ra.addFlashAttribute("horaInici", horaInici);
+        ra.addFlashAttribute("dataFi", dataFi);
+        ra.addFlashAttribute("horaFi", horaFi);
+        ra.addFlashAttribute("observacions", observacions);
+        ra.addAttribute("dni", dni);
+        ra.addAttribute("matricula", matricula);
+        return "redirect:/dashboard/reserves/nova";
     }
 
     @PostMapping("/dashboard/reserves/{codi}/eliminar")

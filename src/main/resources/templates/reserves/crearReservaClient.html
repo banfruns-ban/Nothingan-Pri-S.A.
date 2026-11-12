@@ -83,35 +83,42 @@
         <form th:action="@{/reserves-client/guardar}" th:object="${reserva}" method="post" class="form-grid">
             
             <!-- Guardem la matrícula del vehicle -->
-            <input type="hidden" name="vehicle.matricula" th:value="${vehicleSeleccionat != null ? vehicleSeleccionat.matricula : ''}">
+            <input type="hidden" name="vehicle.matricula"
+                   th:value="${vehicleSeleccionat != null ? vehicleSeleccionat.matricula : (reserva.vehicle != null ? reserva.vehicle.matricula : '')}">
 
             <div class="seccio-títol">Període de Recollida i Devolució</div>
 
             <div class="form-grup">
                 <label>Data d'inici *</label>
-                <input type="date" name="dataInici" required th:value="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}">
+                <input type="date" name="dataInici" required
+                       th:value="${reserva.dataInici != null ? #temporals.format(reserva.dataInici, 'yyyy-MM-dd') : #temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}">
             </div>
 
             <div class="form-grup">
                 <label>Hora d'inici *</label>
-                <input type="time" name="horaInici" required value="09:00">
+                <input type="time" name="horaInici" required
+                       th:value="${reserva.horaInici != null ? #temporals.format(reserva.horaInici, 'HH:mm') : '09:00'}">
             </div>
 
             <div class="form-grup">
                 <label>Data de devolució *</label>
-                <input type="date" name="dataFi" required>
+                <input type="date" name="dataFi" required
+                       th:value="${reserva.dataFi != null ? #temporals.format(reserva.dataFi, 'yyyy-MM-dd') : ''}">
             </div>
 
             <div class="form-grup">
                 <label>Hora de devolució *</label>
-                <input type="time" name="horaFi" required value="19:00">
+                <input type="time" name="horaFi" required
+                       th:value="${reserva.horaFi != null ? #temporals.format(reserva.horaFi, 'HH:mm') : '19:00'}">
             </div>
 
             <div class="seccio-títol">Observacions addicionals</div>
 
             <div class="form-grup full-width">
                 <label>Comentaris o necessitats especials</label>
-                <input type="text" name="observacions" placeholder="Ex: Sella per a nadó, recollida en horari especial...">
+                <input type="text" name="observacions"
+                       placeholder="Ex: Sella per a nadó, recollida en horari especial..."
+                       th:value="${reserva.observacions}">
             </div>
 
             <div class="form-grup full-width" style="margin-top: 16px; display: flex; gap: 12px;">

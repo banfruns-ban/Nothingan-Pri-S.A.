@@ -110,6 +110,7 @@ public class reserves {
             return "redirect:/reserves-client";
         } catch (Exception e) {
             ra.addFlashAttribute("error", "No s'ha pogut realitzar la reserva: " + e.getMessage());
+            ra.addFlashAttribute("reserva", reserva);
             return "redirect:/reserves-client/nova?matricula=" + matricula;
         }
     }

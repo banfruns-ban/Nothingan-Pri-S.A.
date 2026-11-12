@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html lang="ca" xmlns:th="http://www.thymeleaf.org">
+<html lang="ca" 
+      xmlns:th="http://www.thymeleaf.org" 
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -19,8 +21,19 @@
             </div>
         </a>
         <div class="accions-usuari">
-            <a class="btn" th:href="@{/login}">Iniciar sessió</a>
-            <a class="btn btn-primari" th:href="@{/registre}">Registrar-se</a>
+            <!-- Si l'usuari NO ha iniciat sessió -->
+            <th:block sec:authorize="!isAuthenticated()">
+                <a class="btn" th:href="@{/login}">Iniciar sessió</a>
+                <a class="btn btn-primari" th:href="@{/registre}">Registrar-se</a>
+            </th:block>
+
+            <!-- Si l'usuari SÍ ha iniciat sessió -->
+            <th:block sec:authorize="isAuthenticated()">
+                <a class="btn" th:href="@{/reserves-client}">Les meves reserves</a>
+                <form th:action="@{/logout}" method="post" style="display: inline; margin: 0;">
+                    <button type="submit" class="btn btn-primari" style="cursor: pointer;">Tancar sessió</button>
+                </form>
+            </th:block>
         </div>
     </header>
 

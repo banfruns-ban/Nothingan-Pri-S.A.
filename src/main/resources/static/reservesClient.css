@@ -274,3 +274,22 @@
     .card-detall { flex-direction: column; }
     .card-detall img { width: 100%; }
 }
+
+.form-eliminar { margin-left: auto; }
+
+.btn-eliminar-resenya {
+    background: transparent;
+    border: 1px solid #fca5a5;
+    color: #dc2626;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-eliminar-resenya:hover {
+    background: #dc2626;
+    color: #fff;
+    border-color: #dc2626;
+}

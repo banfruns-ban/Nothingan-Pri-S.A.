@@ -94,4 +94,32 @@ public class ressenyaController {
         }
         return "redirect:/dashboard/vehicles/detall/" + matricula;
     }
+    // ---------- CLIENT (portal): eliminar la pròpia ressenya ----------
+@PostMapping("/reserves-client/vehicle/{matricula}/resenyes/{codi}/eliminar")
+public String eliminarClient(@PathVariable String matricula,
+                             @PathVariable Long codi,
+                             @RequestParam(required = false) Long codiReserva,
+                             Authentication auth,
+                             RedirectAttributes ra) {
+    try {
+        if (auth == null || !auth.isAuthenticated()) {
+            throw new IllegalArgumentException("Cal iniciar sessió com a client");
+        }
+        String id = auth.getName().trim();
+        clientEntity client = clientRepository.findByEmailIgnoreCase(id)
+                .or(() -> clientRepository.findById(id.toUpperCase()))
+                .orElseThrow(() -> new IllegalArgumentException("Cal iniciar sessió com a client"));
+
+        resenyesLogic.eliminarDelClient(codi, client.getDni());
+        ra.addFlashAttribute("succes", "Ressenya eliminada correctament");
+    } catch (IllegalArgumentException e) {
+        ra.addFlashAttribute("error", e.getMessage());
+    } catch (Exception e) {
+        log.error("Error eliminant la ressenya {}", codi, e);
+        ra.addFlashAttribute("error", "No s'ha pogut eliminar la ressenya");
+    }
+    return codiReserva != null
+            ? "redirect:/reserves-client/valorar/" + codiReserva
+            : "redirect:/reserves-client/nova?matricula=" + matricula;
+}
 }

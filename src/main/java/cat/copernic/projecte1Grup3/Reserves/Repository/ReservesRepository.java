@@ -17,6 +17,6 @@ public interface ReservesRepository extends JpaRepository<ReservesEntity, Long> 
     // RF91: CONSULTA D'INFORME PER CLIENTS
     // ============================================================
     // Cerca totes les reserves que pertanyen a qualsevol dels DNIs d'una llista de clients.
-    @Query("SELECT r FROM reservesEntity r WHERE r.client.dni IN :dnis")
+    @Query("SELECT r FROM ReservesEntity r WHERE r.client.dni IN :dnis")
     List<ReservesEntity> findByClientDniIn(@Param("dnis") List<String> dnis);
 }

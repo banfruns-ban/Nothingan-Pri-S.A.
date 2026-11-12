@@ -46,7 +46,7 @@ public interface VehiclesRepository extends JpaRepository<VehiclesEntity, String
            "AND (:tipus IS NULL OR :tipus = '' OR v.tipusVehicle = :tipus) " +
            "AND (" +
            "   :dataInici IS NULL OR :dataFi IS NULL OR v.matricula NOT IN (" +
-           "       SELECT r.vehicle.matricula FROM reservesEntity r " +
+           "       SELECT r.vehicle.matricula FROM ReservesEntity r " +
            "       WHERE r.estat NOT IN ('CANCELADA', 'ANULLADA', 'FINALITZADA') " +
            "       AND (CAST(r.dataInici AS timestamp) < :dataFi AND CAST(r.dataFi AS timestamp) > :dataInici)" +
            "   )" +

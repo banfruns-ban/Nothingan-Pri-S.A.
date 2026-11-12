@@ -18,44 +18,70 @@ import org.springframework.security.web.savedrequest.SavedRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+/**
+ * Configuración central de Spring Security. Gestiona el control de acceso por
+ * roles (ADMIN, AGENT, CLIENT), la protección de rutas, el inicio/cierre de
+ * sesión y las redirecciones inteligentes.
+ */
 @Configuration
-@EnableMethodSecurity
+@EnableMethodSecurity // Habilita las anotaciones @PreAuthorize en los controladores (ej. AgentController)
 public class SecurityConfig {
 
+    // ============================================================
+    // BLOQUE 1: CADENA DE FILTROS Y REGLAS DE AUTORIZACIÓN HTTP
+    // ============================================================
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
+                // 1. Recursos estáticos y hojas de estilo públicos
                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                 .requestMatchers("/*.css", "/**/*.css").permitAll()
+                // 2. Páginas públicas accesibles sin iniciar sesión
                 .requestMatchers("/", "/home", "/login", "/forgot-password", "/registre", "/cataleg").permitAll()
-                // Recursos que no són pàgines: evitem que es guardin com a "pàgina prèvia"
+                // 3. Recursos multimedia y de sistema: permitimos acceso libre para evitar
+                // que Spring Security los intercepte y los guarde en caché como "página previa"
                 .requestMatchers("/error", "/favicon.ico", "/uploads/**", "/images/**").permitAll()
-                // Restricció d'alta, edició i baixa d'agents NOMÉS per a ADMIN
+                // 4. RESTRICCIÓN DE AGENTES (SOLO ADMIN):
+                // Debe ir ANTES de "/dashboard/**" porque Spring evalúa las reglas de arriba abajo.
+                // Impide que un AGENT pueda registrar, editar o dar de baja otros agentes.
                 .requestMatchers("/dashboard/agents/alta",
                         "/dashboard/agents/editar/**",
                         "/dashboard/agents/eliminar/**").hasRole("ADMIN")
+                // 5. Panel de control interno (incluye la API en tiempo real /dashboard/api/stats)
                 .requestMatchers("/dashboard/**").hasAnyRole("ADMIN", "AGENT")
+                // 6. Área privada exclusiva para clientes
                 .requestMatchers("/reserves-client/**").hasRole("CLIENT")
+                // 7. Cualquier otra ruta no especificada requiere estar autenticado
                 .anyRequest().authenticated())
+                // Guarda en sesión la última página visitada antes de pedir login
                 .requestCache(cache -> cache.requestCache(requestCache()))
+                // Configuración del formulario de inicio de sesión personalizado
                 .formLogin(form -> form
                 .loginPage("/login")
-                .successHandler(customSuccessHandler(requestCache()))
+                .successHandler(customSuccessHandler(requestCache())) // Redirección dinámica según rol
                 .permitAll())
-                .logout(logout -> logout.logoutSuccessUrl("/home").permitAll())
+                // Configuración del cierre de sesión
+                .logout(logout -> logout
+                .logoutSuccessUrl("/home")
+                .permitAll())
+                // ============================================================
+                // BLOQUE 2: GESTIÓN DE ACCESOS DENEGADOS (403 / REDIRECCIONES)
+                // ============================================================
                 .exceptionHandling(exceptions -> exceptions
                 .accessDeniedHandler((request, response, exception) -> {
                     String ctx = request.getContextPath();
                     String uri = request.getRequestURI();
 
                     if (uri.startsWith(ctx + "/dashboard")) {
-                        // Un client intenta entrar al panell d'agents
+                        // Si un CLIENT intenta entrar al panel de administración, se le redirige al inicio
+                        // (Nota: si un AGENT intenta entrar a /dashboard/agents/alta, también entrará aquí)
                         response.sendRedirect(ctx + "/");
                     } else if (uri.startsWith(ctx + "/reserves-client")) {
-                        // Un agent/admin intenta entrar a la zona de clients
+                        // Si un ADMIN o AGENT intenta entrar a la zona privada de clientes, vuelve al dashboard
                         response.sendRedirect(ctx + "/dashboard");
                     } else {
+                        // Para cualquier otro caso no autorizado, devuelve error HTTP 403 Forbidden
                         response.sendError(HttpServletResponse.SC_FORBIDDEN);
                     }
                 }));
@@ -63,17 +89,23 @@ public class SecurityConfig {
         return http.build();
     }
 
+    // ============================================================
+    // BLOQUE 3: CACHÉ DE PETICIONES PREVIAS
+    // ============================================================
     @Bean
     RequestCache requestCache() {
         return new HttpSessionRequestCache();
     }
 
+    // ============================================================
+    // BLOQUE 4: REDIRECCIÓN INTELIGENTE TRAS INICIAR SESIÓN
+    // ============================================================
     @Bean
     AuthenticationSuccessHandler customSuccessHandler(RequestCache requestCache) {
         return (HttpServletRequest request, HttpServletResponse response, Authentication authentication) -> {
             String contextPath = request.getContextPath();
 
-            // ADMIN o AGENT van al dashboard
+            // 1. Si el usuario tiene rol ADMIN o AGENT, entra directamente al Dashboard
             for (GrantedAuthority authority : authentication.getAuthorities()) {
                 String role = authority.getAuthority();
                 if (role.equals("ROLE_ADMIN") || role.equals("ROLE_AGENT")) {
@@ -82,7 +114,8 @@ public class SecurityConfig {
                 }
             }
 
-            // Clients: recuperem la URL prèvia, només si és una pàgina real
+            // 2. Si es CLIENT: recuperamos la URL que intentaba visitar antes del login,
+            // filtrando que sea una página web real y no una imagen, icono o ruta de error
             SavedRequest savedRequest = requestCache.getRequest(request, response);
             if (savedRequest != null) {
                 String targetUrl = savedRequest.getRedirectUrl();
@@ -96,13 +129,17 @@ public class SecurityConfig {
                 }
             }
 
-            // Per defecte, al catàleg
+            // 3. Si es CLIENT y no tenía ninguna página previa guardada, va al catálogo por defecto
             response.sendRedirect(contextPath + "/cataleg");
         };
     }
 
+    // ============================================================
+    // BLOQUE 5: ENCRIPTACIÓN DE CONTRASEÑAS
+    // ============================================================
     @Bean
     public PasswordEncoder passwordEncoder() {
+        // Utiliza el algoritmo BCrypt para encriptar y verificar contraseñas de forma segura
         return new BCryptPasswordEncoder();
     }
 }

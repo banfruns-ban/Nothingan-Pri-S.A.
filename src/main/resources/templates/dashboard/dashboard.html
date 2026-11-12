@@ -14,7 +14,7 @@
     </head>
     <body>
 
-        <!-- Sidebar Lateral (Centralizado mediante fragmento Thymeleaf) -->
+        <!-- Sidebar Lateral (Centralitzat mitjançant fragment Thymeleaf) -->
         <div th:replace="~{fragments/sidebar :: sidebar}"></div>
 
         <!-- Main Content -->
@@ -156,11 +156,12 @@
         <!-- ============================================================ -->
         <script>
             /**
-             * Consulta l'endpoint API REST (/api/dashboard/stats) i reescriu
+             * Consulta l'endpoint API REST (/dashboard/api/stats) i reescriu
              * el contingut dels KPIs i de la taula de lliuraments sense parpellejar.
              */
             function actualitzarDashboardRealtime() {
-                fetch('/api/dashboard/stats')
+                // Invocació a la nova ruta protegida sota /dashboard/**
+                fetch('/dashboard/api/stats')
                         .then(response => {
                             if (!response.ok)
                                 throw new Error('Error en respondre l\'API');

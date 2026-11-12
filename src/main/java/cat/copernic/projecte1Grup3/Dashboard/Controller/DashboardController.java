@@ -59,17 +59,16 @@ public class DashboardController {
     }
 
     // ============================================================
-    // NUEVO: ENDPOINT API PARA TIEMPO REAL (GET /api/dashboard/stats)
+    // ENDPOINT API PARA TIEMPO REAL (GET /dashboard/api/stats)
     // ============================================================
     /**
-     * Endpoint API invocado por JavaScript (Polling) cada 3 segundos.
-     *
-     * @ResponseBody: Indica a Spring que NO busque una plantilla HTML, sino que
-     * convierta el Map devuelto directamente en un archivo JSON.
+     * Endpoint API invocado por JavaScript (Polling) en segundo plano. Ubicado
+     * dentro de /dashboard/api/stats para estar protegido bajo las reglas de
+     * acceso de /dashboard/** en SecurityConfig.
      *
      * @return Map con los KPIs actualizados y el listado de entregas activas.
      */
-    @GetMapping("/api/dashboard/stats")
+    @GetMapping("/dashboard/api/stats")
     @ResponseBody
     public Map<String, Object> obtenirEstadistiquesJSON() {
         Map<String, Object> response = new HashMap<>();

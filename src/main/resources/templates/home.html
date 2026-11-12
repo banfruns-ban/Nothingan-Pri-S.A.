@@ -20,7 +20,7 @@
                 <small>RENT A CAR · TERRASSA</small>
             </div>
         </a>
-        <div class="accions-usuari">
+        <div class="accions-usuari" style="display: flex; align-items: center; gap: 12px;">
             <!-- Si l'usuari NO ha iniciat sessió -->
             <th:block sec:authorize="!isAuthenticated()">
                 <a class="btn" th:href="@{/login}">Iniciar sessió</a>
@@ -30,6 +30,12 @@
             <!-- Si l'usuari SÍ ha iniciat sessió -->
             <th:block sec:authorize="isAuthenticated()">
                 <a class="btn" th:href="@{/reserves-client}">Les meves reserves</a>
+                
+                <a th:href="@{/perfil}" title="El meu perfil"
+                   style="width: 38px; height: 38px; border-radius: 50%; background: #2563eb; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px; text-decoration: none; border: 2px solid #93c5fd;">
+                    <span th:text="${inicialUsuari != null ? inicialUsuari : 'C'}">C</span>
+                </a>
+
                 <form th:action="@{/logout}" method="post" style="display: inline; margin: 0;">
                     <button type="submit" class="btn btn-primari" style="cursor: pointer;">Tancar sessió</button>
                 </form>

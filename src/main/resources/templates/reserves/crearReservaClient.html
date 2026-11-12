@@ -28,12 +28,26 @@
             <a th:href="@{/cataleg}">Catàleg</a>
             <a th:href="@{/reserves-client}">Les meves reserves</a>
             
-            <div class="accés-usuaris">
-                <form th:action="@{/logout}" method="post" style="display: inline;">
-                    <button type="submit" class="btn btn-login" style="cursor: pointer; display: flex; align-items: center; gap: 6px;">
-                        <i class="fa-solid fa-right-from-bracket"></i> Tancar sessió
-                    </button>
-                </form>
+            <div class="accés-usuaris" style="display: flex; align-items: center; gap: 12px;">
+                <!-- Si l'usuari SÍ ha iniciat sessió -->
+                <th:block sec:authorize="isAuthenticated()">
+                    <a th:href="@{/perfil}" title="El meu perfil"
+                       style="width: 36px; height: 36px; border-radius: 50%; background: #2563eb; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; text-decoration: none; border: 2px solid #93c5fd;">
+                        <span th:text="${inicialUsuari != null ? inicialUsuari : 'C'}">C</span>
+                    </a>
+
+                    <form th:action="@{/logout}" method="post" style="display: inline; margin: 0;">
+                        <button type="submit" class="btn btn-login" style="cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                            <i class="fa-solid fa-right-from-bracket"></i> Tancar sessió
+                        </button>
+                    </form>
+                </th:block>
+
+                <!-- Si l'usuari NO ha iniciat sessió -->
+                <th:block sec:authorize="!isAuthenticated()">
+                    <a th:href="@{/login}" class="btn btn-login">Iniciar sessió</a>
+                    <a th:href="@{/registre}" class="btn btn-login">Registrar-se</a>
+                </th:block>
             </div>
         </div>
     </header>

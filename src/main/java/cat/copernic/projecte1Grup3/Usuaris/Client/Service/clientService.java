@@ -17,11 +17,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-@Service // Marca la classe com a Capa de Servei (Lògica de Negoci)
+@Service
 public class clientService {
 
     private static final Logger log = LoggerFactory.getLogger(clientService.class);
-    // Constants d'estat per al compliment del RF82
     public static final String PENDENT = "PENDENT";
     public static final String VALIDAT = "VALIDAT";
     public static final String REBUTJAT = "REBUTJAT";
@@ -30,7 +29,6 @@ public class clientService {
     private final clientRepositoryMongo clientRepositoryMongo;
     private final PasswordEncoder passwordEncoder;
 
-    // Indicem a Spring quin constructor ha d'utilitzar per a la injecció de dependències
     @Autowired
     public clientService(clientRepository clientRepository,
                          clientRepositoryMongo clientRepositoryMongo) {
@@ -48,10 +46,8 @@ public class clientService {
     // ---------- LLISTAR I FILTRAR ----------
     public List<clientEntity> llistar(String q, String dni, String estat, String email,
                                       LocalDate dataNaixement) {
-        // 1. Cerca general inicial a MySQL
         List<clientEntity> clients = clientRepository.findAll();
 
-        // 2. Filtre general per text (nom, DNI/NIE, email o telèfon)
         if (q != null && !q.isBlank()) {
             String text = q.trim().toLowerCase();
             clients = clients.stream()
@@ -60,7 +56,6 @@ public class clientService {
                     .toList();
         }
 
-        // 3. Filtre específic per DNI / NIE
         if (dni != null && !dni.isBlank()) {
             String d = dni.trim().toUpperCase();
             clients = clients.stream()
@@ -68,21 +63,18 @@ public class clientService {
                     .toList();
         }
 
-        // 4. Filtre per estat de validació (PENDENT, VALIDAT, REBUTJAT)
         if (estat != null && !estat.isBlank()) {
             clients = clients.stream()
                     .filter(c -> estat.equals(c.getEstatValidacio()))
                     .toList();
         }
 
-        // 5. Filtre per data de naixement exacta
         if (dataNaixement != null) {
             clients = clients.stream()
                     .filter(c -> dataNaixement.equals(c.getDataNaixement()))
                     .toList();
         }
 
-        // 6. Filtre per correu electrònic
         if (email != null && !email.isBlank()) {
             String e = email.trim().toLowerCase();
             clients = clients.stream()
@@ -97,11 +89,10 @@ public class clientService {
     }
 
     // ---------- ALTA DE CLIENT (Doble Persistència) ----------
-    @Transactional(rollbackFor = Exception.class) // Assegura que es guardi en totes dues BD o es cancel·li tot si hi ha un error
+    @Transactional(rollbackFor = Exception.class)
     public void alta(clientEntity client, MultipartFile fotoDniFrontal,
                      MultipartFile fotoDniPosterior, MultipartFile fotoCarnet) throws IOException {
 
-        // Validació del format oficial de DNI/NIE amb Expressió Regular
         String dni = client.getDni() == null ? "" : client.getDni().trim().toUpperCase();
         if (!dni.matches("^([0-9]{8}|[XYZ][0-9]{7})[A-Z]$")) {
             throw new IllegalArgumentException(
@@ -129,12 +120,10 @@ public class clientService {
         validaImatge(fotoDniPosterior);
         validaImatge(fotoCarnet);
 
-        // RF82: Tot registre extern neix en estat PENDENT per defecte
         client.setPremium(false);
         client.setEstatValidacio(PENDENT);
-        clientRepository.saveAndFlush(client); // Guarda a MySQL
+        clientRepository.saveAndFlush(client);
 
-        // Guarda les 3 imatges en format binari dins de MongoDB
         clientDocuments doc = new clientDocuments();
         doc.setDni(dni);
         if (hiHa(fotoDniFrontal)) {
@@ -149,7 +138,7 @@ public class clientService {
             doc.setFotoCarnet(fotoCarnet.getBytes());
             doc.setTipusFotoCarnet(fotoCarnet.getContentType());
         }
-        clientRepositoryMongo.save(doc); // Guarda a MongoDB
+        clientRepositoryMongo.save(doc);
         log.info("Client donat d'alta: {}", dni);
     }
 
@@ -161,7 +150,7 @@ public class clientService {
         return clientRepositoryMongo.findById(dni);
     }
 
-    // ---------- ACTUALITZACIÓ ----------
+    // ---------- ACTUALITZACIÓ (PANEL AGENT) ----------
     @Transactional(rollbackFor = Exception.class)
     public void actualitzar(String dni, clientEntity dades, String estat, boolean premium,
                             MultipartFile fotoDniFrontal, MultipartFile fotoDniPosterior,
@@ -174,7 +163,6 @@ public class clientService {
             throw new IllegalArgumentException("Estat no vàlid");
         }
 
-        // El correu només és duplicat si el té UN ALTRE client (DNI diferent)
         String email = dades.getEmail() == null ? "" : dades.getEmail().trim();
         if (!email.isEmpty() && clientRepository.existsByEmailIgnoreCaseAndDniNot(email, dni)) {
             throw new IllegalArgumentException("Aquest correu ja està en ús per un altre client");
@@ -194,7 +182,6 @@ public class clientService {
         c.setAdreca(dades.getAdreca());
         c.setTipusLlicencia(dades.getTipusLlicencia());
 
-        // Només se sobreescriuen les dates si el formulari les envia (evita pisar amb null)
         if (dades.getDataNaixement() != null) {
             c.setDataNaixement(dades.getDataNaixement());
         }
@@ -211,7 +198,6 @@ public class clientService {
         clientRepository.saveAndFlush(c);
         log.info("Client actualitzat: {}", dni);
 
-        // Actualitza els fitxers a MongoDB només si s'han adjuntat imatges meves
         if (hiHa(fotoDniFrontal) || hiHa(fotoDniPosterior) || hiHa(fotoCarnet)) {
             clientDocuments doc = clientRepositoryMongo.findById(dni).orElseGet(() -> {
                 clientDocuments nou = new clientDocuments();
@@ -234,11 +220,49 @@ public class clientService {
         }
     }
 
+    // ---------- PERFIL DEL CLIENT (AUTOGESTIÓ) ----------
+    public Optional<clientEntity> obtenirPerEmail(String email) {
+        return clientRepository.findByEmailIgnoreCase(email);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void actualitzarPerfilClient(String emailActual, clientEntity dades) {
+        clientEntity c = clientRepository.findByEmailIgnoreCase(emailActual)
+                .orElseThrow(() -> new IllegalArgumentException("Client no trobat"));
+
+        String nouEmail = dades.getEmail() == null ? "" : dades.getEmail().trim();
+        if (!nouEmail.isEmpty() && clientRepository.existsByEmailIgnoreCaseAndDniNot(nouEmail, c.getDni())) {
+            throw new IllegalArgumentException("Aquest correu ja està en ús per un altre client");
+        }
+
+        c.setNom(dades.getNom());
+        c.setEmail(nouEmail);
+        if (dades.getPassword() != null && !dades.getPassword().isBlank()) {
+            if (dades.getPassword().length() < 8) {
+                throw new IllegalArgumentException("La contrasenya ha de tenir com a mínim 8 caràcters");
+            }
+            c.setPassword(passwordEncoder.encode(dades.getPassword()));
+        }
+        c.setTelefon(dades.getTelefon());
+        c.setNacionalitat(dades.getNacionalitat());
+        c.setAdreca(dades.getAdreca());
+        c.setTipusLlicencia(dades.getTipusLlicencia());
+
+        if (dades.getDataNaixement() != null) {
+            c.setDataNaixement(dades.getDataNaixement());
+        }
+        if (dades.getDataCaducitatDNI() != null) {
+            c.setDataCaducitatDNI(dades.getDataCaducitatDNI());
+        }
+
+        clientRepository.saveAndFlush(c);
+        log.info("Perfil actualitzat pel client: {}", c.getDni());
+    }
+
     private boolean hiHa(MultipartFile f) {
         return f != null && !f.isEmpty();
     }
 
-    // Comprova format (PNG/JPEG) i restringeix la mida a 5MB màx.
     private void validaImatge(MultipartFile f) {
         if (!hiHa(f)) {
             return;
@@ -257,9 +281,9 @@ public class clientService {
                 .orElseThrow(() -> new IllegalArgumentException("Client no trobat"));
 
         clientRepository.delete(c);
-        clientRepository.flush(); // Si el client té reserves associades, salta l'excepció aquí i cancel·la l'esborrat
+        clientRepository.flush();
 
-        clientRepositoryMongo.deleteById(dni); // Elimina de MongoDB només després de confirmar l'èxit a MySQL
+        clientRepositoryMongo.deleteById(dni);
         log.warn("Client eliminat: {}", dni);
     }
 

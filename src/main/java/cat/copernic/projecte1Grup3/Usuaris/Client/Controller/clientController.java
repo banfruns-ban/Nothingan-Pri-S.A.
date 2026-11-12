@@ -3,6 +3,8 @@ package cat.copernic.projecte1Grup3.Usuaris.Client.Controller;
 import cat.copernic.projecte1Grup3.Usuaris.Client.Documents.clientDocuments;
 import cat.copernic.projecte1Grup3.Usuaris.Client.Entity.clientEntity;
 import cat.copernic.projecte1Grup3.Usuaris.Client.Service.clientService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Optional;
@@ -12,6 +14,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -81,7 +85,6 @@ public class clientController {
         return "client/llistaClients";
     }
 
-    // Acepta tanto /clients/{dni} como /clients/detall/{dni} para evitar errores 404
     @GetMapping({"/dashboard/clients/{dni}", "/dashboard/clients/detall/{dni}"})
     public String detall(@PathVariable String dni, Model model, RedirectAttributes ra) {
         return clientLogic.obtenir(dni).map(c -> {
@@ -145,33 +148,31 @@ public class clientController {
         });
     }
 
-   @PostMapping("/dashboard/clients/{dni}/editar")
-public String editar(@PathVariable String dni,
-                     @ModelAttribute("client") clientEntity dades,
-                     @RequestParam String estatValidacio,
-                     @RequestParam(defaultValue = "false") boolean premium,
-                     @RequestParam(value = "fotoDniFrontal", required = false) MultipartFile fotoDniFrontal,
-                     @RequestParam(value = "fotoDniPosterior", required = false) MultipartFile fotoDniPosterior,
-                     @RequestParam(value = "fotoCarnet", required = false) MultipartFile fotoCarnet,
-                     RedirectAttributes ra) {
-    try {
-        clientLogic.actualitzar(dni, dades, estatValidacio, premium,
-                fotoDniFrontal, fotoDniPosterior, fotoCarnet);
-        ra.addFlashAttribute("missatge", "Client actualitzat correctament");
-    } catch (IllegalArgumentException e) {
-        // Errores de validación de negocio: email duplicado, estado no válido, imagen incorrecta...
-        ra.addFlashAttribute("error", e.getMessage());
-    } catch (DataIntegrityViolationException e) {
-        // Violación de BD no prevista: se guarda la causa real en el log
-        log.error("Error d'integritat editant el client {}: {}", dni, e.getMostSpecificCause().getMessage(), e);
-        ra.addFlashAttribute("error",
-                "No s'ha pogut guardar el client. Revisa que totes les dades siguin vàlides");
-    } catch (IOException e) {
-        log.error("Error llegint les imatges del client {}", dni, e);
-        ra.addFlashAttribute("error", "No s'han pogut llegir les imatges");
+    @PostMapping("/dashboard/clients/{dni}/editar")
+    public String editar(@PathVariable String dni,
+                         @ModelAttribute("client") clientEntity dades,
+                         @RequestParam String estatValidacio,
+                         @RequestParam(defaultValue = "false") boolean premium,
+                         @RequestParam(value = "fotoDniFrontal", required = false) MultipartFile fotoDniFrontal,
+                         @RequestParam(value = "fotoDniPosterior", required = false) MultipartFile fotoDniPosterior,
+                         @RequestParam(value = "fotoCarnet", required = false) MultipartFile fotoCarnet,
+                         RedirectAttributes ra) {
+        try {
+            clientLogic.actualitzar(dni, dades, estatValidacio, premium,
+                    fotoDniFrontal, fotoDniPosterior, fotoCarnet);
+            ra.addFlashAttribute("missatge", "Client actualitzat correctament");
+        } catch (IllegalArgumentException e) {
+            ra.addFlashAttribute("error", e.getMessage());
+        } catch (DataIntegrityViolationException e) {
+            log.error("Error d'integritat editant el client {}: {}", dni, e.getMostSpecificCause().getMessage(), e);
+            ra.addFlashAttribute("error",
+                    "No s'ha pogut guardar el client. Revisa que totes les dades siguin vàlides");
+        } catch (IOException e) {
+            log.error("Error llegint les imatges del client {}", dni, e);
+            ra.addFlashAttribute("error", "No s'han pogut llegir les imatges");
+        }
+        return "redirect:/dashboard/clients";
     }
-    return "redirect:/dashboard/clients";
-}
 
     @PostMapping("/dashboard/clients/{dni}/eliminar")
     public String eliminar(@PathVariable String dni, RedirectAttributes ra) {
@@ -203,6 +204,7 @@ public String editar(@PathVariable String dni,
         ra.addFlashAttribute("missatge", "Estat premium actualitzat");
         return "redirect:/dashboard/clients";
     }
+
     // =====================================================
     // REGISTRE DES DEL PORTAL CLIENT (RF81)
     // =====================================================
@@ -212,7 +214,7 @@ public String editar(@PathVariable String dni,
         if (!model.containsAttribute("client")) {
             model.addAttribute("client", new clientEntity());
         }
-        return "registre"; // Plantilla HTML pública
+        return "registre";
     }
 
     @PostMapping("/registre")
@@ -223,7 +225,6 @@ public String editar(@PathVariable String dni,
             @RequestParam("fotoCarnet") MultipartFile fotoCarnet,
             RedirectAttributes ra) {
         try {
-            // Executa el teu service d'alta (assigna estat PENDENT i desa a MySQL + MongoDB)
             clientLogic.alta(client, fotoDniFrontal, fotoDniPosterior, fotoCarnet);
             ra.addFlashAttribute("missatge", "Sol·licitud de registre enviada amb èxit! L'administrador ha de validar el teu compte.");
             return "redirect:/cataleg";
@@ -235,5 +236,48 @@ public String editar(@PathVariable String dni,
         }
         return "redirect:/registre";
     }
-    
+
+    // =====================================================
+    // EL MEU PERFIL (PORTAL CLIENT)
+    // =====================================================
+
+    @GetMapping("/perfil")
+    public String veurePerfil(Authentication auth, Model model, RedirectAttributes ra) {
+        if (auth == null || !auth.isAuthenticated()) {
+            return "redirect:/login";
+        }
+        return clientLogic.obtenirPerEmail(auth.getName()).map(c -> {
+            model.addAttribute("client", c);
+            return "client/perfil";
+        }).orElseGet(() -> {
+            ra.addFlashAttribute("error", "No s'ha trobat el perfil del client.");
+            return "redirect:/cataleg";
+        });
+    }
+
+    @PostMapping("/perfil")
+    public String guardarPerfil(@ModelAttribute("client") clientEntity dades,
+                                Authentication auth,
+                                HttpServletRequest request,
+                                HttpServletResponse response,
+                                RedirectAttributes ra) {
+        String emailActual = auth.getName();
+        try {
+            clientLogic.actualitzarPerfilClient(emailActual, dades);
+
+            if (dades.getEmail() != null && !emailActual.equalsIgnoreCase(dades.getEmail().trim())) {
+                new SecurityContextLogoutHandler().logout(request, response, auth);
+                ra.addFlashAttribute("missatge", "Correu electrònic actualitzat. Torna a iniciar sessió amb el nou correu.");
+                return "redirect:/login";
+            }
+
+            ra.addFlashAttribute("missatge", "Les teves dades s'han actualitzat correctament!");
+        } catch (IllegalArgumentException e) {
+            ra.addFlashAttribute("error", e.getMessage());
+        } catch (DataIntegrityViolationException e) {
+            log.error("Error d'integritat actualitzant perfil de {}", emailActual, e);
+            ra.addFlashAttribute("error", "No s'han pogut desar els canvis. Revisa les dades introduïdes.");
+        }
+        return "redirect:/perfil";
+    }
 }

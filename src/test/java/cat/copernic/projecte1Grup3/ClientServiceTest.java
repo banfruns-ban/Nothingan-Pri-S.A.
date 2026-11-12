@@ -3,11 +3,9 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package cat.copernic.projecte1Grup3;
-import cat.copernic.projecte1Grup3.Usuaris.Client.Service.clientService;
-import cat.copernic.projecte1Grup3.Usuaris.Client.Documents.clientDocuments;
-import cat.copernic.projecte1Grup3.Usuaris.Client.Entity.clientEntity;
-import cat.copernic.projecte1Grup3.Usuaris.Client.Repository.clientRepository;
-import cat.copernic.projecte1Grup3.Usuaris.Client.Repository.clientRepositoryMongo;
+import cat.copernic.projecte1Grup3.Usuaris.Client.Service.ClientService;
+import cat.copernic.projecte1Grup3.Usuaris.Client.Documents.ClientDocuments;
+import cat.copernic.projecte1Grup3.Usuaris.Client.Entity.ClientEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -24,25 +22,27 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import cat.copernic.projecte1Grup3.Usuaris.Client.Repository.ClientRepository;
+import cat.copernic.projecte1Grup3.Usuaris.Client.Repository.ClientRepositoryMongo;
 
 @ExtendWith(MockitoExtension.class)
 class ClientServiceTest {
 
     @Mock
-    private clientRepository clientRepository;
+    private ClientRepository clientRepository;
 
     @Mock
-    private clientRepositoryMongo clientRepositoryMongo;
+    private ClientRepositoryMongo clientRepositoryMongo;
 
     @InjectMocks
-    private clientService clientService;
+    private ClientService clientService;
 
-    private clientEntity clientExemple;
+    private ClientEntity clientExemple;
     private MockMultipartFile imatge;
 
     @BeforeEach
     void setUp() {
-        clientExemple = new clientEntity();
+        clientExemple = new ClientEntity();
         clientExemple.setDni("12345678Z");
         clientExemple.setNom("Joan Garcia");
         clientExemple.setEmail("joan@test.com");
@@ -129,7 +129,7 @@ class ClientServiceTest {
         assertEquals("PENDENT", clientExemple.getEstatValidacio());
         assertFalse(clientExemple.isPremium());
         verify(clientRepository, times(1)).saveAndFlush(clientExemple);
-        verify(clientRepositoryMongo, times(1)).save(any(clientDocuments.class));
+        verify(clientRepositoryMongo, times(1)).save(any(ClientDocuments.class));
     }
 
     // ---------- ACTUALITZAR ----------
@@ -141,7 +141,7 @@ class ClientServiceTest {
         when(clientRepository.existsByEmailIgnoreCaseAndDniNot("altre@test.com", "12345678Z"))
                 .thenReturn(true);
 
-        clientEntity dades = new clientEntity();
+        ClientEntity dades = new ClientEntity();
         dades.setEmail("altre@test.com");
 
         assertThrows(IllegalArgumentException.class,
@@ -157,7 +157,7 @@ class ClientServiceTest {
         LocalDate dniAbans = clientExemple.getDataCaducitatDNI();
         LocalDate naixementAbans = clientExemple.getDataNaixement();
 
-        clientEntity dades = new clientEntity();
+        ClientEntity dades = new ClientEntity();
         dades.setNom("Joan Garcia Soler");
         dades.setEmail("joan@test.com");
 
@@ -176,7 +176,7 @@ class ClientServiceTest {
         when(clientRepository.findById("12345678Z")).thenReturn(Optional.of(clientExemple));
 
         assertThrows(IllegalArgumentException.class,
-                () -> clientService.actualitzar("12345678Z", new clientEntity(), "INVENTAT", false, null, null, null));
+                () -> clientService.actualitzar("12345678Z", new ClientEntity(), "INVENTAT", false, null, null, null));
 
         verify(clientRepository, never()).saveAndFlush(any());
     }
@@ -235,7 +235,7 @@ class ClientServiceTest {
 
         assertThrows(IllegalArgumentException.class, () -> clientService.eliminar("00000000T"));
 
-        verify(clientRepository, never()).delete(any(clientEntity.class));
+        verify(clientRepository, never()).delete(any(ClientEntity.class));
         verify(clientRepositoryMongo, never()).deleteById(any());
     }
 
@@ -244,13 +244,13 @@ class ClientServiceTest {
     @Test
     @DisplayName("Comprovar que llistar filtra els clients per estat de validació")
     void testLlistarPerEstat() {
-        clientEntity pendent = new clientEntity();
+        ClientEntity pendent = new ClientEntity();
         pendent.setDni("87654321X");
         pendent.setEstatValidacio("PENDENT");
 
         when(clientRepository.findAll()).thenReturn(List.of(clientExemple, pendent));
 
-        List<clientEntity> resultat = clientService.llistar(null, null, "PENDENT", null, null);
+        List<ClientEntity> resultat = clientService.llistar(null, null, "PENDENT", null, null);
 
         assertEquals(1, resultat.size());
         assertEquals("87654321X", resultat.get(0).getDni());

@@ -1,6 +1,6 @@
 package cat.copernic.projecte1Grup3.Usuaris.Client.Entity;
 
-import cat.copernic.projecte1Grup3.Usuaris.Entity.usuariEntity;
+import cat.copernic.projecte1Grup3.Usuaris.Entity.UsuariEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.PrePersist;
@@ -15,7 +15,7 @@ import org.springframework.format.annotation.DateTimeFormat;
     name = "DNI",
     referencedColumnName = "dni"
 ) // Mapeo de herencia: comparte la clave primaria 'dni' con la entidad padre usuariEntity
-public class clientEntity extends usuariEntity {
+public class ClientEntity extends UsuariEntity {
     
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     @Column(name = "data_caducitat_DNI", nullable = false)
@@ -62,12 +62,12 @@ public class clientEntity extends usuariEntity {
     }
 
     // Constructor sin argumentos por defecto para JPA
-    public clientEntity() {
+    public ClientEntity() {
         super();
     }
 
     // Constructor completo que inicializa también la superclase (usuariEntity)
-    public clientEntity(LocalDate dataCaducitatDNI,
+    public ClientEntity(LocalDate dataCaducitatDNI,
                         String nacionalitat,
                         String adreca,
                         String tipusLlicencia,

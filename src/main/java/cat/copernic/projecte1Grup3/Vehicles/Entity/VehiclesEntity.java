@@ -1,6 +1,6 @@
 package cat.copernic.projecte1Grup3.Vehicles.Entity;
 
-import cat.copernic.projecte1Grup3.Reserves.Entity.reservesEntity;
+import cat.copernic.projecte1Grup3.Reserves.Entity.ReservesEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -92,7 +92,7 @@ public class VehiclesEntity {
 
     // --- RELACIÓ ONE-TO-MANY AMB RESERVES ---
     @OneToMany(mappedBy = "vehicle", cascade = CascadeType.ALL)
-    private List<reservesEntity> reserves = new ArrayList<>();
+    private List<ReservesEntity> reserves = new ArrayList<>();
 
     /**
      * Constructor per defecte requerit per JPA.
@@ -257,11 +257,11 @@ public class VehiclesEntity {
         this.foto = foto;
     }
 
-    public List<reservesEntity> getReserves() {
+    public List<ReservesEntity> getReserves() {
         return reserves;
     }
 
-    public void setReserves(List<reservesEntity> reserves) {
+    public void setReserves(List<ReservesEntity> reserves) {
         this.reserves = reserves;
     }
 }

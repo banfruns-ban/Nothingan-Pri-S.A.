@@ -9,8 +9,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody; // Permite devolver objetos/JSON en lugar de plantillas Thymeleaf
 
-import cat.copernic.projecte1Grup3.Reserves.Service.reservesService;
-import cat.copernic.projecte1Grup3.Usuaris.Client.Service.clientService;
+import cat.copernic.projecte1Grup3.Reserves.Service.ReservesService;
+import cat.copernic.projecte1Grup3.Usuaris.Client.Service.ClientService;
 import cat.copernic.projecte1Grup3.Vehicles.Service.VehiclesService;
 
 /**
@@ -21,13 +21,13 @@ import cat.copernic.projecte1Grup3.Vehicles.Service.VehiclesService;
 public class DashboardController {
 
     // Referencias a los servicios de lógica de negocio
-    private final reservesService reservesLogic;
-    private final clientService clientLogic;
+    private final ReservesService reservesLogic;
+    private final ClientService clientLogic;
     private final VehiclesService vehiclesLogic;
 
     // Inyección de dependencias por constructor
-    public DashboardController(reservesService reservesLogic,
-            clientService clientLogic,
+    public DashboardController(ReservesService reservesLogic,
+            ClientService clientLogic,
             VehiclesService vehiclesLogic) {
         this.reservesLogic = reservesLogic;
         this.clientLogic = clientLogic;

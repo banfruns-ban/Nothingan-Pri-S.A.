@@ -13,29 +13,29 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import cat.copernic.projecte1Grup3.Reserves.Entity.reservesEntity;
+import cat.copernic.projecte1Grup3.Reserves.Entity.ReservesEntity;
 import cat.copernic.projecte1Grup3.Reserves.Service.ReservesClientService;
-import cat.copernic.projecte1Grup3.Reserves.Service.reservesService;
-import cat.copernic.projecte1Grup3.Ressenya.Service.ressenyaService;
-import cat.copernic.projecte1Grup3.Usuaris.Client.Entity.clientEntity;
-import cat.copernic.projecte1Grup3.Usuaris.Client.Service.clientService;
+import cat.copernic.projecte1Grup3.Reserves.Service.ReservesService;
+import cat.copernic.projecte1Grup3.Ressenya.Service.RessenyaService;
+import cat.copernic.projecte1Grup3.Usuaris.Client.Entity.ClientEntity;
+import cat.copernic.projecte1Grup3.Usuaris.Client.Service.ClientService;
 import cat.copernic.projecte1Grup3.Vehicles.Entity.VehiclesEntity;
 import cat.copernic.projecte1Grup3.Vehicles.Service.VehiclesService;
 
 @Controller
 @RequestMapping("/reserves-client")
-public class reserves {
+public class Reserves {
 
-    private final reservesService reservesService;
+    private final ReservesService reservesService;
     private final VehiclesService vehiclesService;
-    private final clientService clientService;
+    private final ClientService clientService;
     private final ReservesClientService reservesClientService;
-    private final ressenyaService ressenyaService;
+    private final RessenyaService ressenyaService;
 
     @Autowired
-    public reserves(reservesService reservesService, VehiclesService vehiclesService,
-                    clientService clientService, ReservesClientService reservesClientService,
-                    ressenyaService ressenyaService) {
+    public Reserves(ReservesService reservesService, VehiclesService vehiclesService,
+                    ClientService clientService, ReservesClientService reservesClientService,
+                    RessenyaService ressenyaService) {
         this.reservesService = reservesService;
         this.vehiclesService = vehiclesService;
         this.clientService = clientService;
@@ -77,7 +77,7 @@ public class reserves {
         }
 
         if (!model.containsAttribute("reserva")) {
-            model.addAttribute("reserva", new reservesEntity());
+            model.addAttribute("reserva", new ReservesEntity());
         }
 
         return "reserves/crearReservaClient";
@@ -86,7 +86,7 @@ public class reserves {
     // POST /reserves-client/guardar
     @PostMapping("/guardar")
     public String guardarReservaClient(
-            @ModelAttribute("reserva") reservesEntity reserva,
+            @ModelAttribute("reserva") ReservesEntity reserva,
             Authentication authentication,
             RedirectAttributes ra) {
 
@@ -98,7 +98,7 @@ public class reserves {
         String matricula = reserva.getVehicle() != null ? reserva.getVehicle().getMatricula() : "";
 
         try {
-            clientEntity client = reservesClientService.obtenirClient(authentication.getName())
+            ClientEntity client = reservesClientService.obtenirClient(authentication.getName())
                     .orElseThrow(() -> new IllegalArgumentException("Client no trobat"));
 
             reservesService.crear(client.getDni(), matricula,

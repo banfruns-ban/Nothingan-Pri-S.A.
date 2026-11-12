@@ -8,16 +8,16 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import cat.copernic.projecte1Grup3.Reserves.Service.ReservesClientService;
-import cat.copernic.projecte1Grup3.Ressenya.Service.ressenyaService;
+import cat.copernic.projecte1Grup3.Ressenya.Service.RessenyaService;
 
 @Controller
 public class ReservesClientController {
 
     private final ReservesClientService reservesClientService;
-    private final ressenyaService ressenyaService;
+    private final RessenyaService ressenyaService;
 
     public ReservesClientController(ReservesClientService reservesClientService,
-                                    ressenyaService ressenyaService) {
+                                    RessenyaService ressenyaService) {
         this.reservesClientService = reservesClientService;
         this.ressenyaService = ressenyaService;
     }

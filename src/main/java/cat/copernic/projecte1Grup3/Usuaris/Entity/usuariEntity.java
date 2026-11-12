@@ -17,7 +17,7 @@ import jakarta.validation.constraints.Size;
 @Entity
 @Table(name = "usuaris")
 @Inheritance(strategy = InheritanceType.JOINED)
-public class usuariEntity {
+public class UsuariEntity {
 
     // El format del DNI/NIE es valida a clientService.alta(...), no aquí,
     // perquè els registres antics es puguin editar sense errors.
@@ -78,16 +78,16 @@ public class usuariEntity {
         this.password = password;
     }
 
-    public usuariEntity() {
+    public UsuariEntity() {
     }
 
-    public usuariEntity(String dni, String nom, String email) {
+    public UsuariEntity(String dni, String nom, String email) {
         this.dni = dni;
         this.nom = nom;
         this.email = email;
     }
 
-    public usuariEntity(String dni, String nom, String email, String password) {
+    public UsuariEntity(String dni, String nom, String email, String password) {
         this.dni = dni;
         this.nom = nom;
         this.email = email;

@@ -4,10 +4,8 @@
  */
 package cat.copernic.projecte1Grup3.Reserves.Dades;
 
-import cat.copernic.projecte1Grup3.Reserves.Entity.reservesEntity;
-import cat.copernic.projecte1Grup3.Reserves.Repository.reservesRepository;
-import cat.copernic.projecte1Grup3.Usuaris.Client.Entity.clientEntity;
-import cat.copernic.projecte1Grup3.Usuaris.Client.Repository.clientRepository;
+import cat.copernic.projecte1Grup3.Reserves.Entity.ReservesEntity;
+import cat.copernic.projecte1Grup3.Usuaris.Client.Entity.ClientEntity;
 import cat.copernic.projecte1Grup3.Vehicles.Entity.VehiclesEntity;
 import cat.copernic.projecte1Grup3.Vehicles.Repository.VehiclesRepository;
 import java.math.BigDecimal;
@@ -17,14 +15,16 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import cat.copernic.projecte1Grup3.Reserves.Repository.ReservesRepository;
+import cat.copernic.projecte1Grup3.Usuaris.Client.Repository.ClientRepository;
 
 @Configuration
 public class DadesReserves {
 
     @Bean
     @Order(10) // s'executa després dels carregadors de clients i vehicles
-    CommandLineRunner carregarReserves(reservesRepository reservesRepo,
-                                       clientRepository clientRepo,
+    CommandLineRunner carregarReserves(ReservesRepository reservesRepo,
+                                       ClientRepository clientRepo,
                                        VehiclesRepository vehicleRepo) {
         return args -> {
             // Només es carrega si encara no hi ha reserves (evita duplicats en reiniciar)
@@ -50,17 +50,17 @@ public class DadesReserves {
         };
     }
 
-    private void crea(reservesRepository reservesRepo, clientRepository clientRepo,
+    private void crea(ReservesRepository reservesRepo, ClientRepository clientRepo,
                       VehiclesRepository vehicleRepo, String dni, String matricula,
                       LocalDate dataInici, LocalDate dataFi,
                       LocalTime horaInici, LocalTime horaFi,
                       String costTotal, String fianca, String estat, String observacions) {
 
-        clientEntity client = clientRepo.findById(dni).orElse(null);
+        ClientEntity client = clientRepo.findById(dni).orElse(null);
         VehiclesEntity vehicle = vehicleRepo.findById(matricula).orElse(null);
         if (client == null || vehicle == null) return; // falta client o vehicle: s'omet
 
-        reservesEntity r = new reservesEntity();
+        ReservesEntity r = new ReservesEntity();
         r.setClient(client);
         r.setVehicle(vehicle);
         r.setDataInici(dataInici);

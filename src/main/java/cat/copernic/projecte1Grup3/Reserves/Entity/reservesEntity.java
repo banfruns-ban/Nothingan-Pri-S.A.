@@ -1,6 +1,6 @@
 package cat.copernic.projecte1Grup3.Reserves.Entity;
 
-import cat.copernic.projecte1Grup3.Usuaris.Client.Entity.clientEntity;
+import cat.copernic.projecte1Grup3.Usuaris.Client.Entity.ClientEntity;
 import cat.copernic.projecte1Grup3.Vehicles.Entity.VehiclesEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -16,7 +16,7 @@ import java.time.LocalTime;
 
 @Entity
 @Table(name = "Reserves")
-public class reservesEntity {
+public class ReservesEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,7 +25,7 @@ public class reservesEntity {
 
     @ManyToOne
     @JoinColumn(name = "DNI_client", referencedColumnName = "DNI")
-    private clientEntity client;
+    private ClientEntity client;
 
     @ManyToOne
     @JoinColumn(name = "Matricula_vehicle", referencedColumnName = "matricula")
@@ -64,10 +64,10 @@ public class reservesEntity {
     @Column(name = "observacions", columnDefinition = "TEXT")
     private String observacions;
 
-    public reservesEntity() {
+    public ReservesEntity() {
     }
 
-    public reservesEntity(Long codiReserva, clientEntity client, VehiclesEntity vehicle, LocalDate dataInici, LocalDate dataFi, LocalTime horaInici, LocalTime horaFi, BigDecimal costTotal, BigDecimal fianca, LocalDate dataLliurament, LocalTime horaLliurament, String estat, LocalDate dataRetorn, String observacions) {
+    public ReservesEntity(Long codiReserva, ClientEntity client, VehiclesEntity vehicle, LocalDate dataInici, LocalDate dataFi, LocalTime horaInici, LocalTime horaFi, BigDecimal costTotal, BigDecimal fianca, LocalDate dataLliurament, LocalTime horaLliurament, String estat, LocalDate dataRetorn, String observacions) {
         this.codiReserva = codiReserva;
         this.client = client;
         this.vehicle = vehicle;
@@ -92,11 +92,11 @@ public class reservesEntity {
         this.codiReserva = codiReserva;
     }
 
-    public clientEntity getClient() {
+    public ClientEntity getClient() {
         return client;
     }
 
-    public void setClient(clientEntity client) {
+    public void setClient(ClientEntity client) {
         this.client = client;
     }
 

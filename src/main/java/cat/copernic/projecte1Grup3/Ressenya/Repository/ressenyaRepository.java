@@ -4,7 +4,7 @@
  */
 package cat.copernic.projecte1Grup3.Ressenya.Repository;
 
-import cat.copernic.projecte1Grup3.Ressenya.Entity.ressenyaEntity;
+import cat.copernic.projecte1Grup3.Ressenya.Entity.RessenyaEntity;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Repository;
  * @author User
  */
 @Repository
-public interface ressenyaRepository extends JpaRepository<ressenyaEntity, Long> {
+public interface RessenyaRepository extends JpaRepository<RessenyaEntity, Long> {
 boolean existsByVehicleMatriculaAndClientDni(String matricula, String dni);
-    List<ressenyaEntity> findByVehicleMatriculaOrderByDataCreacioDesc(String matricula);
+    List<RessenyaEntity> findByVehicleMatriculaOrderByDataCreacioDesc(String matricula);
 }

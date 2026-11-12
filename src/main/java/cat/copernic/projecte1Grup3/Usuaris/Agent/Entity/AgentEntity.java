@@ -1,7 +1,7 @@
 // ===== CABECERA =====
 package cat.copernic.projecte1Grup3.Usuaris.Agent.Entity;
 
-import cat.copernic.projecte1Grup3.Usuaris.Entity.usuariEntity; // Clase padre (dni, nom, email, password)
+import cat.copernic.projecte1Grup3.Usuaris.Entity.UsuariEntity; // Clase padre (dni, nom, email, password)
 import jakarta.persistence.Column;     // Configura una columna (nullable, etc.)
 import jakarta.persistence.Entity;     // Marca la clase como entidad JPA
 import jakarta.persistence.EnumType;   // Forma de guardar el enum (STRING u ORDINAL)
@@ -11,7 +11,7 @@ import jakarta.persistence.Table;      // Define el nombre de la tabla
 // ===== DECLARACIÓN DE LA CLASE =====
 @Entity                 // Esta clase se mapea a una tabla: cada objeto es una fila (tabla en SQL)
 @Table(name = "agents") // Nombre de la tabla (si no, se llamaría AgentEntity) (Nombre de la tabla creada)
-public class AgentEntity extends usuariEntity { // Un agente ES un usuario: hereda dni, nom, email y password
+public class AgentEntity extends UsuariEntity { // Un agente ES un usuario: hereda dni, nom, email y password
 
     // ===== ATRIBUTOS (columnas de la tabla) =====
     @Column(nullable = false)   // Obligatorio: NOT NULL en la BD

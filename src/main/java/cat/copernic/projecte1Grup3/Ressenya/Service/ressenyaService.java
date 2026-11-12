@@ -6,25 +6,25 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import cat.copernic.projecte1Grup3.Ressenya.Entity.ressenyaEntity;
-import cat.copernic.projecte1Grup3.Ressenya.Repository.ressenyaRepository;
-import cat.copernic.projecte1Grup3.Usuaris.Client.Repository.clientRepository;
+import cat.copernic.projecte1Grup3.Ressenya.Entity.RessenyaEntity;
 import cat.copernic.projecte1Grup3.Vehicles.Repository.VehiclesRepository;
+import cat.copernic.projecte1Grup3.Ressenya.Repository.RessenyaRepository;
+import cat.copernic.projecte1Grup3.Usuaris.Client.Repository.ClientRepository;
 
 @Service
-public class ressenyaService {
+public class RessenyaService {
 
-    private final ressenyaRepository resenyaRepo;
+    private final RessenyaRepository resenyaRepo;
     private final VehiclesRepository vehicleRepo;
-    private final clientRepository clientRepo;
+    private final ClientRepository clientRepo;
 
-    public ressenyaService(ressenyaRepository resenyaRepo, VehiclesRepository vehicleRepo, clientRepository clientRepo) {
+    public RessenyaService(RessenyaRepository resenyaRepo, VehiclesRepository vehicleRepo, ClientRepository clientRepo) {
         this.resenyaRepo = resenyaRepo;
         this.vehicleRepo = vehicleRepo;
         this.clientRepo = clientRepo;
     }
 
-    public List<ressenyaEntity> llistarPerVehicle(String matricula) {
+    public List<RessenyaEntity> llistarPerVehicle(String matricula) {
         return resenyaRepo.findByVehicleMatriculaOrderByDataCreacioDesc(matricula);
     }
 
@@ -54,7 +54,7 @@ public class ressenyaService {
             throw new IllegalArgumentException("El comentari no pot superar els 500 caràcters");
         }
 
-        ressenyaEntity r = new ressenyaEntity();
+        RessenyaEntity r = new RessenyaEntity();
         r.setVehicle(vehicle);
         r.setClient(client);
         r.setPuntuacio(puntuacio);
@@ -72,7 +72,7 @@ public class ressenyaService {
     }
     @Transactional
 public void eliminarDelClient(Long codi, String dni) {
-    ressenyaEntity r = resenyaRepo.findById(codi)
+    RessenyaEntity r = resenyaRepo.findById(codi)
             .orElseThrow(() -> new IllegalArgumentException("Ressenya no trobada"));
 
     if (r.getClient() == null || dni == null

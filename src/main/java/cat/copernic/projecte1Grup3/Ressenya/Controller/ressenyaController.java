@@ -9,19 +9,19 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import cat.copernic.projecte1Grup3.Ressenya.Service.ressenyaService;
-import cat.copernic.projecte1Grup3.Usuaris.Client.Entity.clientEntity;
-import cat.copernic.projecte1Grup3.Usuaris.Client.Repository.clientRepository;
+import cat.copernic.projecte1Grup3.Ressenya.Service.RessenyaService;
+import cat.copernic.projecte1Grup3.Usuaris.Client.Entity.ClientEntity;
+import cat.copernic.projecte1Grup3.Usuaris.Client.Repository.ClientRepository;
 
 @Controller
-public class ressenyaController {
+public class RessenyaController {
 
-    private static final Logger log = LoggerFactory.getLogger(ressenyaController.class);
+    private static final Logger log = LoggerFactory.getLogger(RessenyaController.class);
 
-    private final ressenyaService resenyesLogic;
-    private final clientRepository clientRepository;
+    private final RessenyaService resenyesLogic;
+    private final ClientRepository clientRepository;
 
-    public ressenyaController(ressenyaService resenyesLogic, clientRepository clientRepository) {
+    public RessenyaController(RessenyaService resenyesLogic, ClientRepository clientRepository) {
         this.resenyesLogic = resenyesLogic;
         this.clientRepository = clientRepository;
     }
@@ -60,7 +60,7 @@ public class ressenyaController {
             String id = auth.getName().trim();
 
             // El login pot ser l'email o el DNI
-            clientEntity client = clientRepository.findByEmailIgnoreCase(id)
+            ClientEntity client = clientRepository.findByEmailIgnoreCase(id)
                     .or(() -> clientRepository.findById(id.toUpperCase()))
                     .orElseThrow(() -> new IllegalArgumentException("Cal iniciar sessió com a client"));
 
@@ -106,7 +106,7 @@ public String eliminarClient(@PathVariable String matricula,
             throw new IllegalArgumentException("Cal iniciar sessió com a client");
         }
         String id = auth.getName().trim();
-        clientEntity client = clientRepository.findByEmailIgnoreCase(id)
+        ClientEntity client = clientRepository.findByEmailIgnoreCase(id)
                 .or(() -> clientRepository.findById(id.toUpperCase()))
                 .orElseThrow(() -> new IllegalArgumentException("Cal iniciar sessió com a client"));
 

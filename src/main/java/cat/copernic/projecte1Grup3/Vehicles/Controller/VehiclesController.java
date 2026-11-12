@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import cat.copernic.projecte1Grup3.Ressenya.Service.ressenyaService;
+import cat.copernic.projecte1Grup3.Ressenya.Service.RessenyaService;
 import cat.copernic.projecte1Grup3.Vehicles.Entity.VehiclesEntity;
 import cat.copernic.projecte1Grup3.Vehicles.Service.VehiclesService;
 import jakarta.validation.Valid;
@@ -32,9 +32,9 @@ import jakarta.validation.Valid;
 public class VehiclesController {
     private static final Logger log = LoggerFactory.getLogger(VehiclesController.class);
     private final VehiclesService vehiclesService;
-    private final ressenyaService ressenyaLogic;
+    private final RessenyaService ressenyaLogic;
     @Autowired
-    public VehiclesController(VehiclesService vehiclesService, ressenyaService ressenyaLogic) {
+    public VehiclesController(VehiclesService vehiclesService, RessenyaService ressenyaLogic) {
         this.vehiclesService = vehiclesService;
         this.ressenyaLogic = ressenyaLogic; 
     }

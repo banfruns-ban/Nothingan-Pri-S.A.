@@ -5,7 +5,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 // Define que esta clase se guarda como un documento dentro de la colección 'client_documents' en MongoDB
 @Document(collection = "client_documents")
-public class clientDocuments {
+public class ClientDocuments {
 
     @Id
     private String dni; // Mismo DNI de la base de datos relacional (MySQL) para vincular los datos
@@ -20,10 +20,10 @@ public class clientDocuments {
     private String tipusFotoCarnet;         // Tipo MIME del carnet de conducir
 
     // Constructor vacío por defecto
-    public clientDocuments() {}
+    public ClientDocuments() {}
 
     // Constructor parametrizado completo
-    public clientDocuments(String dni, byte[] fotoDniFrontal, String tipusFotoDniFrontal, 
+    public ClientDocuments(String dni, byte[] fotoDniFrontal, String tipusFotoDniFrontal, 
                            byte[] fotoDniPosterior, String tipusFotoDniPosterior, 
                            byte[] fotoCarnet, String tipusFotoCarnet) {
         this.dni = dni;

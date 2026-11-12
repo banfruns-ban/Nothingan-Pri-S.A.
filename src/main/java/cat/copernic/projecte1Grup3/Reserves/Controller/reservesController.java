@@ -17,22 +17,22 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import cat.copernic.projecte1Grup3.Reserves.Entity.reservesEntity;
-import cat.copernic.projecte1Grup3.Reserves.Service.reservesService;
-import cat.copernic.projecte1Grup3.Usuaris.Client.Service.clientService;
+import cat.copernic.projecte1Grup3.Reserves.Entity.ReservesEntity;
+import cat.copernic.projecte1Grup3.Reserves.Service.ReservesService;
+import cat.copernic.projecte1Grup3.Usuaris.Client.Service.ClientService;
 
 @Controller
-public class reservesController {
+public class ReservesController {
 
     private static final Logger log
-            = LoggerFactory.getLogger(reservesController.class);
+            = LoggerFactory.getLogger(ReservesController.class);
 
-    private final reservesService reservesLogic;
-    private final clientService clientLogic;
+    private final ReservesService reservesLogic;
+    private final ClientService clientLogic;
 
-    public reservesController(
-            reservesService reservesLogic,
-            clientService clientLogic) {
+    public ReservesController(
+            ReservesService reservesLogic,
+            ClientService clientLogic) {
         this.reservesLogic = reservesLogic;
         this.clientLogic = clientLogic;
     }
@@ -118,7 +118,7 @@ public class reservesController {
             RedirectAttributes ra) {
 
         try {
-            reservesEntity reserva = reservesLogic.crear(
+            ReservesEntity reserva = reservesLogic.crear(
                     dni,
                     matricula,
                     dataInici,
@@ -174,13 +174,13 @@ public class reservesController {
     // GET: Obrir pantalla de lliurament
     @GetMapping("/dashboard/reserves/{codi}/lliurar")
     public String mostrarFormulariLliurament(@PathVariable Long codi, Model model, RedirectAttributes ra) {
-        Optional<reservesEntity> optReserva = reservesLogic.obtenir(codi);
+        Optional<ReservesEntity> optReserva = reservesLogic.obtenir(codi);
         if (optReserva.isEmpty()) {
             ra.addFlashAttribute("error", "Reserva #" + codi + " no trobada.");
             return "redirect:/dashboard";
         }
-        reservesEntity r = optReserva.get();
-        if (reservesService.EN_CURS.equals(r.getEstat()) || reservesService.FINALITZADA.equals(r.getEstat()) || reservesService.CANCELADA.equals(r.getEstat())) {
+        ReservesEntity r = optReserva.get();
+        if (ReservesService.EN_CURS.equals(r.getEstat()) || ReservesService.FINALITZADA.equals(r.getEstat()) || ReservesService.CANCELADA.equals(r.getEstat())) {
             ra.addFlashAttribute("error", "No es pot lliurar una reserva en estat " + r.getEstat());
             return "redirect:/dashboard";
         }
@@ -211,13 +211,13 @@ public class reservesController {
     // GET: Obrir pantalla de retorn
     @GetMapping("/dashboard/reserves/{codi}/retornar")
     public String mostrarFormulariRetorn(@PathVariable Long codi, Model model, RedirectAttributes ra) {
-        Optional<reservesEntity> optReserva = reservesLogic.obtenir(codi);
+        Optional<ReservesEntity> optReserva = reservesLogic.obtenir(codi);
         if (optReserva.isEmpty()) {
             ra.addFlashAttribute("error", "Reserva #" + codi + " no trobada.");
             return "redirect:/dashboard";
         }
-        reservesEntity r = optReserva.get();
-        if (!reservesService.EN_CURS.equals(r.getEstat())) {
+        ReservesEntity r = optReserva.get();
+        if (!ReservesService.EN_CURS.equals(r.getEstat())) {
             ra.addFlashAttribute("error", "Només es poden retornar vehicles de reserves en estat EN_CURS.");
             return "redirect:/dashboard";
         }
@@ -229,7 +229,7 @@ public class reservesController {
 
     @GetMapping("/dashboard/reserves/{codi}")
     public String detall(@PathVariable Long codi, Model model, RedirectAttributes ra) {
-        Optional<reservesEntity> reserva = reservesLogic.obtenir(codi);
+        Optional<ReservesEntity> reserva = reservesLogic.obtenir(codi);
 
         if (reserva.isEmpty()) {
             ra.addFlashAttribute("error", "Reserva no trobada");

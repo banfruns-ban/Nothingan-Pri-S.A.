@@ -1,8 +1,8 @@
 package cat.copernic.projecte1Grup3.Usuaris.Client.Controller;
 
-import cat.copernic.projecte1Grup3.Usuaris.Client.Documents.clientDocuments;
-import cat.copernic.projecte1Grup3.Usuaris.Client.Entity.clientEntity;
-import cat.copernic.projecte1Grup3.Usuaris.Client.Service.clientService;
+import cat.copernic.projecte1Grup3.Usuaris.Client.Documents.ClientDocuments;
+import cat.copernic.projecte1Grup3.Usuaris.Client.Entity.ClientEntity;
+import cat.copernic.projecte1Grup3.Usuaris.Client.Service.ClientService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -23,12 +23,12 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
-public class clientController {
+public class ClientController {
 
-    private static final Logger log = LoggerFactory.getLogger(clientController.class);
-    private final clientService clientLogic;
+    private static final Logger log = LoggerFactory.getLogger(ClientController.class);
+    private final ClientService clientLogic;
 
-    public clientController(clientService clientLogic) {
+    public ClientController(ClientService clientLogic) {
         this.clientLogic = clientLogic;
     }
 
@@ -39,14 +39,14 @@ public class clientController {
     @GetMapping({"/dashboard/clients/alta", "/dashboard/clients/altaUsuari", "/dashboard/clients/nou"})
     public String mostrarFormulari(Model model) {
         if (!model.containsAttribute("client")) {
-            model.addAttribute("client", new clientEntity());
+            model.addAttribute("client", new ClientEntity());
         }
         return "client/altaUsuari";
     }
 
     @PostMapping({"/dashboard/clients/alta", "/dashboard/clients/altaUsuari"})
     public String altaClient(
-            @ModelAttribute("client") clientEntity client,
+            @ModelAttribute("client") ClientEntity client,
             @RequestParam("fotoDniFrontal") MultipartFile fotoDniFrontal,
             @RequestParam("fotoDniPosterior") MultipartFile fotoDniPosterior,
             @RequestParam("fotoCarnet") MultipartFile fotoCarnet,
@@ -99,11 +99,11 @@ public class clientController {
     @GetMapping("/dashboard/clients/{dni}/imatge/{tipus}")
     @ResponseBody
     public ResponseEntity<byte[]> imatge(@PathVariable String dni, @PathVariable String tipus) {
-        Optional<clientDocuments> docs = clientLogic.obtenirDocuments(dni);
+        Optional<ClientDocuments> docs = clientLogic.obtenirDocuments(dni);
         if (docs.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        clientDocuments d = docs.get();
+        ClientDocuments d = docs.get();
 
         byte[] bytes;
         String mime;
@@ -150,7 +150,7 @@ public class clientController {
 
     @PostMapping("/dashboard/clients/{dni}/editar")
     public String editar(@PathVariable String dni,
-                         @ModelAttribute("client") clientEntity dades,
+                         @ModelAttribute("client") ClientEntity dades,
                          @RequestParam String estatValidacio,
                          @RequestParam(defaultValue = "false") boolean premium,
                          @RequestParam(value = "fotoDniFrontal", required = false) MultipartFile fotoDniFrontal,
@@ -212,14 +212,14 @@ public class clientController {
     @GetMapping("/registre")
     public String mostrarFormulariRegistre(Model model) {
         if (!model.containsAttribute("client")) {
-            model.addAttribute("client", new clientEntity());
+            model.addAttribute("client", new ClientEntity());
         }
         return "registre";
     }
 
     @PostMapping("/registre")
     public String processarRegistreClient(
-            @ModelAttribute("client") clientEntity client,
+            @ModelAttribute("client") ClientEntity client,
             @RequestParam("fotoDniFrontal") MultipartFile fotoDniFrontal,
             @RequestParam("fotoDniPosterior") MultipartFile fotoDniPosterior,
             @RequestParam("fotoCarnet") MultipartFile fotoCarnet,
@@ -256,7 +256,7 @@ public class clientController {
     }
 
     @PostMapping("/perfil")
-    public String guardarPerfil(@ModelAttribute("client") clientEntity dades,
+    public String guardarPerfil(@ModelAttribute("client") ClientEntity dades,
                                 Authentication auth,
                                 HttpServletRequest request,
                                 HttpServletResponse response,

@@ -1,17 +1,17 @@
 package cat.copernic.projecte1Grup3.Security;
 
-import cat.copernic.projecte1Grup3.Usuaris.Client.Repository.clientRepository;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import cat.copernic.projecte1Grup3.Usuaris.Client.Repository.ClientRepository;
 
 @ControllerAdvice
 public class GlobalUserAdvice {
 
-    private final clientRepository clientRepository;
+    private final ClientRepository clientRepository;
 
-    public GlobalUserAdvice(clientRepository clientRepository) {
+    public GlobalUserAdvice(ClientRepository clientRepository) {
         this.clientRepository = clientRepository;
     }
 

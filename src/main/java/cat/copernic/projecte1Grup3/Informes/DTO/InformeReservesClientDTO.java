@@ -1,6 +1,6 @@
 package cat.copernic.projecte1Grup3.Informes.DTO;
 
-import cat.copernic.projecte1Grup3.Reserves.Entity.reservesEntity;
+import cat.copernic.projecte1Grup3.Reserves.Entity.ReservesEntity;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -11,7 +11,7 @@ import java.util.List;
 public class InformeReservesClientDTO {
 
     // Llista de les reserves filtrades
-    private List<reservesEntity> reserves;
+    private List<ReservesEntity> reserves;
     
     // Recompte total de reserves trobades
     private long totalReserves;
@@ -24,7 +24,7 @@ public class InformeReservesClientDTO {
     }
 
     // Constructor amb tots els camps
-    public InformeReservesClientDTO(List<reservesEntity> reserves, long totalReserves, BigDecimal preuTotal) {
+    public InformeReservesClientDTO(List<ReservesEntity> reserves, long totalReserves, BigDecimal preuTotal) {
         this.reserves = reserves;
         this.totalReserves = totalReserves;
         this.preuTotal = preuTotal;
@@ -34,11 +34,11 @@ public class InformeReservesClientDTO {
     // GETTERS I SETTERS
     // ============================================================
 
-    public List<reservesEntity> getReserves() {
+    public List<ReservesEntity> getReserves() {
         return reserves;
     }
 
-    public void setReserves(List<reservesEntity> reserves) {
+    public void setReserves(List<ReservesEntity> reserves) {
         this.reserves = reserves;
     }
 

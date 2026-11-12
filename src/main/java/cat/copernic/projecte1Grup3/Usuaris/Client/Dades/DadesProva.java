@@ -1,18 +1,18 @@
 package cat.copernic.projecte1Grup3.Usuaris.Client.Dades;
 
-import cat.copernic.projecte1Grup3.Usuaris.Client.Entity.clientEntity;
-import cat.copernic.projecte1Grup3.Usuaris.Client.Repository.clientRepository;
+import cat.copernic.projecte1Grup3.Usuaris.Client.Entity.ClientEntity;
 import java.time.LocalDate;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import cat.copernic.projecte1Grup3.Usuaris.Client.Repository.ClientRepository;
 
 @Configuration
 public class DadesProva {
 
     @Bean
-    CommandLineRunner carregarClients(clientRepository repo, PasswordEncoder passwordEncoder) {
+    CommandLineRunner carregarClients(ClientRepository repo, PasswordEncoder passwordEncoder) {
         return args -> {
             crea(repo, passwordEncoder, "12345678Z", "Joan Garcia Soler", "joan@test.com", "612345678",
                  LocalDate.of(1990, 5, 14), "Espanyola", "Carrer Major 12, Terrassa", "B",
@@ -20,11 +20,11 @@ public class DadesProva {
         };
     }
 
-    private void crea(clientRepository repo, PasswordEncoder passwordEncoder,
+    private void crea(ClientRepository repo, PasswordEncoder passwordEncoder,
                       String dni, String nom, String email, String tel,
                       LocalDate naix, String nac, String adreca, String llicencia,
                       LocalDate capDni, LocalDate capCarnet, String estat, boolean premium) {
-        clientEntity existing = repo.findById(dni).orElse(null);
+        ClientEntity existing = repo.findById(dni).orElse(null);
         if (existing != null) {
             String password = existing.getPassword();
             if (password == null || password.isBlank()) {
@@ -37,7 +37,7 @@ public class DadesProva {
             return;
         }
 
-        clientEntity c = new clientEntity();
+        ClientEntity c = new ClientEntity();
         c.setDni(dni);
         c.setNom(nom);
         c.setEmail(email);

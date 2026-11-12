@@ -17,7 +17,6 @@ import org.springframework.security.web.savedrequest.SavedRequest;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
 
 @Configuration
 @EnableMethodSecurity
@@ -30,6 +29,8 @@ public class SecurityConfig {
                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                 .requestMatchers("/*.css", "/**/*.css").permitAll()
                 .requestMatchers("/", "/home", "/login", "/forgot-password", "/registre", "/cataleg").permitAll()
+                // Recursos que no són pàgines: evitem que es guardin com a "pàgina prèvia"
+                .requestMatchers("/error", "/favicon.ico", "/uploads/**", "/images/**").permitAll()
                 // Restricció d'alta, edició i baixa d'agents NOMÉS per a ADMIN
                 .requestMatchers("/dashboard/agents/alta",
                         "/dashboard/agents/editar/**",
@@ -45,8 +46,15 @@ public class SecurityConfig {
                 .logout(logout -> logout.logoutSuccessUrl("/home").permitAll())
                 .exceptionHandling(exceptions -> exceptions
                 .accessDeniedHandler((request, response, exception) -> {
-                    if (request.getRequestURI().startsWith(request.getContextPath() + "/dashboard")) {
-                        response.sendRedirect(request.getContextPath() + "/");
+                    String ctx = request.getContextPath();
+                    String uri = request.getRequestURI();
+
+                    if (uri.startsWith(ctx + "/dashboard")) {
+                        // Un client intenta entrar al panell d'agents
+                        response.sendRedirect(ctx + "/");
+                    } else if (uri.startsWith(ctx + "/reserves-client")) {
+                        // Un agent/admin intenta entrar a la zona de clients
+                        response.sendRedirect(ctx + "/dashboard");
                     } else {
                         response.sendError(HttpServletResponse.SC_FORBIDDEN);
                     }
@@ -64,8 +72,8 @@ public class SecurityConfig {
     AuthenticationSuccessHandler customSuccessHandler(RequestCache requestCache) {
         return (HttpServletRequest request, HttpServletResponse response, Authentication authentication) -> {
             String contextPath = request.getContextPath();
-            
-            // Comproveu si l'usuari és ADMIN o AGENT per enviar-lo al dashboard
+
+            // ADMIN o AGENT van al dashboard
             for (GrantedAuthority authority : authentication.getAuthorities()) {
                 String role = authority.getAuthority();
                 if (role.equals("ROLE_ADMIN") || role.equals("ROLE_AGENT")) {
@@ -74,19 +82,22 @@ public class SecurityConfig {
                 }
             }
 
-            
-            // Per a clients: recuperem la URL prèvia que intentava visitar (si existeix)
+            // Clients: recuperem la URL prèvia, només si és una pàgina real
             SavedRequest savedRequest = requestCache.getRequest(request, response);
             if (savedRequest != null) {
                 String targetUrl = savedRequest.getRedirectUrl();
-                response.sendRedirect(targetUrl);
-                return;
+                boolean esPaginaValida = !targetUrl.contains("/error")
+                        && !targetUrl.contains("/uploads/")
+                        && !targetUrl.contains("/images/")
+                        && !targetUrl.contains("favicon");
+                if (esPaginaValida) {
+                    response.sendRedirect(targetUrl);
+                    return;
+                }
             }
-            
-            // Per defecte si no venia de cap lloc específic, va al catàleg
-            response.sendRedirect(contextPath + "/cataleg");
 
-           
+            // Per defecte, al catàleg
+            response.sendRedirect(contextPath + "/cataleg");
         };
     }
 

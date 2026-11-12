@@ -47,8 +47,10 @@ public class ReservesClientController {
                     model.addAttribute("reserva", r);
                     model.addAttribute("vehicle", r.getVehicle());
                     model.addAttribute("resenyes",
+                            
                             ressenyaService.llistarPerVehicle(r.getVehicle().getMatricula()));model.addAttribute("jaValorat", ressenyaService.jaHaValorat(
         r.getVehicle().getMatricula(), r.getClient().getDni()));
+                           model.addAttribute("dniClient", r.getClient().getDni());
                     return "reserves/valorarReserva";
                 })
                 .orElseGet(() -> {

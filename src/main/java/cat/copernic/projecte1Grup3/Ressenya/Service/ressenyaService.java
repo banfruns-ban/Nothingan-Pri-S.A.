@@ -70,4 +70,15 @@ public class ressenyaService {
         }
         resenyaRepo.deleteById(codi);
     }
+    @Transactional
+public void eliminarDelClient(Long codi, String dni) {
+    ressenyaEntity r = resenyaRepo.findById(codi)
+            .orElseThrow(() -> new IllegalArgumentException("Ressenya no trobada"));
+
+    if (r.getClient() == null || dni == null
+            || !r.getClient().getDni().equalsIgnoreCase(dni.trim())) {
+        throw new IllegalArgumentException("Només pots eliminar les teves ressenyes");
+    }
+    resenyaRepo.delete(r);
+}
 }

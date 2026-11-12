@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="ca">
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" 
+      lang="ca">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -23,15 +25,25 @@
 
         <div class="nav-header">
             <a th:href="@{/cataleg}">Catàleg</a>
-            <a th:href="@{/reserves-client}" class="active">Les meves reserves</a>
+            
+            <!-- Només visible si l'usuari ha iniciat sessió -->
+            <a sec:authorize="isAuthenticated()" th:href="@{/reserves-client}" class="active">Les meves reserves</a>
 
             <div class="accés-usuaris">
-                <!-- Botó de Tancar Sessió (Formulari POST compatible amb Spring Security) -->
-                <form th:action="@{/logout}" method="post" style="display: inline;">
-                    <button type="submit" class="btn btn-login" style="cursor: pointer; display: flex; align-items: center; gap: 6px;">
-                        <i class="fa-solid fa-right-from-bracket"></i> Tancar sessió
-                    </button>
-                </form>
+                <!-- Si l'usuari SÍ ha iniciat sessió -->
+                <th:block sec:authorize="isAuthenticated()">
+                    <form th:action="@{/logout}" method="post" style="display: inline;">
+                        <button type="submit" class="btn btn-login" style="cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                            <i class="fa-solid fa-right-from-bracket"></i> Tancar sessió
+                        </button>
+                    </form>
+                </th:block>
+
+                <!-- Si l'usuari NO ha iniciat sessió -->
+                <th:block sec:authorize="!isAuthenticated()">
+                    <a th:href="@{/login}" class="btn btn-login">Iniciar sessió</a>
+                    <a th:href="@{/registre}" class="btn btn-login" style="margin-left: 8px;">Registrar-se</a>
+                </th:block>
             </div>
         </div>
     </header>

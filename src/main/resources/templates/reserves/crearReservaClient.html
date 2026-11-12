@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="ca">
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" 
+      lang="ca">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,25 +16,24 @@
 
     <!-- Header corporatiu -->
     <header>
-        <div class="marca">
+        <a th:href="@{/}" class="marca">
             <div class="logo">NP</div>
             <div>
                 <strong>NOTHINGAN PRI S.A.</strong>
                 <small>PORTAL CLIENT</small>
             </div>
-        </div>
+        </a>
 
         <div class="nav-header">
             <a th:href="@{/cataleg}">Catàleg</a>
             <a th:href="@{/reserves-client}">Les meves reserves</a>
             
-            <div style="display: flex; gap: 10px; align-items: center; margin-left: 12px;">
-                <a th:href="@{/login}" class="btn" style="background: transparent; color: #fff; border: 1px solid #334155; padding: 6px 14px; border-radius: 6px; font-weight: 600; font-size: 12px;">
-                    Iniciar sessió
-                </a>
-                <a th:href="@{/registre}" class="btn" style="background: #2563eb; color: #fff; border: 1px solid #2563eb; padding: 6px 14px; border-radius: 6px; font-weight: 600; font-size: 12px;">
-                    Registrar-se
-                </a>
+            <div class="accés-usuaris">
+                <form th:action="@{/logout}" method="post" style="display: inline;">
+                    <button type="submit" class="btn btn-login" style="cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                        <i class="fa-solid fa-right-from-bracket"></i> Tancar sessió
+                    </button>
+                </form>
             </div>
         </div>
     </header>
@@ -108,30 +109,29 @@
                 </button>
             </div>
         </form>
+
         <!-- ===================== RESSENYES ===================== -->
-<div th:if="${vehicleSeleccionat != null}" class="ressenyes-seccio">
-    <h3>Ressenyes d'aquest vehicle</h3>
+        <div th:if="${vehicleSeleccionat != null}" class="ressenyes-seccio">
+            <h3>Ressenyes d'aquest vehicle</h3>
 
-    <div th:if="${succes}" class="ressenya-succes">
-        <span th:text="${succes}"></span>
-    </div>
+            <div th:if="${succes}" class="ressenya-succes">
+                <span th:text="${succes}"></span>
+            </div>
 
-   
+            <p class="ressenya-buida" th:if="${resenyes == null or #lists.isEmpty(resenyes)}">Encara no hi ha ressenyes.</p>
 
-    <p class="ressenya-buida" th:if="${resenyes == null or #lists.isEmpty(resenyes)}">Encara no hi ha ressenyes.</p>
-
-    <div th:each="r : ${resenyes}" class="ressenya-item">
-        <div class="ressenya-cap">
-            <strong th:text="${r.client.nom}">Client</strong>
-            <span class="ressenya-data" th:text="${#temporals.format(r.dataCreacio, 'dd/MM/yyyy')}">01/01/2026</span>
+            <div th:each="r : ${resenyes}" class="ressenya-item">
+                <div class="ressenya-cap">
+                    <strong th:text="${r.client.nom}">Client</strong>
+                    <span class="ressenya-data" th:text="${#temporals.format(r.dataCreacio, 'dd/MM/yyyy')}">01/01/2026</span>
+                </div>
+                <div class="ressenya-estrelles">
+                    <i th:each="i : ${#numbers.sequence(1, 5)}"
+                       th:class="${i <= r.puntuacio} ? 'fa-solid fa-star' : 'fa-regular fa-star'"></i>
+                </div>
+                <p class="ressenya-text" th:if="${r.comentari != null}" th:text="${r.comentari}"></p>
+            </div>
         </div>
-        <div class="ressenya-estrelles">
-            <i th:each="i : ${#numbers.sequence(1, 5)}"
-               th:class="${i <= r.puntuacio} ? 'fa-solid fa-star' : 'fa-regular fa-star'"></i>
-        </div>
-        <p class="ressenya-text" th:if="${r.comentari != null}" th:text="${r.comentari}"></p>
-    </div>
-</div>
     </div>
 
 </body>

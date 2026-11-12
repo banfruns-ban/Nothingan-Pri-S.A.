@@ -1,5 +1,7 @@
 package cat.copernic.projecte1Grup3.Reserves.Service;
 
+import cat.copernic.projecte1Grup3.Informes.Entity.EstatHistoric;
+import cat.copernic.projecte1Grup3.Informes.Service.HistoricService;
 import cat.copernic.projecte1Grup3.Reserves.Entity.reservesEntity;
 import cat.copernic.projecte1Grup3.Reserves.Repository.reservesRepository;
 import cat.copernic.projecte1Grup3.Usuaris.Client.Entity.clientEntity;
@@ -43,13 +45,16 @@ public class reservesService {
     private final reservesRepository reservesRepository;
     private final clientRepository clientRepository;
     private final VehiclesRepository vehiclesRepository;
+    private final HistoricService historicService;
 
     public reservesService(reservesRepository reservesRepository,
             clientRepository clientRepository,
-            VehiclesRepository vehiclesRepository) {
+            VehiclesRepository vehiclesRepository,
+            HistoricService historicService) {
         this.reservesRepository = reservesRepository;
         this.clientRepository = clientRepository;
         this.vehiclesRepository = vehiclesRepository;
+        this.historicService = historicService;
     }
 
     public List<VehiclesEntity> vehiclesActius() {
@@ -210,6 +215,7 @@ public class reservesService {
                 ? null : observacions.trim());
 
         reservesEntity guardada = reservesRepository.save(reserva);
+        historicService.desar(guardada, EstatHistoric.PENDENT);
         log.info("Reserva #{} creada: client {} i vehicle {} ({} -> {})",
                 guardada.getCodiReserva(), client.getDni(), matricula, inici, fi);
         return guardada;

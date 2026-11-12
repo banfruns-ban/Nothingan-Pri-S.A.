@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import cat.copernic.projecte1Grup3.Informes.Entity.EstatHistoric;
 import cat.copernic.projecte1Grup3.Informes.Entity.HistoricReserva;
 import cat.copernic.projecte1Grup3.Informes.Repository.HistoricReservaRepository;
-import cat.copernic.projecte1Grup3.Reserves.Entity.reservesEntity;
+import cat.copernic.projecte1Grup3.Reserves.Entity.ReservesEntity;
 
 /**
  * Servei de l'històric de reserves (Mongo). Es crida des de reservesService
@@ -26,7 +26,7 @@ public class HistoricService {
         this.repo = repo;
     }
 
-    public void desar(reservesEntity r, EstatHistoric estat) {
+    public void desar(ReservesEntity r, EstatHistoric estat) {
         HistoricReserva h = repo.findById(r.getCodiReserva()).orElseGet(HistoricReserva::new);
 
         h.setIdReserva(r.getCodiReserva());

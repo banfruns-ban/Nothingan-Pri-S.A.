@@ -2,10 +2,8 @@ package cat.copernic.projecte1Grup3.Usuaris.Client.Service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import cat.copernic.projecte1Grup3.Usuaris.Client.Documents.clientDocuments;
-import cat.copernic.projecte1Grup3.Usuaris.Client.Entity.clientEntity;
-import cat.copernic.projecte1Grup3.Usuaris.Client.Repository.clientRepository;
-import cat.copernic.projecte1Grup3.Usuaris.Client.Repository.clientRepositoryMongo;
+import cat.copernic.projecte1Grup3.Usuaris.Client.Documents.ClientDocuments;
+import cat.copernic.projecte1Grup3.Usuaris.Client.Entity.ClientEntity;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
@@ -16,27 +14,29 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import cat.copernic.projecte1Grup3.Usuaris.Client.Repository.ClientRepository;
+import cat.copernic.projecte1Grup3.Usuaris.Client.Repository.ClientRepositoryMongo;
 
 @Service
-public class clientService {
+public class ClientService {
 
-    private static final Logger log = LoggerFactory.getLogger(clientService.class);
+    private static final Logger log = LoggerFactory.getLogger(ClientService.class);
     public static final String PENDENT = "PENDENT";
     public static final String VALIDAT = "VALIDAT";
     public static final String REBUTJAT = "REBUTJAT";
 
-    private final clientRepository clientRepository;
-    private final clientRepositoryMongo clientRepositoryMongo;
+    private final ClientRepository clientRepository;
+    private final ClientRepositoryMongo clientRepositoryMongo;
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public clientService(clientRepository clientRepository,
-                         clientRepositoryMongo clientRepositoryMongo) {
+    public ClientService(ClientRepository clientRepository,
+                         ClientRepositoryMongo clientRepositoryMongo) {
         this(clientRepository, clientRepositoryMongo, new BCryptPasswordEncoder());
     }
 
-    public clientService(clientRepository clientRepository,
-                         clientRepositoryMongo clientRepositoryMongo,
+    public ClientService(ClientRepository clientRepository,
+                         ClientRepositoryMongo clientRepositoryMongo,
                          PasswordEncoder passwordEncoder) {
         this.clientRepository = clientRepository;
         this.clientRepositoryMongo = clientRepositoryMongo;
@@ -44,9 +44,9 @@ public class clientService {
     }
 
     // ---------- LLISTAR I FILTRAR ----------
-    public List<clientEntity> llistar(String q, String dni, String estat, String email,
+    public List<ClientEntity> llistar(String q, String dni, String estat, String email,
                                       LocalDate dataNaixement) {
-        List<clientEntity> clients = clientRepository.findAll();
+        List<ClientEntity> clients = clientRepository.findAll();
 
         if (q != null && !q.isBlank()) {
             String text = q.trim().toLowerCase();
@@ -90,7 +90,7 @@ public class clientService {
 
     // ---------- ALTA DE CLIENT (Doble Persistència) ----------
     @Transactional(rollbackFor = Exception.class)
-    public void alta(clientEntity client, MultipartFile fotoDniFrontal,
+    public void alta(ClientEntity client, MultipartFile fotoDniFrontal,
                      MultipartFile fotoDniPosterior, MultipartFile fotoCarnet) throws IOException {
 
         String dni = client.getDni() == null ? "" : client.getDni().trim().toUpperCase();
@@ -124,7 +124,7 @@ public class clientService {
         client.setEstatValidacio(PENDENT);
         clientRepository.saveAndFlush(client);
 
-        clientDocuments doc = new clientDocuments();
+        ClientDocuments doc = new ClientDocuments();
         doc.setDni(dni);
         if (hiHa(fotoDniFrontal)) {
             doc.setFotoDniFrontal(fotoDniFrontal.getBytes());
@@ -142,21 +142,21 @@ public class clientService {
         log.info("Client donat d'alta: {}", dni);
     }
 
-    public Optional<clientEntity> obtenir(String dni) {
+    public Optional<ClientEntity> obtenir(String dni) {
         return clientRepository.findById(dni);
     }
 
-    public Optional<clientDocuments> obtenirDocuments(String dni) {
+    public Optional<ClientDocuments> obtenirDocuments(String dni) {
         return clientRepositoryMongo.findById(dni);
     }
 
     // ---------- ACTUALITZACIÓ (PANEL AGENT) ----------
     @Transactional(rollbackFor = Exception.class)
-    public void actualitzar(String dni, clientEntity dades, String estat, boolean premium,
+    public void actualitzar(String dni, ClientEntity dades, String estat, boolean premium,
                             MultipartFile fotoDniFrontal, MultipartFile fotoDniPosterior,
                             MultipartFile fotoCarnet) throws IOException {
 
-        clientEntity c = clientRepository.findById(dni)
+        ClientEntity c = clientRepository.findById(dni)
                 .orElseThrow(() -> new IllegalArgumentException("Client no trobat"));
 
         if (!VALIDAT.equals(estat) && !REBUTJAT.equals(estat) && !PENDENT.equals(estat)) {
@@ -199,8 +199,8 @@ public class clientService {
         log.info("Client actualitzat: {}", dni);
 
         if (hiHa(fotoDniFrontal) || hiHa(fotoDniPosterior) || hiHa(fotoCarnet)) {
-            clientDocuments doc = clientRepositoryMongo.findById(dni).orElseGet(() -> {
-                clientDocuments nou = new clientDocuments();
+            ClientDocuments doc = clientRepositoryMongo.findById(dni).orElseGet(() -> {
+                ClientDocuments nou = new ClientDocuments();
                 nou.setDni(dni);
                 return nou;
             });
@@ -221,13 +221,13 @@ public class clientService {
     }
 
     // ---------- PERFIL DEL CLIENT (AUTOGESTIÓ) ----------
-    public Optional<clientEntity> obtenirPerEmail(String email) {
+    public Optional<ClientEntity> obtenirPerEmail(String email) {
         return clientRepository.findByEmailIgnoreCase(email);
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public void actualitzarPerfilClient(String emailActual, clientEntity dades) {
-        clientEntity c = clientRepository.findByEmailIgnoreCase(emailActual)
+    public void actualitzarPerfilClient(String emailActual, ClientEntity dades) {
+        ClientEntity c = clientRepository.findByEmailIgnoreCase(emailActual)
                 .orElseThrow(() -> new IllegalArgumentException("Client no trobat"));
 
         String nouEmail = dades.getEmail() == null ? "" : dades.getEmail().trim();
@@ -277,7 +277,7 @@ public class clientService {
     // ---------- ELIMINACIÓ DE CLIENT ----------
     @Transactional
     public void eliminar(String dni) {
-        clientEntity c = clientRepository.findById(dni)
+        ClientEntity c = clientRepository.findById(dni)
                 .orElseThrow(() -> new IllegalArgumentException("Client no trobat"));
 
         clientRepository.delete(c);
@@ -293,7 +293,7 @@ public class clientService {
         if (!VALIDAT.equals(estat) && !REBUTJAT.equals(estat) && !PENDENT.equals(estat)) {
             throw new IllegalArgumentException("Estat no vàlid");
         }
-        clientEntity c = clientRepository.findById(dni)
+        ClientEntity c = clientRepository.findById(dni)
                 .orElseThrow(() -> new IllegalArgumentException("Client no trobat"));
         
         c.setEstatValidacio(estat);
@@ -303,7 +303,7 @@ public class clientService {
     // ---------- CANVI D'ESTAT PREMIUM ----------
     @Transactional
     public void canviarPremium(String dni, boolean premium) {
-        clientEntity c = clientRepository.findById(dni)
+        ClientEntity c = clientRepository.findById(dni)
                 .orElseThrow(() -> new IllegalArgumentException("Client no trobat"));
         c.setPremium(premium);
         clientRepository.save(c);

@@ -9,16 +9,16 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import cat.copernic.projecte1Grup3.Informes.Service.InformeException;
 import cat.copernic.projecte1Grup3.Informes.Service.InformeReservesService;
-import cat.copernic.projecte1Grup3.Usuaris.Client.Service.clientService;
+import cat.copernic.projecte1Grup3.Usuaris.Client.Service.ClientService;
 
 @Controller
 public class InformeReservesController {
 
     private final InformeReservesService informeService;
-    private final clientService clientLogic;
+    private final ClientService clientLogic;
 
     public InformeReservesController(InformeReservesService informeService,
-            clientService clientLogic) {
+            ClientService clientLogic) {
         this.informeService = informeService;
         this.clientLogic = clientLogic;
     }

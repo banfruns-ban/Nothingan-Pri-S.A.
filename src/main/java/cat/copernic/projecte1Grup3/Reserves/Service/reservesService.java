@@ -2,10 +2,8 @@ package cat.copernic.projecte1Grup3.Reserves.Service;
 
 import cat.copernic.projecte1Grup3.Informes.Entity.EstatHistoric;
 import cat.copernic.projecte1Grup3.Informes.Service.HistoricService;
-import cat.copernic.projecte1Grup3.Reserves.Entity.reservesEntity;
-import cat.copernic.projecte1Grup3.Reserves.Repository.reservesRepository;
-import cat.copernic.projecte1Grup3.Usuaris.Client.Entity.clientEntity;
-import cat.copernic.projecte1Grup3.Usuaris.Client.Repository.clientRepository;
+import cat.copernic.projecte1Grup3.Reserves.Entity.ReservesEntity;
+import cat.copernic.projecte1Grup3.Usuaris.Client.Entity.ClientEntity;
 import cat.copernic.projecte1Grup3.Vehicles.Entity.VehiclesEntity;
 import cat.copernic.projecte1Grup3.Vehicles.Repository.VehiclesRepository;
 
@@ -30,11 +28,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import cat.copernic.projecte1Grup3.Reserves.Repository.ReservesRepository;
+import cat.copernic.projecte1Grup3.Usuaris.Client.Repository.ClientRepository;
 
 @Service
-public class reservesService {
+public class ReservesService {
 
-    private static final Logger log = LoggerFactory.getLogger(reservesService.class);
+    private static final Logger log = LoggerFactory.getLogger(ReservesService.class);
 
     public static final String PENDENT = "PENDENT";
     public static final String CONFIRMADA = "CONFIRMADA";
@@ -42,13 +42,13 @@ public class reservesService {
     public static final String FINALITZADA = "FINALITZADA";
     public static final String CANCELADA = "CANCELADA"; // O "ANULLADA" segons la teva base de dades
 
-    private final reservesRepository reservesRepository;
-    private final clientRepository clientRepository;
+    private final ReservesRepository reservesRepository;
+    private final ClientRepository clientRepository;
     private final VehiclesRepository vehiclesRepository;
     private final HistoricService historicService;
 
-    public reservesService(reservesRepository reservesRepository,
-            clientRepository clientRepository,
+    public ReservesService(ReservesRepository reservesRepository,
+            ClientRepository clientRepository,
             VehiclesRepository vehiclesRepository,
             HistoricService historicService) {
         this.reservesRepository = reservesRepository;
@@ -63,10 +63,10 @@ public class reservesService {
                 .toList();
     }
 
-    public List<reservesEntity> llistar(String q, String dni, String email,
+    public List<ReservesEntity> llistar(String q, String dni, String email,
             LocalDate dataReserva, String matricula,
             String codi, String estat) {
-        List<reservesEntity> reserves = reservesRepository.findAll();
+        List<ReservesEntity> reserves = reservesRepository.findAll();
 
         if (q != null && !q.isBlank()) {
             String text = q.trim().toLowerCase();
@@ -125,7 +125,7 @@ public class reservesService {
         }
 
         return reserves.stream()
-                .sorted(Comparator.comparing(reservesEntity::getCodiReserva).reversed())
+                .sorted(Comparator.comparing(ReservesEntity::getCodiReserva).reversed())
                 .toList();
     }
 
@@ -133,12 +133,12 @@ public class reservesService {
         return valor != null && valor.toLowerCase().contains(text);
     }
 
-    public Optional<reservesEntity> obtenir(Long codi) {
+    public Optional<ReservesEntity> obtenir(Long codi) {
         return reservesRepository.findById(codi);
     }
 
     @Transactional
-    public reservesEntity crear(String dni, String matricula,
+    public ReservesEntity crear(String dni, String matricula,
             LocalDate dataInici, LocalTime horaInici,
             LocalDate dataFi, LocalTime horaFi,
             String observacions) {
@@ -153,7 +153,7 @@ public class reservesService {
             throw new IllegalArgumentException("Cal indicar les dates i hores d'inici i fi");
         }
 
-        clientEntity client = clientRepository.findById(dni.trim().toUpperCase())
+        ClientEntity client = clientRepository.findById(dni.trim().toUpperCase())
                 .orElseThrow(() -> new IllegalArgumentException("Client no trobat"));
         if (!"VALIDAT".equals(client.getEstatValidacio())) {
             throw new IllegalArgumentException(
@@ -187,9 +187,9 @@ public class reservesService {
                     "La durada màxima de lloguer és de " + vehicle.getMaxDiesLloguer() + " dia(es)");
         }
 
-        List<reservesEntity> existents
+        List<ReservesEntity> existents
                 = reservesRepository.findByVehicleMatriculaAndEstatNot(matricula, CANCELADA);
-        for (reservesEntity r : existents) {
+        for (ReservesEntity r : existents) {
             LocalDateTime iniciR = LocalDateTime.of(r.getDataInici(), r.getHoraInici());
             LocalDateTime fiR = LocalDateTime.of(r.getDataFi(), r.getHoraFi());
             boolean esSolapa = iniciR.isBefore(fi) && fiR.isAfter(inici);
@@ -199,7 +199,7 @@ public class reservesService {
             }
         }
 
-        reservesEntity reserva = new reservesEntity();
+        ReservesEntity reserva = new ReservesEntity();
         reserva.setClient(client);
         reserva.setVehicle(vehicle);
         reserva.setDataInici(dataInici);
@@ -214,7 +214,7 @@ public class reservesService {
         reserva.setObservacions(observacions == null || observacions.isBlank()
                 ? null : observacions.trim());
 
-        reservesEntity guardada = reservesRepository.save(reserva);
+        ReservesEntity guardada = reservesRepository.save(reserva);
         historicService.desar(guardada, EstatHistoric.PENDENT);
         log.info("Reserva #{} creada: client {} i vehicle {} ({} -> {})",
                 guardada.getCodiReserva(), client.getDni(), matricula, inici, fi);
@@ -223,7 +223,7 @@ public class reservesService {
 
     @Transactional
     public void eliminar(Long codi) {
-        reservesEntity r = reservesRepository.findById(codi)
+        ReservesEntity r = reservesRepository.findById(codi)
                 .orElseThrow(() -> new IllegalArgumentException("Reserva no trobada"));
 
         if (EN_CURS.equals(r.getEstat()) || FINALITZADA.equals(r.getEstat())) {
@@ -235,7 +235,7 @@ public class reservesService {
     }
 
     // Emmagatzematge físic a: uploads/vehicles/(MATRICULA_MARCA_MODEL)/(lliurar|retornar)/
-    public String guardarFotos(reservesEntity reserva, MultipartFile[] fotos, String accio) {
+    public String guardarFotos(ReservesEntity reserva, MultipartFile[] fotos, String accio) {
         if (fotos == null || fotos.length == 0) {
             return "";
         }
@@ -287,10 +287,10 @@ public class reservesService {
     }
 
     @Transactional
-    public reservesEntity lliurar(Long codi, LocalDate dataLliurament, LocalTime horaLliurament,
+    public ReservesEntity lliurar(Long codi, LocalDate dataLliurament, LocalTime horaLliurament,
             Integer kmInicials, String nivellCombustible, String novesObservacions,
             MultipartFile[] fotos) {
-        reservesEntity r = reservesRepository.findById(codi)
+        ReservesEntity r = reservesRepository.findById(codi)
                 .orElseThrow(() -> new IllegalArgumentException("Reserva no trobada: #" + codi));
 
         if (EN_CURS.equals(r.getEstat()) || FINALITZADA.equals(r.getEstat()) || CANCELADA.equals(r.getEstat())) {
@@ -322,18 +322,18 @@ public class reservesService {
         }
 
         r.setObservacions(obs.toString());
-        reservesEntity guardada = reservesRepository.save(r);
+        ReservesEntity guardada = reservesRepository.save(r);
         log.info("Reserva #{} lliurada: vehicle {} a client {}",
                 codi, r.getVehicle().getMatricula(), r.getClient().getDni());
         return guardada;
     }
 
     @Transactional
-    public reservesEntity retornar(Long codi, LocalDate dataRetorn, LocalTime horaRetorn,
+    public ReservesEntity retornar(Long codi, LocalDate dataRetorn, LocalTime horaRetorn,
             boolean teDesperfectes, boolean desperfectesImputables,
             BigDecimal importDanys, BigDecimal deduccioCarburant,
             String novesObservacions, MultipartFile[] fotos) {
-        reservesEntity r = reservesRepository.findById(codi)
+        ReservesEntity r = reservesRepository.findById(codi)
                 .orElseThrow(() -> new IllegalArgumentException("Reserva no trobada: #" + codi));
 
         if (!EN_CURS.equals(r.getEstat())) {
@@ -407,7 +407,7 @@ public class reservesService {
         r.setObservacions(obs.toString());
         r.setEstat(FINALITZADA);
 
-        reservesEntity guardada = reservesRepository.save(r);
+        ReservesEntity guardada = reservesRepository.save(r);
         log.info("Reserva #{} finalitzada. Fiança retornada: {}€", codi, fiancaARetornar);
         return guardada;
     }
@@ -424,13 +424,13 @@ public class reservesService {
                 .count();
     }
 
-    public List<reservesEntity> llistarPropersLliuraments() {
+    public List<ReservesEntity> llistarPropersLliuraments() {
         LocalDate avui = LocalDate.now();
         return reservesRepository.findAll().stream()
                 .filter(r -> !CANCELADA.equals(r.getEstat()) && !FINALITZADA.equals(r.getEstat()))
                 .filter(r -> EN_CURS.equals(r.getEstat()) || (r.getDataInici() != null && !r.getDataInici().isBefore(avui)))
-                .sorted(Comparator.comparing(reservesEntity::getDataInici)
-                        .thenComparing(reservesEntity::getHoraInici))
+                .sorted(Comparator.comparing(ReservesEntity::getDataInici)
+                        .thenComparing(ReservesEntity::getHoraInici))
                 .limit(10)
                 .toList();
     }
@@ -438,7 +438,7 @@ public class reservesService {
     // ============================================================
     // MÈTODE PER FILTRAR RESERVES PER CLIENTS (DNI)
     // ============================================================
-    public List<reservesEntity> llistarReservesPerClients(List<String> dnisClients) {
+    public List<ReservesEntity> llistarReservesPerClients(List<String> dnisClients) {
         if (dnisClients == null || dnisClients.isEmpty()) {
             return reservesRepository.findAll();
         }
@@ -458,13 +458,13 @@ public class reservesService {
     // ============================================================
     // MÈTODE PER CERCAR LES RESERVES D'UN CLIENT ESPECÍFIC
     // ============================================================
-    public List<reservesEntity> buscarPerClient(String dni) {
+    public List<ReservesEntity> buscarPerClient(String dni) {
         if (dni == null || dni.isBlank()) {
             return List.of();
         }
         return reservesRepository.findAll().stream()
                 .filter(r -> r.getClient() != null && dni.equalsIgnoreCase(r.getClient().getDni()))
-                .sorted(Comparator.comparing(reservesEntity::getCodiReserva).reversed())
+                .sorted(Comparator.comparing(ReservesEntity::getCodiReserva).reversed())
                 .toList();
     }
 
@@ -473,7 +473,7 @@ public class reservesService {
     // ============================================================
     @Transactional
     public void anularReserva(Long codiReserva) {
-        reservesEntity r = reservesRepository.findById(codiReserva)
+        ReservesEntity r = reservesRepository.findById(codiReserva)
                 .orElseThrow(() -> new IllegalArgumentException("Reserva no trobada: #" + codiReserva));
 
         if (FINALITZADA.equals(r.getEstat()) || EN_CURS.equals(r.getEstat()) || CANCELADA.equals(r.getEstat())) {
@@ -489,7 +489,7 @@ public class reservesService {
     // MÈTODE PER GUARDAR LA RESERVA DES DEL CLIENT
     // ============================================================
     @Transactional
-    public reservesEntity guardarReservaClient(reservesEntity reserva) {
+    public ReservesEntity guardarReservaClient(ReservesEntity reserva) {
         if (reserva == null) {
             throw new IllegalArgumentException("La reserva no pot ser nul·la");
         }

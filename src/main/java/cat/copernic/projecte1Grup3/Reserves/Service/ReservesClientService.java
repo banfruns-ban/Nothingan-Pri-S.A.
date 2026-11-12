@@ -6,30 +6,30 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
-import cat.copernic.projecte1Grup3.Reserves.Entity.reservesEntity;
-import cat.copernic.projecte1Grup3.Reserves.Repository.reservesRepository;
-import cat.copernic.projecte1Grup3.Usuaris.Client.Entity.clientEntity;
-import cat.copernic.projecte1Grup3.Usuaris.Client.Repository.clientRepository;
+import cat.copernic.projecte1Grup3.Reserves.Entity.ReservesEntity;
+import cat.copernic.projecte1Grup3.Usuaris.Client.Entity.ClientEntity;
+import cat.copernic.projecte1Grup3.Reserves.Repository.ReservesRepository;
+import cat.copernic.projecte1Grup3.Usuaris.Client.Repository.ClientRepository;
 
 @Service
 public class ReservesClientService {
 
-    private final reservesRepository reservesRepository;
-    private final clientRepository clientRepository;
+    private final ReservesRepository reservesRepository;
+    private final ClientRepository clientRepository;
 
-    public ReservesClientService(reservesRepository reservesRepository,
-                                 clientRepository clientRepository) {
+    public ReservesClientService(ReservesRepository reservesRepository,
+                                 ClientRepository clientRepository) {
         this.reservesRepository = reservesRepository;
         this.clientRepository = clientRepository;
     }
 
     // El login pot ser el DNI o l'email: provem tots dos
-    public Optional<clientEntity> obtenirClient(String identificador) {
+    public Optional<ClientEntity> obtenirClient(String identificador) {
         if (identificador == null || identificador.isBlank()) {
             return Optional.empty();
         }
         String id = identificador.trim();
-        Optional<clientEntity> client = clientRepository.findById(id.toUpperCase());
+        Optional<ClientEntity> client = clientRepository.findById(id.toUpperCase());
         if (client.isEmpty()) {
             client = clientRepository.findByEmailIgnoreCase(id);
         }
@@ -37,17 +37,17 @@ public class ReservesClientService {
     }
 
     // Només les reserves del client loguejat
-    public List<reservesEntity> llistarPerClient(String identificador) {
+    public List<ReservesEntity> llistarPerClient(String identificador) {
         return obtenirClient(identificador)
                 .map(c -> reservesRepository.findByClientDniIn(List.of(c.getDni()))
                         .stream()
-                        .sorted(Comparator.comparing(reservesEntity::getCodiReserva).reversed())
+                        .sorted(Comparator.comparing(ReservesEntity::getCodiReserva).reversed())
                         .toList())
                 .orElse(List.of());
     }
 
     // Una reserva concreta, només si pertany al client loguejat
-    public Optional<reservesEntity> obtenirReservaDelClient(Long codi, String identificador) {
+    public Optional<ReservesEntity> obtenirReservaDelClient(Long codi, String identificador) {
         return obtenirClient(identificador).flatMap(c ->
                 reservesRepository.findById(codi)
                         .filter(r -> r.getClient() != null

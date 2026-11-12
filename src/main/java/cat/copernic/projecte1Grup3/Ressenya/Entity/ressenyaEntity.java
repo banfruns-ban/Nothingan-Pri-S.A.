@@ -4,8 +4,8 @@
  */
 package cat.copernic.projecte1Grup3.Ressenya.Entity;
 
-import cat.copernic.projecte1Grup3.Reserves.Entity.reservesEntity;
-import cat.copernic.projecte1Grup3.Usuaris.Client.Entity.clientEntity;
+import cat.copernic.projecte1Grup3.Reserves.Entity.ReservesEntity;
+import cat.copernic.projecte1Grup3.Usuaris.Client.Entity.ClientEntity;
 import cat.copernic.projecte1Grup3.Vehicles.Entity.VehiclesEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -22,7 +22,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "Ressenya")
-public class ressenyaEntity {
+public class RessenyaEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,11 +36,11 @@ public class ressenyaEntity {
 
     @ManyToOne
     @JoinColumn(name = "DNI_client", referencedColumnName = "DNI")
-    private clientEntity client;
+    private ClientEntity client;
 
     @ManyToOne
     @JoinColumn(name = "codi_reserva")
-    private reservesEntity reserva;
+    private ReservesEntity reserva;
 
     @Min(1)
     @Max(5)
@@ -53,10 +53,10 @@ public class ressenyaEntity {
    @Column(nullable = false)
     private LocalDateTime dataCreacio;
 
-    public ressenyaEntity() {
+    public RessenyaEntity() {
     }
 
-    public ressenyaEntity(int puntuacio, String comentari, LocalDateTime dataCreacio, clientEntity client, VehiclesEntity vehicle) {
+    public RessenyaEntity(int puntuacio, String comentari, LocalDateTime dataCreacio, ClientEntity client, VehiclesEntity vehicle) {
         this.puntuacio = puntuacio;
         this.comentari = comentari;
         this.dataCreacio = dataCreacio;
@@ -96,11 +96,11 @@ public class ressenyaEntity {
         this.dataCreacio = dataCreacio;
     }
 
-    public clientEntity getClient() {
+    public ClientEntity getClient() {
         return client;
     }
 
-    public void setClient(clientEntity client) {
+    public void setClient(ClientEntity client) {
         this.client = client;
     }
         public VehiclesEntity getVehicle() {

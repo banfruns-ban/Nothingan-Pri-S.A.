@@ -3,8 +3,8 @@ package cat.copernic.projecte1Grup3.Informes.Controller;
 import cat.copernic.projecte1Grup3.Informes.Entity.InformeReserves;
 import cat.copernic.projecte1Grup3.Informes.Service.InformeException;
 import cat.copernic.projecte1Grup3.Informes.Service.InformeReservesService;
-import cat.copernic.projecte1Grup3.Usuaris.Client.Entity.clientEntity;
-import cat.copernic.projecte1Grup3.Usuaris.Client.Service.clientService;
+import cat.copernic.projecte1Grup3.Usuaris.Client.Entity.ClientEntity;
+import cat.copernic.projecte1Grup3.Usuaris.Client.Service.ClientService;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -35,14 +35,14 @@ class InformeReservesControllerTest {
     private InformeReservesService informeService;
 
     @Mock
-    private clientService clientLogic;
+    private ClientService clientLogic;
 
     @Mock
     private Model model;
 
     private InformeReservesController controller;
 
-    private List<clientEntity> llistaClientsValidats;
+    private List<ClientEntity> llistaClientsValidats;
     private InformeReserves informeMock;
 
     @BeforeEach
@@ -50,7 +50,7 @@ class InformeReservesControllerTest {
         // Instanciación explícita por constructor para Java 23
         controller = new InformeReservesController(informeService, clientLogic);
 
-        llistaClientsValidats = List.of(new clientEntity());
+        llistaClientsValidats = List.of(new ClientEntity());
         informeMock = mock(InformeReserves.class);
 
         // Stubbing por defecto para clientLogic ya que el controlador lo ejecuta siempre al inicio

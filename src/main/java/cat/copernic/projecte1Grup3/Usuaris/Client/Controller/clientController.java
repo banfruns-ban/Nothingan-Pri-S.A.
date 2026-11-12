@@ -1,8 +1,10 @@
 package cat.copernic.projecte1Grup3.Usuaris.Client.Controller;
 
-import cat.copernic.projecte1Grup3.Usuaris.Client.Documents.clientDocuments;
-import cat.copernic.projecte1Grup3.Usuaris.Client.Entity.clientEntity;
-import cat.copernic.projecte1Grup3.Usuaris.Client.Service.clientService;
+import cat.copernic.projecte1Grup3.Usuaris.Client.Documents.ClientDocuments;
+import cat.copernic.projecte1Grup3.Usuaris.Client.Entity.ClientEntity;
+import cat.copernic.projecte1Grup3.Usuaris.Client.Service.ClientService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Optional;
@@ -12,98 +14,96 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
-public class clientController {
+public class ClientController {
 
-    private static final Logger log = LoggerFactory.getLogger(clientController.class); //<-- Lo mismo que system.out.println (guarda mensajes)
+    private static final Logger log = LoggerFactory.getLogger(ClientController.class);
+    private final ClientService clientLogic;
 
-    private final clientService clientLogic;
-
-    public clientController(clientService clientLogic) {
+    public ClientController(ClientService clientLogic) {
         this.clientLogic = clientLogic;
     }
 
     // =====================================================
-    // ALTA
+    // ALTA DE CLIENTE
     // =====================================================
 
-    @GetMapping("/clients/nou") //<-- Muestra formulario no rellenado
+    @GetMapping({"/dashboard/clients/alta", "/dashboard/clients/altaUsuari", "/dashboard/clients/nou"})
     public String mostrarFormulari(Model model) {
-        if (!model.containsAttribute("client")) { //<--Si no hay cliente entonces prepara para crear uno
-            model.addAttribute("client", new clientEntity());
+        if (!model.containsAttribute("client")) {
+            model.addAttribute("client", new ClientEntity());
         }
-        return "altaUsuari";
+        return "client/altaUsuari";
     }
 
-    @PostMapping("/clients/alta") //<--Regresa formulario rellenado
+    @PostMapping({"/dashboard/clients/alta", "/dashboard/clients/altaUsuari"})
     public String altaClient(
-            @ModelAttribute("client") clientEntity client,
+            @ModelAttribute("client") ClientEntity client,
             @RequestParam("fotoDniFrontal") MultipartFile fotoDniFrontal,
             @RequestParam("fotoDniPosterior") MultipartFile fotoDniPosterior,
             @RequestParam("fotoCarnet") MultipartFile fotoCarnet,
             RedirectAttributes ra) {
         try {
-            clientLogic.alta(client, fotoDniFrontal, fotoDniPosterior, fotoCarnet);  // 1. Intenta el alta
-            ra.addFlashAttribute("missatge", "Client donat d'alta correctament!");  //<-- Envia missatge
-        } catch (IllegalArgumentException e) {  // 3. Dato mal puesto: muestra el motivo
+            clientLogic.alta(client, fotoDniFrontal, fotoDniPosterior, fotoCarnet);
+            ra.addFlashAttribute("missatge", "Client donat d'alta correctament!");
+            return "redirect:/dashboard/clients";
+        } catch (IllegalArgumentException e) {
             ra.addFlashAttribute("error", e.getMessage());
-        } catch (Exception e) { //Fallo inesperado
+        } catch (Exception e) {
             log.error("Error en l'alta del client", e);
             ra.addFlashAttribute("error", "No s'ha pogut completar el registre");
         }
-        return "redirect:/clients/nou";
+        return "redirect:/dashboard/clients/alta";
     }
 
     // =====================================================
     // LISTADO Y DETALLE
     // =====================================================
 
-    @GetMapping("/clients") //<-- pide ver datos
-    public String llistar(@RequestParam(required = false) String q, //devuelve q que que en este caso es query, busca el nombre
+    @GetMapping("/dashboard/clients")
+    public String llistar(@RequestParam(required = false) String q,
                           @RequestParam(required = false) String dni,
                           @RequestParam(required = false) String estat,
+                          @RequestParam(required = false) String email,
                           @RequestParam(required = false)
                           @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataNaixement,
                           Model model) {
-        model.addAttribute("clients", clientLogic.llistar(q, dni, estat, dataNaixement));
-        model.addAttribute("q", q); //<--puente entre tu código Java y la plantilla Thymeleaf.
+        model.addAttribute("clients", clientLogic.llistar(q, dni, estat, email, dataNaixement));
+        model.addAttribute("q", q);
         model.addAttribute("dni", dni);
         model.addAttribute("estat", estat);
         model.addAttribute("dataNaixement", dataNaixement);
-        return "llistaClients";
+        model.addAttribute("email", email);
+        return "client/llistaClients";
     }
 
-    @GetMapping("/clients/{dni}")
+    @GetMapping({"/dashboard/clients/{dni}", "/dashboard/clients/detall/{dni}"})
     public String detall(@PathVariable String dni, Model model, RedirectAttributes ra) {
         return clientLogic.obtenir(dni).map(c -> {
             model.addAttribute("client", c);
-            return "detallClient";
+            return "client/detallClient";
         }).orElseGet(() -> {
             ra.addFlashAttribute("error", "Client no trobat");
-            return "redirect:/clients";
+            return "redirect:/dashboard/clients";
         });
     }
 
-    // tipus = frontal | posterior | carnet
-    @GetMapping("/clients/{dni}/imatge/{tipus}")
+    @GetMapping("/dashboard/clients/{dni}/imatge/{tipus}")
     @ResponseBody
     public ResponseEntity<byte[]> imatge(@PathVariable String dni, @PathVariable String tipus) {
-        Optional<clientDocuments> docs = clientLogic.obtenirDocuments(dni);
+        Optional<ClientDocuments> docs = clientLogic.obtenirDocuments(dni);
         if (docs.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        clientDocuments d = docs.get();
+        ClientDocuments d = docs.get();
 
         byte[] bytes;
         String mime;
@@ -134,23 +134,23 @@ public class clientController {
     }
 
     // =====================================================
-    // EDICIÓN
+    // EDICIÓN Y ELIMINACIÓN
     // =====================================================
 
-    @GetMapping("/clients/{dni}/editar")
+    @GetMapping("/dashboard/clients/{dni}/editar")
     public String formulariEditar(@PathVariable String dni, Model model, RedirectAttributes ra) {
         return clientLogic.obtenir(dni).map(c -> {
             model.addAttribute("client", c);
-            return "editarClient";
+            return "client/editarClient";
         }).orElseGet(() -> {
             ra.addFlashAttribute("error", "Client no trobat");
-            return "redirect:/clients";
+            return "redirect:/dashboard/clients";
         });
     }
 
-    @PostMapping("/clients/{dni}/editar")
+    @PostMapping("/dashboard/clients/{dni}/editar")
     public String editar(@PathVariable String dni,
-                         @ModelAttribute("client") clientEntity dades,
+                         @ModelAttribute("client") ClientEntity dades,
                          @RequestParam String estatValidacio,
                          @RequestParam(defaultValue = "false") boolean premium,
                          @RequestParam(value = "fotoDniFrontal", required = false) MultipartFile fotoDniFrontal,
@@ -161,39 +161,123 @@ public class clientController {
             clientLogic.actualitzar(dni, dades, estatValidacio, premium,
                     fotoDniFrontal, fotoDniPosterior, fotoCarnet);
             ra.addFlashAttribute("missatge", "Client actualitzat correctament");
-        } catch (DataIntegrityViolationException e) {
-            ra.addFlashAttribute("error", "Aquest correu ja està en ús per un altre client");
-            return "redirect:/clients/" + dni + "/editar";
         } catch (IllegalArgumentException e) {
             ra.addFlashAttribute("error", e.getMessage());
-            return "redirect:/clients/" + dni + "/editar";
+        } catch (DataIntegrityViolationException e) {
+            log.error("Error d'integritat editant el client {}: {}", dni, e.getMostSpecificCause().getMessage(), e);
+            ra.addFlashAttribute("error",
+                    "No s'ha pogut guardar el client. Revisa que totes les dades siguin vàlides");
         } catch (IOException e) {
-            log.error("Error guardant les imatges de {}", dni, e);
-            ra.addFlashAttribute("error", "No s'han pogut guardar les imatges");
-            return "redirect:/clients/" + dni + "/editar";
+            log.error("Error llegint les imatges del client {}", dni, e);
+            ra.addFlashAttribute("error", "No s'han pogut llegir les imatges");
         }
-        return "redirect:/clients";
+        return "redirect:/dashboard/clients";
+    }
+
+    @PostMapping("/dashboard/clients/{dni}/eliminar")
+    public String eliminar(@PathVariable String dni, RedirectAttributes ra) {
+        try {
+            clientLogic.eliminar(dni);
+            ra.addFlashAttribute("missatge", "Client eliminat correctament");
+        } catch (IllegalArgumentException e) {
+            ra.addFlashAttribute("error", e.getMessage());
+        } catch (DataIntegrityViolationException e) {
+            ra.addFlashAttribute("error", "No es pot eliminar: el client té reserves associades");
+        }
+        return "redirect:/dashboard/clients";
     }
 
     // =====================================================
-    // VALIDACIÓN DEL ADMINISTRADOR
+    // VALIDACIÓN Y ESTADO (RF82)
     // =====================================================
 
-    @PostMapping("/clients/{dni}/validacio")
-    public String validar(@PathVariable String dni,
-                          @RequestParam String estat,
-                          RedirectAttributes ra) {
+    @PostMapping("/dashboard/clients/{dni}/validacio")
+    public String validar(@PathVariable String dni, @RequestParam String estat, RedirectAttributes ra) {
         clientLogic.canviarEstat(dni, estat);
         ra.addFlashAttribute("missatge", "Estat actualitzat a " + estat);
-        return "redirect:/clients";
+        return "redirect:/dashboard/clients";
     }
 
-    @PostMapping("/clients/{dni}/premium")
-    public String premium(@PathVariable String dni,
-                          @RequestParam boolean premium,
-                          RedirectAttributes ra) {
+    @PostMapping("/dashboard/clients/{dni}/premium")
+    public String premium(@PathVariable String dni, @RequestParam boolean premium, RedirectAttributes ra) {
         clientLogic.canviarPremium(dni, premium);
         ra.addFlashAttribute("missatge", "Estat premium actualitzat");
-        return "redirect:/clients";
+        return "redirect:/dashboard/clients";
+    }
+
+    // =====================================================
+    // REGISTRE DES DEL PORTAL CLIENT (RF81)
+    // =====================================================
+
+    @GetMapping("/registre")
+    public String mostrarFormulariRegistre(Model model) {
+        if (!model.containsAttribute("client")) {
+            model.addAttribute("client", new ClientEntity());
+        }
+        return "registre";
+    }
+
+    @PostMapping("/registre")
+    public String processarRegistreClient(
+            @ModelAttribute("client") ClientEntity client,
+            @RequestParam("fotoDniFrontal") MultipartFile fotoDniFrontal,
+            @RequestParam("fotoDniPosterior") MultipartFile fotoDniPosterior,
+            @RequestParam("fotoCarnet") MultipartFile fotoCarnet,
+            RedirectAttributes ra) {
+        try {
+            clientLogic.alta(client, fotoDniFrontal, fotoDniPosterior, fotoCarnet);
+            ra.addFlashAttribute("missatge", "Sol·licitud de registre enviada amb èxit! L'administrador ha de validar el teu compte.");
+            return "redirect:/cataleg";
+        } catch (IllegalArgumentException e) {
+            ra.addFlashAttribute("error", e.getMessage());
+        } catch (Exception e) {
+            log.error("Error en el registre del client extern", e);
+            ra.addFlashAttribute("error", "No s'ha pogut completar el registre. Revisa que les dades i fitxers siguin correctes.");
+        }
+        return "redirect:/registre";
+    }
+
+    // =====================================================
+    // EL MEU PERFIL (PORTAL CLIENT)
+    // =====================================================
+
+    @GetMapping("/perfil")
+    public String veurePerfil(Authentication auth, Model model, RedirectAttributes ra) {
+        if (auth == null || !auth.isAuthenticated()) {
+            return "redirect:/login";
+        }
+        return clientLogic.obtenirPerEmail(auth.getName()).map(c -> {
+            model.addAttribute("client", c);
+            return "client/perfil";
+        }).orElseGet(() -> {
+            ra.addFlashAttribute("error", "No s'ha trobat el perfil del client.");
+            return "redirect:/cataleg";
+        });
+    }
+
+    @PostMapping("/perfil")
+    public String guardarPerfil(@ModelAttribute("client") ClientEntity dades,
+                                Authentication auth,
+                                HttpServletRequest request,
+                                HttpServletResponse response,
+                                RedirectAttributes ra) {
+        String emailActual = auth.getName();
+        try {
+            clientLogic.actualitzarPerfilClient(emailActual, dades);
+
+            if (dades.getEmail() != null && !emailActual.equalsIgnoreCase(dades.getEmail().trim())) {
+                new SecurityContextLogoutHandler().logout(request, response, auth);
+                ra.addFlashAttribute("missatge", "Correu electrònic actualitzat. Torna a iniciar sessió amb el nou correu.");
+                return "redirect:/login";
+            }
+
+            ra.addFlashAttribute("missatge", "Les teves dades s'han actualitzat correctament!");
+        } catch (IllegalArgumentException e) {
+            ra.addFlashAttribute("error", e.getMessage());
+        } catch (DataIntegrityViolationException e) {
+            log.error("Error d'integritat actualitzant perfil de {}", emailActual, e);
+            ra.addFlashAttribute("error", "No s'han pogut desar els canvis. Revisa les dades introduïdes.");
+        }
+        return "redirect:/perfil";
     }
 }

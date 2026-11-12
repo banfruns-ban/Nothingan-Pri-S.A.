@@ -8,196 +8,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <!-- FontAwesome per les icones -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <style>
-        :root {
-            --sidebar-bg: #111827;
-            --sidebar-active: #1d4ed8;
-            --main-bg: #f9fafb;
-            --card-border: #e5e7eb;
-        }
-
-        body {
-            background-color: var(--main-bg);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            min-height: 100vh;
-        }
-
-        /* Sidebar estil idèntic al panell */
-        .sidebar {
-            width: 260px;
-            background-color: var(--sidebar-bg);
-            color: #9ca3af;
-            min-height: 100vh;
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 100;
-        }
-
-        .sidebar .brand {
-            padding: 24px 20px;
-            color: #ffffff;
-            font-weight: 700;
-            font-size: 1.1rem;
-            border-bottom: 1px solid #1f2937;
-        }
-
-        .sidebar .brand span {
-            display: block;
-            font-size: 0.75rem;
-            color: #6b7280;
-            font-weight: 400;
-            margin-top: 2px;
-        }
-
-        .sidebar .nav-link {
-            color: #9ca3af;
-            padding: 12px 20px;
-            font-size: 0.95rem;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            border-radius: 8px;
-            margin: 4px 12px;
-            transition: all 0.2s;
-        }
-
-        .sidebar .nav-link:hover {
-            color: #ffffff;
-            background-color: #1f2937;
-        }
-
-        .sidebar .nav-link.active {
-            background-color: var(--sidebar-active);
-            color: #ffffff;
-            font-weight: 500;
-        }
-
-        /* Contingut Principal */
-        .main-content {
-            margin-left: 260px;
-            padding: 40px;
-        }
-
-        /* Targeta de Filtres */
-        .filter-card {
-            background: #ffffff;
-            border: 1px solid var(--card-border);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 28px;
-        }
-
-        .filter-card label {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: #374151;
-            margin-bottom: 6px;
-        }
-
-        /* Taula de vehicles */
-        .custom-table-card {
-            background: #ffffff;
-            border: 1px solid var(--card-border);
-            border-radius: 12px;
-            overflow: hidden;
-        }
-
-        .table {
-            margin-bottom: 0;
-        }
-
-        .table thead {
-            background-color: #ffffff;
-            border-bottom: 1px solid var(--card-border);
-        }
-
-        .table thead th {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: #6b7280;
-            font-weight: 700;
-            padding: 16px 20px;
-            border: none;
-        }
-
-        .table tbody td {
-            padding: 16px 20px;
-            vertical-align: middle;
-            font-size: 0.9rem;
-            border-bottom: 1px solid #f3f4f6;
-            color: #111827;
-        }
-
-        .vehicle-img {
-            width: 70px;
-            height: 48px;
-            object-fit: cover;
-            border-radius: 6px;
-        }
-
-        .vehicle-title {
-            font-weight: 700;
-            color: #111827;
-            margin: 0;
-        }
-
-        .vehicle-sub {
-            font-size: 0.8rem;
-            color: #9ca3af;
-        }
-
-        .btn-editar {
-            background-color: #eff6ff;
-            color: #2563eb;
-            border: none;
-            font-weight: 600;
-            font-size: 0.85rem;
-            padding: 6px 14px;
-            border-radius: 6px;
-            text-decoration: none;
-        }
-
-        .btn-editar:hover {
-            background-color: #dbeafe;
-            color: #1d4ed8;
-        }
-
-        .btn-desactivar {
-            background-color: #f3f4f6;
-            color: #6b7280;
-            border: none;
-            font-weight: 500;
-            font-size: 0.85rem;
-            padding: 6px 14px;
-            border-radius: 6px;
-        }
-
-        .btn-desactivar:hover {
-            background-color: #e5e7eb;
-            color: #374151;
-        }
-
-        .badge-actiu {
-            background-color: #dcfce7;
-            color: #166534;
-            font-weight: 600;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.75rem;
-        }
-
-        .badge-inactiu {
-            background-color: #fee2e2;
-            color: #991b1b;
-            font-weight: 600;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.75rem;
-        }
-    </style>
+    <!-- CSS Unificat -->
+    <link rel="stylesheet" th:href="@{/agents.css}">
 </head>
 <body>
 
@@ -208,17 +20,23 @@
             <span>PANEL DE CONTROL AGENT</span>
         </div>
         <nav class="mt-3">
-            <a href="#" class="nav-link">
+            <a th:href="@{/dashboard}" class="nav-link">
                 <i class="fa-solid fa-border-all"></i> Dashboard
             </a>
-            <a th:href="@{/vehicles}" class="nav-link active">
+            <a th:href="@{/dashboard/vehicles}" class="nav-link active">
                 <i class="fa-solid fa-car"></i> Flota de Vehicles
             </a>
-            <a href="#" class="nav-link">
+            <a th:href="@{/dashboard/agents/llista}" class="nav-link">
+                <i class="fa-solid fa-user-gear"></i> Gestió d'Agents
+            </a>
+            <a th:href="@{/dashboard/clients}" class="nav-link">
                 <i class="fa-solid fa-users"></i> Gestió de Clients
             </a>
-            <a href="#" class="nav-link">
+            <a th:href="@{/dashboard/reserves}" class="nav-link">
                 <i class="fa-regular fa-calendar-check"></i> Reserves Actives
+            </a>
+            <a th:href="@{/dashboard/informes/reserves}" class="nav-link">
+                <i class="fa-solid fa-chart-line"></i> Informes de Reserves
             </a>
         </nav>
     </aside>
@@ -226,18 +44,17 @@
     <!-- Main Content -->
     <main class="main-content">
         
-        <!-- Header amb botó d'Alta (RF40) -->
         <div class="d-flex justify-content-between align-items-start mb-4">
             <div>
                 <h2 class="fw-bold text-dark m-0">Flota de Vehicles</h2>
                 <p class="text-muted small mb-0 mt-1">Consulteu, filtreu i gestioneu tots els vehicles disponibles per al lloguer.</p>
             </div>
-            <a th:href="@{/vehicles/nou}" class="btn btn-primary fw-semibold px-4 py-2" style="border-radius: 8px;">
+            <a th:href="@{/dashboard/vehicles/nou}" class="btn btn-primary fw-semibold px-4 py-2" style="border-radius: 8px;">
                 + Afegir nou vehicle
             </a>
         </div>
 
-        <!-- Alertes de flash attributes -->
+        <!-- Alertes Flash -->
         <div th:if="${succes}" class="alert alert-success alert-dismissible fade show mb-4" role="alert">
             <span th:text="${succes}"></span>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -249,40 +66,53 @@
 
         <!-- Targeta de Filtres -->
         <div class="filter-card shadow-sm">
-            <form th:action="@{/vehicles}" method="get" class="row g-3">
+            <form th:action="@{/dashboard/vehicles}" method="get" class="row g-3 align-items-end">
+                
                 <div class="col-md-5">
-                    <label>Cerca per model o matrícula</label>
-                    <input type="text" name="cerca" class="form-control" placeholder="Ex. Toyota Yaris..." th:value="${param.cerca}">
+                    <label for="cerca">Cerca per model o matrícula</label>
+                    <input type="text" id="cerca" name="cerca" class="form-control" 
+                           placeholder="Ex. Toyota Yaris..." 
+                           th:value="${cerca}">
                 </div>
+
                 <div class="col-md-3">
-                    <label>Categoria</label>
-                    <select name="tipus" class="form-select">
-                        <option value="">Tots els tipus</option>
-                        <option value="Econòmic" th:selected="${param.tipus == 'Econòmic'}">Econòmic</option>
-                        <option value="SUV" th:selected="${param.tipus == 'SUV'}">SUV</option>
-                        <option value="Furgoneta" th:selected="${param.tipus == 'Furgoneta'}">Furgoneta</option>
-                        <option value="Urbà" th:selected="${param.tipus == 'Urbà'}">Urbà</option>
+                    <label for="tipus">Categoria</label>
+                    <select id="tipus" name="tipus" class="form-select">
+                        <option value="" th:selected="${tipus == null or tipus.isBlank()}">Tots els tipus</option>
+                        <option value="Turisme" th:selected="${tipus == 'Turisme'}">Turisme</option>
+                        <option value="Furgoneta" th:selected="${tipus == 'Furgoneta'}">Furgoneta</option>
+                        <option value="SUV" th:selected="${tipus == 'SUV'}">SUV</option>
+                        <option value="Motocicleta" th:selected="${tipus == 'Motocicleta'}">Motocicleta</option>
                     </select>
                 </div>
+
                 <div class="col-md-3">
-                    <label>Estat</label>
-                    <select name="estat" class="form-select">
-                        <option value="">Actius i Inactius</option>
-                        <option value="true" th:selected="${param.estat == 'true'}">Només Actius</option>
-                        <option value="false" th:selected="${param.estat == 'false'}">Només Inactius</option>
+                    <label for="estat">Estat</label>
+                    <select id="estat" name="estat" class="form-select">
+                        <option value="" th:selected="${estat == null}">Actius i Inactius</option>
+                        <option value="true" th:selected="${estat == true}">Actius</option>
+                        <option value="false" th:selected="${estat == false}">Inactius</option>
                     </select>
                 </div>
-                <div class="col-md-1 d-flex align-items-end">
-                    <button type="submit" class="btn btn-outline-secondary w-100">
+
+                <div class="col-md-1 d-flex gap-1">
+                    <button type="submit" class="btn btn-primary w-100" title="Filtrar">
                         <i class="fa-solid fa-filter"></i>
                     </button>
+                    <a th:if="${(cerca != null and !#strings.isEmpty(cerca)) or (tipus != null and !#strings.isEmpty(tipus)) or estat != null}" 
+                       th:href="@{/dashboard/vehicles}"
+                       class="btn btn-outline-danger" 
+                       title="Netejar filtre">
+                        <i class="fa-solid fa-xmark"></i>
+                    </a>
                 </div>
+
             </form>
         </div>
 
-        <!-- Taula de Llistat de Vehicles (RF43) -->
+        <!-- Taula de Llistat de Vehicles -->
         <div class="custom-table-card shadow-sm">
-            <table class="table">
+            <table class="table align-middle">
                 <thead>
                     <tr>
                         <th>VISTA</th>
@@ -298,46 +128,56 @@
                 </thead>
                 <tbody>
                     <tr th:each="v : ${vehicles}">
-                        <td>
-                            <img th:src="@{${'/images/vehicles/' + v.matricula + '.jpg'}}" 
-                                 src="https://via.placeholder.com/70x48?text=Vehicle" 
-                                 alt="Foto Vehicle" class="vehicle-img"
-                                 onerror="this.src='https://via.placeholder.com/70x48?text=Vehicle';">
+                        <td style="width: 70px;">
+                            <img th:if="${v.foto != null and !v.foto.isBlank()}"
+                                 th:src="@{'/uploads/vehicles/' + ${v.foto}}"
+                                 alt="Foto Vehicle" class="agent-img" style="width: 55px; height: 38px; object-fit: cover; border-radius: 6px;">
+                            <div th:unless="${v.foto != null and !v.foto.isBlank()}" 
+                                 class="agent-img d-flex align-items-center justify-content-center bg-light text-muted border" 
+                                 style="width: 55px; height: 38px; font-size: 0.65rem; border-radius: 6px;">
+                                 Vehicle
+                            </div>
                         </td>
                         <td>
-                            <a th:href="@{/vehicles/detall/{m}(m=${v.matricula})}" class="text-decoration-none">
-                                <p class="vehicle-title" th:text="${v.marca + ' ' + v.model}">Toyota Yaris Hybrid</p>
+                            <a th:href="@{'/dashboard/vehicles/detall/' + ${v.matricula}}" class="text-decoration-none">
+                                <p class="agent-title" th:text="${v.marca + ' ' + v.model}">Toyota Yaris Hybrid</p>
                             </a>
-                            <span class="vehicle-sub" th:text="'ID: ' + ${v.matricula}">ID: VEH-001</span>
+                            <span class="agent-sub" th:text="'ID: ' + ${v.matricula}">ID: 4823KLP</span>
                         </td>
                         <td>
-                            <strong th:text="${v.matricula}">4823-LKF</strong>
+                            <strong th:text="${v.matricula}">4823KLP</strong>
                         </td>
-                        <td th:text="${v.tipusVehicle}">Econòmic</td>
-                        <td th:text="${v.anyMatriculacio}">2023</td>
+                        <td th:text="${v.tipusVehicle}">Furgoneta</td>
+                        <td th:text="${v.anyMatriculacio}">2024</td>
+                        <td th:text="${#numbers.formatDecimal(v.preuHora, 1, 2) + ' €'}">45.00 €</td>
+                        <td th:text="${#numbers.formatDecimal(v.fianca, 1, 2) + ' €'}">300.00 €</td>
                         <td>
-                            <strong th:text="${v.preuHora + ' €'}">45 €</strong>
-                        </td>
-                        <td th:text="${v.fianca + ' €'}">300 €</td>
-                        <td>
-                            <span th:if="${v.actiu}" class="badge-actiu">Actiu</span>
-                            <span th:if="${!v.actiu}" class="badge-inactiu">Inactiu</span>
-                        </td>
-                        <td class="text-end">
-                            <!-- Enllaç a Editar (RF42) -->
-                            <a th:href="@{/vehicles/editar/{m}(m=${v.matricula})}" class="btn-editar me-1">Editar</a>
-                            
-                            <!-- Formuari per Desactivar / Eliminar (RF41) -->
-                            <form th:action="@{/vehicles/eliminar/{m}(m=${v.matricula})}" method="post" class="d-inline"
-                                  onsubmit="return confirm('Estàs segur de desactivar aquest vehicle?');">
-                                <button type="submit" class="btn-desactivar">Desactivar</button>
+                            <form th:action="@{'/dashboard/vehicles/canviar-estat/' + ${v.matricula}}" method="post" class="d-inline">
+                                <select name="actiu" onchange="this.form.submit()" 
+                                        class="form-select form-select-sm border-0 fw-semibold"
+                                        th:classappend="${v.actiu ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger'}"
+                                        style="width: auto; cursor: pointer;">
+                                    <option value="true" th:selected="${v.actiu}">Actiu</option>
+                                    <option value="false" th:selected="${!v.actiu}">Inactiu</option>
+                                </select>
                             </form>
+                        </td>
+                        
+                        <td class="text-end">
+                            <div class="d-inline-flex gap-1 align-items-center">
+                                <a th:href="@{'/dashboard/vehicles/editar/' + ${v.matricula}}" class="btn btn-editar">Editar</a>
+                                <a th:href="@{'/dashboard/vehicles/detall/' + ${v.matricula}}" class="btn btn-outline-secondary btn-sm me-1 fw-semibold" style="border-radius: 6px; padding: 6px 14px;">Detall</a>
+                                <form th:action="@{'/dashboard/vehicles/eliminar/' + ${v.matricula}}" method="post" class="d-inline"
+                                      onsubmit="return confirm('Estàs segur de voler eliminar aquest vehicle?');">
+                                    <button type="submit" class="btn btn-desactivar">Desactivar</button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                     
                     <tr th:if="${#lists.isEmpty(vehicles)}">
                         <td colspan="9" class="text-center py-4 text-muted">
-                            No s'han trobat vehicles registrats a la base de dades.
+                            No s'han trobat vehicles que coincideixin amb el filtre seleccionat.
                         </td>
                     </tr>
                 </tbody>

@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lliurament de Vehicle - NOTHINGAN PRI S.A</title>
+    <!-- Bootstrap 5 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <!-- FontAwesome per les icones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- CSS Unificat i Dashboard -->
+    <link rel="stylesheet" th:href="@{/agents.css}">
+    <link rel="stylesheet" th:href="@{/dashboard.css}">
+</head>
+<body class="bg-light">
+
+    <!-- Sidebar Lateral -->
+    <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+
+    <!-- Main Content -->
+    <main class="main-content p-4">
+
+        <!-- Capçalera -->
+        <div class="mb-4">
+            <h2 class="fw-bold text-dark">Lliurament de vehicle</h2>
+            <p class="text-muted">Registre d'estat inicial, km i observacions abans d'entregar les claus al client.</p>
+        </div>
+
+        <form th:action="@{'/dashboard/reserves/' + ${reserva.codiReserva} + '/lliurar'}" method="post" enctype="multipart/form-data">
+
+            <!-- Targeta d'Informació de la Reserva -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body d-flex justify-content-between align-items-center py-3">
+                    <div>
+                        <span class="text-muted extra-small d-block text-uppercase fw-semibold">CODI RESERVA</span>
+                        <strong class="text-primary fs-5" th:text="${'RES-' + reserva.codiReserva}">RES-0000</strong>
+                    </div>
+                    <div>
+                        <span class="text-muted extra-small d-block text-uppercase fw-semibold">CLIENT</span>
+                        <strong class="text-dark" th:text="${reserva.client != null ? reserva.client.nom : '---'}">---</strong>
+                    </div>
+                    <div>
+                        <span class="text-muted extra-small d-block text-uppercase fw-semibold">VEHICLE</span>
+                        <strong class="text-dark" th:text="${reserva.vehicle != null ? (reserva.vehicle.marca + ' ' + reserva.vehicle.model) : '---'}">---</strong>
+                    </div>
+                    <div>
+                        <span class="text-muted extra-small d-block text-uppercase fw-semibold">MATRÍCULA</span>
+                        <strong class="text-dark" th:text="${reserva.vehicle != null ? reserva.vehicle.matricula : '---'}">---</strong>
+                    </div>
+                    <div>
+                        <span class="text-muted extra-small d-block text-uppercase fw-semibold">PERÍODE</span>
+                        <strong class="text-dark" th:text="${reserva.dataInici != null ? (#temporals.format(reserva.dataInici, 'dd/MM/yyyy') + ' - ' + #temporals.format(reserva.dataFi, 'dd/MM/yyyy')) : '---'}">---</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <!-- Columna Esquerra: Checklists i Lectures -->
+                <div class="col-lg-7">
+
+                    <!-- Checklist -->
+                    <div class="card border-0 shadow-sm p-4 mb-4">
+                        <h5 class="fw-bold text-dark mb-3">Checklist d'estat del vehicle</h5>
+
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" checked id="check1" name="checkExterior">
+                            <label class="form-check-label fw-semibold" for="check1">Exterior net i sense nous danys estructurals</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" checked id="check2" name="checkInterior">
+                            <label class="form-check-label fw-semibold" for="check2">Interior aspirat i lliure de brossa</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" checked id="check3" name="checkPneumatics">
+                            <label class="form-check-label fw-semibold" for="check3">Pneumàtics verificats amb pressió òptima</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" checked id="check4" name="checkLlums">
+                            <label class="form-check-label fw-semibold" for="check4">Llums davanters, posteriors i intermitents actius</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" checked id="check5" name="checkDiposit">
+                            <label class="form-check-label fw-semibold" for="check5">Dipòsit de combustible / Bateria ple al 100%</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" checked id="check6" name="checkRoda">
+                            <label class="form-check-label fw-semibold" for="check6">Roda de recanvi i equip d'emergència a punt</label>
+                        </div>
+                    </div>
+
+                    <!-- Lectures i paràmetres -->
+                    <div class="card border-0 shadow-sm p-4 mb-4">
+                        <h5 class="fw-bold text-dark mb-3">Lectures i paràmetres del vehicle</h5>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label small text-muted fw-semibold">Odòmetre actual (km)</label>
+                                <input type="number" name="kmInicials" class="form-control" placeholder="14850" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small text-muted fw-semibold">Nivell de combustible de lliurament (%)</label>
+                                <input type="text" name="nivellCombustible" class="form-control" placeholder="100% (Ple)" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Observacions -->
+                    <div class="card border-0 shadow-sm p-4">
+                        <h5 class="fw-bold text-dark mb-3">Observacions / Comentaris</h5>
+                        <textarea name="observacions" class="form-control" rows="3" placeholder="Introduïu petits rascats previs o indicacions particulars..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Columna Dreta: Fotos pels 4 costats -->
+                <div class="col-lg-5">
+
+                    <!-- Fotos estat del vehicle -->
+                    <div class="card border-0 shadow-sm p-4 mb-4">
+                        <h5 class="fw-bold text-dark mb-2">Fotos del lliurament (4 Costats)</h5>
+                        <p class="text-muted small mb-3">Fes clic a qualsevol recavall per pujar la imatge corresponent.</p>
+
+                        <div class="row g-2">
+                            <!-- 1. Frontal -->
+                            <div class="col-6">
+                                <label class="border rounded p-3 text-center bg-light text-muted position-relative overflow-hidden d-block w-100" 
+                                       style="border-style: dashed !important; cursor: pointer; min-height: 110px;">
+                                    <input type="file" name="fotos" accept="image/*" style="display: none;" onchange="previewFotoAuto(this)">
+                                    <div class="ph-content">
+                                        <i class="fa-regular fa-image fs-3 mb-1 d-block"></i>
+                                        <span class="d-block extra-small fw-bold">Frontal</span>
+                                    </div>
+                                    <img class="img-preview d-none w-100 h-100 position-absolute top-0 start-0 rounded" style="object-fit: cover;" alt="Frontal">
+                                </label>
+                            </div>
+                            <!-- 2. Posterior -->
+                            <div class="col-6">
+                                <label class="border rounded p-3 text-center bg-light text-muted position-relative overflow-hidden d-block w-100" 
+                                       style="border-style: dashed !important; cursor: pointer; min-height: 110px;">
+                                    <input type="file" name="fotos" accept="image/*" style="display: none;" onchange="previewFotoAuto(this)">
+                                    <div class="ph-content">
+                                        <i class="fa-regular fa-image fs-3 mb-1 d-block"></i>
+                                        <span class="d-block extra-small fw-bold">Posterior</span>
+                                    </div>
+                                    <img class="img-preview d-none w-100 h-100 position-absolute top-0 start-0 rounded" style="object-fit: cover;" alt="Posterior">
+                                </label>
+                            </div>
+                            <!-- 3. Lateral Esquerre -->
+                            <div class="col-6">
+                                <label class="border rounded p-3 text-center bg-light text-muted position-relative overflow-hidden d-block w-100" 
+                                       style="border-style: dashed !important; cursor: pointer; min-height: 110px;">
+                                    <input type="file" name="fotos" accept="image/*" style="display: none;" onchange="previewFotoAuto(this)">
+                                    <div class="ph-content">
+                                        <i class="fa-regular fa-image fs-3 mb-1 d-block"></i>
+                                        <span class="d-block extra-small fw-bold">Lateral Esquerre</span>
+                                    </div>
+                                    <img class="img-preview d-none w-100 h-100 position-absolute top-0 start-0 rounded" style="object-fit: cover;" alt="Lateral Esquerre">
+                                </label>
+                            </div>
+                            <!-- 4. Lateral Dret -->
+                            <div class="col-6">
+                                <label class="border rounded p-3 text-center bg-light text-muted position-relative overflow-hidden d-block w-100" 
+                                       style="border-style: dashed !important; cursor: pointer; min-height: 110px;">
+                                    <input type="file" name="fotos" accept="image/*" style="display: none;" onchange="previewFotoAuto(this)">
+                                    <div class="ph-content">
+                                        <i class="fa-regular fa-image fs-3 mb-1 d-block"></i>
+                                        <span class="d-block extra-small fw-bold">Lateral Dret</span>
+                                    </div>
+                                    <img class="img-preview d-none w-100 h-100 position-absolute top-0 start-0 rounded" style="object-fit: cover;" alt="Lateral Dret">
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Accions de flux -->
+                    <div class="card border-0 shadow-sm p-4">
+                        <h5 class="fw-bold text-dark mb-2">Accions de flux</h5>
+                        <p class="text-muted small mb-4">En confirmar el lliurament s'enviarà el contracte d'estat digitalitzat al client per correu electrònic.</p>
+
+                        <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold">
+                            Confirmar lliurament
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function previewFotoAuto(input) {
+            if (input.files && input.files[0]) {
+                const label = input.closest('label');
+                const img = label.querySelector('.img-preview');
+                const ph = label.querySelector('.ph-content');
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    img.src = e.target.result;
+                    img.classList.remove('d-none');
+                    if (ph) ph.classList.add('d-none');
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
+</body>
+</html>

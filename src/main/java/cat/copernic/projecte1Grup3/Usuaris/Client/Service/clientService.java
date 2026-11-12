@@ -1,85 +1,52 @@
 package cat.copernic.projecte1Grup3.Usuaris.Client.Service;
 
-import cat.copernic.projecte1Grup3.Usuaris.Client.Documents.clientDocuments;
-import cat.copernic.projecte1Grup3.Usuaris.Client.Entity.clientEntity;
-import cat.copernic.projecte1Grup3.Usuaris.Client.Repository.clientRepository;
-import cat.copernic.projecte1Grup3.Usuaris.Client.Repository.clientRepositoryMongo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import cat.copernic.projecte1Grup3.Usuaris.Client.Documents.ClientDocuments;
+import cat.copernic.projecte1Grup3.Usuaris.Client.Entity.ClientEntity;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import cat.copernic.projecte1Grup3.Usuaris.Client.Repository.ClientRepository;
+import cat.copernic.projecte1Grup3.Usuaris.Client.Repository.ClientRepositoryMongo;
 
 @Service
-public class clientService {
+public class ClientService {
 
+    private static final Logger log = LoggerFactory.getLogger(ClientService.class);
     public static final String PENDENT = "PENDENT";
     public static final String VALIDAT = "VALIDAT";
     public static final String REBUTJAT = "REBUTJAT";
 
-    private static final long MAX_IMATGE = 5L * 1024 * 1024;
+    private final ClientRepository clientRepository;
+    private final ClientRepositoryMongo clientRepositoryMongo;
+    private final PasswordEncoder passwordEncoder;
 
-    private final clientRepository clientRepository;
-    private final clientRepositoryMongo clientRepositoryMongo;
+    @Autowired
+    public ClientService(ClientRepository clientRepository,
+                         ClientRepositoryMongo clientRepositoryMongo) {
+        this(clientRepository, clientRepositoryMongo, new BCryptPasswordEncoder());
+    }
 
-    public clientService(clientRepository clientRepository,
-                         clientRepositoryMongo clientRepositoryMongo) {
+    public ClientService(ClientRepository clientRepository,
+                         ClientRepositoryMongo clientRepositoryMongo,
+                         PasswordEncoder passwordEncoder) {
         this.clientRepository = clientRepository;
         this.clientRepositoryMongo = clientRepositoryMongo;
+        this.passwordEncoder = passwordEncoder != null ? passwordEncoder : new BCryptPasswordEncoder();
     }
 
-    // =====================================================
-    // ALTA
-    // =====================================================
-
-    @Transactional(rollbackFor = Exception.class)
-    public void alta(clientEntity client, MultipartFile fotoDniFrontal,
-                     MultipartFile fotoDniPosterior, MultipartFile fotoCarnet) throws IOException {
-
-        if (client.getDni() == null || client.getDni().isBlank()) {
-            throw new IllegalArgumentException("El DNI és obligatori");
-        }
-        client.setDni(client.getDni().trim().toUpperCase());
-
-        if (clientRepository.existsById(client.getDni())) {
-            throw new IllegalArgumentException("Ja existeix un client amb aquest DNI");
-        }
-
-        // En l'alta les 3 imatges són obligatòries
-        if (!hiHa(fotoDniFrontal) || !hiHa(fotoDniPosterior) || !hiHa(fotoCarnet)) {
-            throw new IllegalArgumentException("Cal pujar les 3 imatges (PNG o JPG, màxim 5MB)");
-        }
-        validaImatge(fotoDniFrontal);
-        validaImatge(fotoDniPosterior);
-        validaImatge(fotoCarnet);
-
-        // Valors que decideix el servidor, no el formulari
-        client.setPremium(false);
-        client.setEstatValidacio(PENDENT);
-
-        // Es llegeixen els bytes abans de guardar res: si falla, no hi ha res a desfer
-        clientDocuments doc = new clientDocuments();
-        doc.setDni(client.getDni());
-        doc.setFotoDniFrontal(fotoDniFrontal.getBytes());
-        doc.setTipusFotoDniFrontal(fotoDniFrontal.getContentType());
-        doc.setFotoDniPosterior(fotoDniPosterior.getBytes());
-        doc.setTipusFotoDniPosterior(fotoDniPosterior.getContentType());
-        doc.setFotoCarnet(fotoCarnet.getBytes());
-        doc.setTipusFotoCarnet(fotoCarnet.getContentType());
-
-        clientRepository.saveAndFlush(client);   // MySQL
-        clientRepositoryMongo.save(doc);         // MongoDB
-    }
-
-    // =====================================================
-    // LISTAR Y BUSCAR
-    // =====================================================
-
-    public List<clientEntity> llistar(String q, String dni, String estat,
+    // ---------- LLISTAR I FILTRAR ----------
+    public List<ClientEntity> llistar(String q, String dni, String estat, String email,
                                       LocalDate dataNaixement) {
-        List<clientEntity> clients = clientRepository.findAll();
+        List<ClientEntity> clients = clientRepository.findAll();
 
         if (q != null && !q.isBlank()) {
             String text = q.trim().toLowerCase();
@@ -107,49 +74,133 @@ public class clientService {
                     .filter(c -> dataNaixement.equals(c.getDataNaixement()))
                     .toList();
         }
+
+        if (email != null && !email.isBlank()) {
+            String e = email.trim().toLowerCase();
+            clients = clients.stream()
+                    .filter(c -> conte(c.getEmail(), e))
+                    .toList();
+        }
         return clients;
     }
 
-    public Optional<clientEntity> obtenir(String dni) {
-        return clientRepository.findById(dni);
+    private boolean conte(String valor, String text) {
+        return valor != null && valor.toLowerCase().contains(text);
     }
 
-    public Optional<clientDocuments> obtenirDocuments(String dni) {
-        return clientRepositoryMongo.findById(dni);
-    }
+    // ---------- ALTA DE CLIENT (Doble Persistència) ----------
+    @Transactional(rollbackFor = Exception.class)
+    public void alta(ClientEntity client, MultipartFile fotoDniFrontal,
+                     MultipartFile fotoDniPosterior, MultipartFile fotoCarnet) throws IOException {
 
-    // =====================================================
-    // EDICIÓN
-    // =====================================================
+        String dni = client.getDni() == null ? "" : client.getDni().trim().toUpperCase();
+        if (!dni.matches("^([0-9]{8}|[XYZ][0-9]{7})[A-Z]$")) {
+            throw new IllegalArgumentException(
+                    "El DNI ha de tenir 8 xifres i una lletra al final (o ser un NIE vàlid)");
+        }
+        client.setDni(dni);
 
-    @Transactional(rollbackFor = Exception.class) //<-- si algo sale mal, vuelve atras
-    public void actualitzar(String dni, clientEntity dades, String estat, boolean premium,
-                            MultipartFile fotoDniFrontal, MultipartFile fotoDniPosterior,
-                            MultipartFile fotoCarnet) throws IOException {
-
-        clientEntity c = clientRepository.findById(dni)
-                .orElseThrow(() -> new IllegalArgumentException("Client no trobat"));
-
-        validaEstat(estat);
+        if (clientRepository.existsById(dni)) {
+            throw new IllegalArgumentException("Ja existeix un client amb aquest DNI");
+        }
+        String password = client.getPassword();
+        if (password == null || password.length() < 8) {
+            throw new IllegalArgumentException("La contrasenya ha de tenir com a mínim 8 caràcters");
+        }
+        client.setPassword(passwordEncoder.encode(password));
+        if (!hiHa(fotoDniFrontal) || !hiHa(fotoDniPosterior) || !hiHa(fotoCarnet)) {
+            throw new IllegalArgumentException("Cal pujar les 3 imatges (PNG o JPG, màxim 5MB)");
+        }
+        
+        if (client.getDataCaducitatCarnet() == null || client.getDataCaducitatCarnet().isBefore(LocalDate.now())) {
+            throw new IllegalArgumentException("El carnet de conduir no pot estar caducat");
+        }
+        
         validaImatge(fotoDniFrontal);
         validaImatge(fotoDniPosterior);
         validaImatge(fotoCarnet);
 
-        c.setNom(dades.getNom());//Cada línea es borrar un dato viejo y escribir el nuevo:
-        c.setEmail(dades.getEmail());
+        client.setPremium(false);
+        client.setEstatValidacio(PENDENT);
+        clientRepository.saveAndFlush(client);
+
+        ClientDocuments doc = new ClientDocuments();
+        doc.setDni(dni);
+        if (hiHa(fotoDniFrontal)) {
+            doc.setFotoDniFrontal(fotoDniFrontal.getBytes());
+            doc.setTipusFotoDniFrontal(fotoDniFrontal.getContentType());
+        }
+        if (hiHa(fotoDniPosterior)) {
+            doc.setFotoDniPosterior(fotoDniPosterior.getBytes());
+            doc.setTipusFotoDniPosterior(fotoDniPosterior.getContentType());
+        }
+        if (hiHa(fotoCarnet)) {
+            doc.setFotoCarnet(fotoCarnet.getBytes());
+            doc.setTipusFotoCarnet(fotoCarnet.getContentType());
+        }
+        clientRepositoryMongo.save(doc);
+        log.info("Client donat d'alta: {}", dni);
+    }
+
+    public Optional<ClientEntity> obtenir(String dni) {
+        return clientRepository.findById(dni);
+    }
+
+    public Optional<ClientDocuments> obtenirDocuments(String dni) {
+        return clientRepositoryMongo.findById(dni);
+    }
+
+    // ---------- ACTUALITZACIÓ (PANEL AGENT) ----------
+    @Transactional(rollbackFor = Exception.class)
+    public void actualitzar(String dni, ClientEntity dades, String estat, boolean premium,
+                            MultipartFile fotoDniFrontal, MultipartFile fotoDniPosterior,
+                            MultipartFile fotoCarnet) throws IOException {
+
+        ClientEntity c = clientRepository.findById(dni)
+                .orElseThrow(() -> new IllegalArgumentException("Client no trobat"));
+
+        if (!VALIDAT.equals(estat) && !REBUTJAT.equals(estat) && !PENDENT.equals(estat)) {
+            throw new IllegalArgumentException("Estat no vàlid");
+        }
+
+        String email = dades.getEmail() == null ? "" : dades.getEmail().trim();
+        if (!email.isEmpty() && clientRepository.existsByEmailIgnoreCaseAndDniNot(email, dni)) {
+            throw new IllegalArgumentException("Aquest correu ja està en ús per un altre client");
+        }
+
+        validaImatge(fotoDniFrontal);
+        validaImatge(fotoDniPosterior);
+        validaImatge(fotoCarnet);
+
+        c.setNom(dades.getNom());
+        c.setEmail(email);
+        if (dades.getPassword() != null && !dades.getPassword().isBlank()) {
+            c.setPassword(passwordEncoder.encode(dades.getPassword()));
+        }
         c.setTelefon(dades.getTelefon());
-        c.setDataNaixement(dades.getDataNaixement());
         c.setNacionalitat(dades.getNacionalitat());
         c.setAdreca(dades.getAdreca());
         c.setTipusLlicencia(dades.getTipusLlicencia());
-        c.setDataCaducitatDNI(dades.getDataCaducitatDNI());
+
+        if (dades.getDataNaixement() != null) {
+            c.setDataNaixement(dades.getDataNaixement());
+        }
+        if (dades.getDataCaducitatDNI() != null) {
+            c.setDataCaducitatDNI(dades.getDataCaducitatDNI());
+        }
+        if (dades.getDataCaducitatCarnet() != null) {
+            c.setDataCaducitatCarnet(dades.getDataCaducitatCarnet());
+        }
+
         c.setEstatValidacio(estat);
         c.setPremium(premium);
-        clientRepository.saveAndFlush(c); //<-lo hace ya
+
+        clientRepository.saveAndFlush(c);
+        log.info("Client actualitzat: {}", dni);
 
         if (hiHa(fotoDniFrontal) || hiHa(fotoDniPosterior) || hiHa(fotoCarnet)) {
-            clientDocuments doc = clientRepositoryMongo.findById(dni).orElseGet(() -> {
-                clientDocuments nou = new clientDocuments();
+            ClientDocuments doc = clientRepositoryMongo.findById(dni).orElseGet(() -> {
+                ClientDocuments nou = new ClientDocuments();
                 nou.setDni(dni);
                 return nou;
             });
@@ -169,60 +220,92 @@ public class clientService {
         }
     }
 
-    // =====================================================
-    // ELIMINAR, ESTADO Y PREMIUM
-    // =====================================================
-
-    @Transactional
-    public void eliminar(String dni) {
-        clientRepository.deleteById(dni);
-        clientRepositoryMongo.deleteById(dni);
+    // ---------- PERFIL DEL CLIENT (AUTOGESTIÓ) ----------
+    public Optional<ClientEntity> obtenirPerEmail(String email) {
+        return clientRepository.findByEmailIgnoreCase(email);
     }
 
-    @Transactional
-    public void canviarEstat(String dni, String estat) {
-        validaEstat(estat);
-        clientEntity c = clientRepository.findById(dni)
+    @Transactional(rollbackFor = Exception.class)
+    public void actualitzarPerfilClient(String emailActual, ClientEntity dades) {
+        ClientEntity c = clientRepository.findByEmailIgnoreCase(emailActual)
                 .orElseThrow(() -> new IllegalArgumentException("Client no trobat"));
-        c.setEstatValidacio(estat);
-        clientRepository.save(c);
+
+        String nouEmail = dades.getEmail() == null ? "" : dades.getEmail().trim();
+        if (!nouEmail.isEmpty() && clientRepository.existsByEmailIgnoreCaseAndDniNot(nouEmail, c.getDni())) {
+            throw new IllegalArgumentException("Aquest correu ja està en ús per un altre client");
+        }
+
+        c.setNom(dades.getNom());
+        c.setEmail(nouEmail);
+        if (dades.getPassword() != null && !dades.getPassword().isBlank()) {
+            if (dades.getPassword().length() < 8) {
+                throw new IllegalArgumentException("La contrasenya ha de tenir com a mínim 8 caràcters");
+            }
+            c.setPassword(passwordEncoder.encode(dades.getPassword()));
+        }
+        c.setTelefon(dades.getTelefon());
+        c.setNacionalitat(dades.getNacionalitat());
+        c.setAdreca(dades.getAdreca());
+        c.setTipusLlicencia(dades.getTipusLlicencia());
+
+        if (dades.getDataNaixement() != null) {
+            c.setDataNaixement(dades.getDataNaixement());
+        }
+        if (dades.getDataCaducitatDNI() != null) {
+            c.setDataCaducitatDNI(dades.getDataCaducitatDNI());
+        }
+
+        clientRepository.saveAndFlush(c);
+        log.info("Perfil actualitzat pel client: {}", c.getDni());
     }
 
-    @Transactional
-    public void canviarPremium(String dni, boolean premium) {
-        clientEntity c = clientRepository.findById(dni)
-                .orElseThrow(() -> new IllegalArgumentException("Client no trobat"));
-        c.setPremium(premium);
-        clientRepository.save(c);
-    }
-
-    // =====================================================
-    // AUXILIARES
-    // =====================================================
-
-    private boolean conte(String valor, String text) {
-        return valor != null && valor.toLowerCase().contains(text);
-    }
-
-    private boolean hiHa(MultipartFile f) {//<--un archivo subido por el usuario desde un formulario
+    private boolean hiHa(MultipartFile f) {
         return f != null && !f.isEmpty();
     }
 
-    private void validaEstat(String estat) {
-        if (!VALIDAT.equals(estat) && !REBUTJAT.equals(estat) && !PENDENT.equals(estat)) {
-            throw new IllegalArgumentException("Estat no vàlid");
-        }
-    }
-
-    // Si no hi ha fitxer, no valida res (a l'edició les imatges són opcionals)
     private void validaImatge(MultipartFile f) {
         if (!hiHa(f)) {
             return;
         }
         String tipus = f.getContentType();
         boolean tipusValid = "image/png".equals(tipus) || "image/jpeg".equals(tipus);
-        if (!tipusValid || f.getSize() > MAX_IMATGE) { //<-- si la imagen no es valida o supera el tamaño
+        if (!tipusValid || f.getSize() > 5 * 1024 * 1024) {
             throw new IllegalArgumentException("Les imatges han de ser PNG o JPG de màxim 5MB");
         }
+    }
+
+    // ---------- ELIMINACIÓ DE CLIENT ----------
+    @Transactional
+    public void eliminar(String dni) {
+        ClientEntity c = clientRepository.findById(dni)
+                .orElseThrow(() -> new IllegalArgumentException("Client no trobat"));
+
+        clientRepository.delete(c);
+        clientRepository.flush();
+
+        clientRepositoryMongo.deleteById(dni);
+        log.warn("Client eliminat: {}", dni);
+    }
+
+    // ---------- CANVI D'ESTAT DE VALIDACIÓ (RF82) ----------
+    @Transactional
+    public void canviarEstat(String dni, String estat) {
+        if (!VALIDAT.equals(estat) && !REBUTJAT.equals(estat) && !PENDENT.equals(estat)) {
+            throw new IllegalArgumentException("Estat no vàlid");
+        }
+        ClientEntity c = clientRepository.findById(dni)
+                .orElseThrow(() -> new IllegalArgumentException("Client no trobat"));
+        
+        c.setEstatValidacio(estat);
+        clientRepository.save(c);
+    }
+
+    // ---------- CANVI D'ESTAT PREMIUM ----------
+    @Transactional
+    public void canviarPremium(String dni, boolean premium) {
+        ClientEntity c = clientRepository.findById(dni)
+                .orElseThrow(() -> new IllegalArgumentException("Client no trobat"));
+        c.setPremium(premium);
+        clientRepository.save(c);
     }
 }

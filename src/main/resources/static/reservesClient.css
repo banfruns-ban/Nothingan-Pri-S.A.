@@ -1,0 +1,295 @@
+.reserves-container {
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 0 16px;
+}
+
+.reserves-cap {
+    margin-bottom: 24px;
+}
+
+.reserves-cap h2 {
+    font-size: 22px;
+    color: #0f172a;
+    margin: 0 0 6px;
+}
+
+.reserves-cap p {
+    color: #64748b;
+    font-size: 13px;
+    margin: 0;
+}
+
+.card-taula {
+    background: #fff;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    overflow: hidden;
+}
+
+.taula-reserves {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 13px;
+}
+
+.taula-reserves th {
+    background: #f8fafc;
+    color: #475569;
+    font-weight: 600;
+    padding: 14px 16px;
+    border-bottom: 1px solid #e2e8f0;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.taula-reserves td {
+    padding: 16px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #0f172a;
+    vertical-align: middle;
+}
+
+.taula-reserves tr:last-child td {
+    border-bottom: none;
+}
+
+.vehicle-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.vehicle-info small {
+    color: #64748b;
+    font-size: 11px;
+}
+
+.dates-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+}
+
+.badge-estat {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 700;
+    display: inline-block;
+}
+
+.badge-actiu {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.badge-pendent {
+    background: #fef9c3;
+    color: #854d0e;
+}
+
+.badge-inactiu {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.btn-anular {
+    background: transparent;
+    border: 1px solid #fca5a5;
+    color: #dc2626;
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-anular:hover {
+    background: #dc2626;
+    color: #fff;
+    border-color: #dc2626;
+}
+
+.alert-success {
+    background: #f0fdf4;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+    padding: 12px 16px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    font-size: 13px;
+}
+
+.alert-error {
+    background: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+    padding: 12px 16px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    font-size: 13px;
+}
+
+.text-center { text-align: center; }
+.py-4 { padding-top: 24px; padding-bottom: 24px; }
+.fw-bold { font-weight: 700; }
+
+.card-resenyes { display: block; }
+.resenyes-contingut { width: 100%; }
+.resenyes-contingut h3 { margin: 0 0 16px; font-size: 18px; }
+
+.form-resenya {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.form-resenya textarea {
+    padding: 9px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: inherit;
+    resize: vertical;
+}
+
+.btn-enviar {
+    align-self: flex-start;
+    padding: 9px 16px;
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.btn-enviar:hover { background: #1d4ed8; }
+
+/* Estrelles: l'ordre invers + flex-direction permet il·luminar les anteriors */
+.rating {
+    display: inline-flex;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+}
+.rating input { display: none; }
+.rating label {
+    font-size: 24px;
+    color: #cbd5e1;
+    cursor: pointer;
+    padding: 0 2px;
+}
+.rating input:checked ~ label,
+.rating label:hover,
+.rating label:hover ~ label { color: #f59e0b; }
+
+.resenya-item {
+    padding: 14px 0;
+    border-bottom: 1px solid #e2e8f0;
+}
+.resenya-item:last-child { border-bottom: none; }
+.resenya-cap { display: flex; gap: 10px; align-items: baseline; font-size: 13px; }
+.resenya-cap span { color: #64748b; font-size: 12px; }
+.resenya-estrelles { color: #f59e0b; margin: 4px 0; }
+.resenya-item p { margin: 0; font-size: 13px; white-space: pre-line; }
+.sense-resenyes { color: #64748b; font-size: 13px; }
+
+/* Botó Valorar (taula) */
+.btn-valorar {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #2563eb;
+    background: #fff;
+    border: 1px solid #bfdbfe;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: background 0.2s;
+}
+.btn-valorar:hover { background: #eff6ff; }
+
+/* Targeta de detall del vehicle */
+.card-detall {
+    display: flex;
+    gap: 24px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+    padding: 24px;
+    margin-bottom: 24px;
+}
+
+.card-detall img {
+    width: 280px;
+    max-width: 100%;
+    height: 190px;
+    border-radius: 8px;
+    object-fit: cover;
+    background: #f1f5f9;
+}
+
+.detall-dades h3 {
+    margin: 0 0 12px;
+    font-size: 18px;
+    color: #0f172a;
+}
+
+.detall-dades dl {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 8px 20px;
+    margin: 0;
+    font-size: 13px;
+}
+
+.detall-dades dt {
+    color: #64748b;
+    font-weight: 600;
+}
+
+.detall-dades dd {
+    margin: 0;
+    color: #0f172a;
+}
+
+.btn-tornar {
+    color: #2563eb;
+    font-weight: 600;
+    font-size: 13px;
+    text-decoration: none;
+}
+.btn-tornar:hover { text-decoration: underline; }
+
+@media (max-width: 640px) {
+    .card-detall { flex-direction: column; }
+    .card-detall img { width: 100%; }
+}
+
+.form-eliminar { margin-left: auto; }
+
+.btn-eliminar-resenya {
+    background: transparent;
+    border: 1px solid #fca5a5;
+    color: #dc2626;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-eliminar-resenya:hover {
+    background: #dc2626;
+    color: #fff;
+    border-color: #dc2626;
+}

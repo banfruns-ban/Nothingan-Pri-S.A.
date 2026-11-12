@@ -2,73 +2,98 @@ package cat.copernic.projecte1Grup3.Vehicles.Service;
 
 import cat.copernic.projecte1Grup3.Vehicles.Entity.VehiclesEntity;
 import cat.copernic.projecte1Grup3.Vehicles.Repository.VehiclesRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Servei encarregat de la lògica de negoci per als Requisits Funcionals RF40 a RF44.
- */
 @Service
 public class VehiclesService {
 
     private final VehiclesRepository vehiclesRepository;
 
-    @Autowired
     public VehiclesService(VehiclesRepository vehiclesRepository) {
         this.vehiclesRepository = vehiclesRepository;
     }
 
-    /**
-     * RF43: Llistar tots els vehicles de la base de dades.
-     * @return Llista completa de vehicles
-     */
     @Transactional(readOnly = true)
     public List<VehiclesEntity> llistarTots() {
         return vehiclesRepository.findAll();
     }
 
     /**
-     * RF44: Consulta detalls d'un vehicle mitjançant la seva matrícula.
-     * @param matricula Identificador únic del vehicle
-     * @return Optional amb l'entitat trobada
+     * Filtra els vehicles segons el text de cerca, categoria (tipus) i estat d'activació.
      */
+    @Transactional(readOnly = true)
+    public List<VehiclesEntity> filtrarVehicles(String cerca, String tipus, Boolean actiu) {
+        if ((cerca == null || cerca.isBlank()) && 
+            (tipus == null || tipus.isBlank()) && 
+            actiu == null) {
+            return vehiclesRepository.findAll();
+        }
+        return vehiclesRepository.filtrarVehicles(cerca, tipus, actiu);
+    }
+
     @Transactional(readOnly = true)
     public Optional<VehiclesEntity> buscarPerMatricula(String matricula) {
         return vehiclesRepository.findById(matricula);
     }
 
-    /**
-     * RF40 i RF42: Guardar o modificar un vehicle.
-     * En cas d'alta (RF40), s'estableix per defecte com a actiu.
-     * @param vehicle Entitat a persistir
-     * @return Entitat guardada
-     */
     @Transactional
     public VehiclesEntity guardarVehicle(VehiclesEntity vehicle) {
         if (vehicle.getActiu() == null) {
-            vehicle.setActiu(true); // Actiu per defecte en donar d'alta
+            Optional<VehiclesEntity> existent = vehiclesRepository.findById(vehicle.getMatricula());
+            if (existent.isPresent()) {
+                vehicle.setActiu(existent.get().getActiu());
+            } else {
+                vehicle.setActiu(true);
+            }
         }
         return vehiclesRepository.save(vehicle);
     }
 
     /**
-     * RF41: Baixa de vehicle.
-     * No es permet la baixa si el vehicle té reserves associades.
-     * @param matricula Matrícula del vehicle a eliminar
-     * @throws IllegalStateException si el vehicle té reserves associades
+     * Modifica l'estat d'activació (Actiu / Inactiu) del vehicle.
      */
     @Transactional
+    public void canviarEstatActiu(String matricula, Boolean nouEstat) {
+        Optional<VehiclesEntity> vehicleOpt = vehiclesRepository.findById(matricula);
+        if (vehicleOpt.isPresent()) {
+            VehiclesEntity vehicle = vehicleOpt.get();
+            vehicle.setActiu(nouEstat);
+            vehiclesRepository.save(vehicle);
+        }
+    }
+
+    @Transactional
     public void eliminarVehicle(String matricula) {
-        // TODO: Quan estigui integrat el repositori de Reserves, verificar:
-        // boolean teReserves = reservesRepository.existsByVehicleMatricula(matricula);
-        // if (teReserves) {
-        //     throw new IllegalStateException("No es pot eliminar el vehicle perquè té reserves associades.");
-        // }
-        
         vehiclesRepository.deleteById(matricula);
+    }
+    
+    @Transactional(readOnly = true)
+    public List<VehiclesEntity> llistarActius() {
+        return vehiclesRepository.findByActiuTrue();
+    }
+
+    @Transactional(readOnly = true)
+    public List<VehiclesEntity> llistarActiusPerTipus(String tipus) {
+        if (tipus == null || tipus.isBlank()) {
+            return llistarActius();
+        }
+        return vehiclesRepository.findByActiuTrueAndTipusVehicle(tipus);
+    }
+
+    /**
+     * Retorna els vehicles disponibles tenint en compte les dates de la reserva i el tipus.
+     * Si les dates són nul·les, es mostren tots els vehicles actius per defecte.
+     */
+    @Transactional(readOnly = true)
+    public List<VehiclesEntity> llistarDisponibles(LocalDateTime dataInici, LocalDateTime dataFi, String tipus) {
+        if (dataInici == null || dataFi == null) {
+            return llistarActiusPerTipus(tipus);
+        }
+        return vehiclesRepository.llistarDisponiblesPerDatesYTipus(dataInici, dataFi, tipus);
     }
 }

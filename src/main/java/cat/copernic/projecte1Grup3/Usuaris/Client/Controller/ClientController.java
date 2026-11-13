@@ -229,9 +229,13 @@ public class ClientController {
             ra.addFlashAttribute("missatge", "Sol·licitud de registre enviada amb èxit! L'administrador ha de validar el teu compte.");
             return "redirect:/cataleg";
         } catch (IllegalArgumentException e) {
+            client.setPassword(null);
+            ra.addFlashAttribute("client", client);
             ra.addFlashAttribute("error", e.getMessage());
         } catch (Exception e) {
             log.error("Error en el registre del client extern", e);
+            client.setPassword(null);
+            ra.addFlashAttribute("client", client);
             ra.addFlashAttribute("error", "No s'ha pogut completar el registre. Revisa que les dades i fitxers siguin correctes.");
         }
         return "redirect:/registre";

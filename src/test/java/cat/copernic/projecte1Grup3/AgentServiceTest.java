@@ -12,13 +12,16 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -39,27 +42,71 @@ class AgentServiceTest {
 
     @BeforeEach
     void setUp() {
-        // Instanciación directa asegurando que ningún mock sea null
         agentService = new AgentService(passwordEncoder, agentRepository);
         agentExemple = new AgentEntity();
+        agentExemple.setDataNaixement(LocalDate.of(1995, 5, 15));
     }
 
     // ============================================================
-    // TESTS: GUARDAR AGENT (LÓGICA CON PASSWORD)
+    // TESTS: GUARDAR AGENT (DNI, EDAD MÍNIMA Y PASSWORD)
     // ============================================================
+    @Test
+    @DisplayName("guardarAgent con DNI inválido debe lanzar IllegalArgumentException")
+    void guardarAgent_DniInvalid_LlancaExcepcio() {
+        agentExemple.setDni("12345678A");
+        agentExemple.setPassword("1234Pass");
+
+        assertThrows(IllegalArgumentException.class, () -> agentService.guardarAgent(agentExemple));
+        verify(agentRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("guardarAgent menor de 18 años debe lanzar IllegalArgumentException")
+    void guardarAgent_MenorDEdat_LlancaExcepcio() {
+        agentExemple.setDni("12345678Z");
+        agentExemple.setPassword("1234Pass");
+        agentExemple.setDataNaixement(LocalDate.now().minusYears(17));
+
+        assertThrows(IllegalArgumentException.class, () -> agentService.guardarAgent(agentExemple));
+        verify(agentRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("guardarAgent sin fecha de nacimiento debe lanzar IllegalArgumentException")
+    void guardarAgent_DataNaixementNull_LlancaExcepcio() {
+        agentExemple.setDni("12345678Z");
+        agentExemple.setPassword("1234Pass");
+        agentExemple.setDataNaixement(null);
+
+        assertThrows(IllegalArgumentException.class, () -> agentService.guardarAgent(agentExemple));
+        verify(agentRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("guardarAgent que cumple 18 años hoy debe permitir guardar")
+    void guardarAgent_Just18AnysAvui_GuardaCorrectament() {
+        agentExemple.setDni("12345678Z");
+        agentExemple.setPassword("1234Pass");
+        agentExemple.setDataNaixement(LocalDate.now().minusYears(18));
+
+        when(agentRepository.findById("12345678Z")).thenReturn(Optional.empty());
+        when(passwordEncoder.encode("1234Pass")).thenReturn("encoded1234Pass");
+
+        agentService.guardarAgent(agentExemple);
+
+        verify(agentRepository, times(1)).save(agentExemple);
+    }
+
     @Test
     @DisplayName("guardarAgent nuevo con contraseña debe encriptar y llamar a save()")
     void guardarAgent_NouAgentAmbPassword_EncriptaISalva() {
-        // Arrange
-        agentExemple.setDni("12345678A");
+        agentExemple.setDni("12345678Z");
         agentExemple.setPassword("1234Pass");
-        when(agentRepository.findById("12345678A")).thenReturn(Optional.empty());
+        when(agentRepository.findById("12345678Z")).thenReturn(Optional.empty());
         when(passwordEncoder.encode("1234Pass")).thenReturn("encoded1234Pass");
 
-        // Act
         agentService.guardarAgent(agentExemple);
 
-        // Assert
         assertEquals("encoded1234Pass", agentExemple.getPassword());
         verify(agentRepository, times(1)).save(agentExemple);
     }
@@ -67,20 +114,17 @@ class AgentServiceTest {
     @Test
     @DisplayName("guardarAgent existente sin cambio de contraseña debe conservar la clave original")
     void guardarAgent_ExistentSenseCanviPassword_ConservaPasswordGuardada() {
-        // Arrange
         AgentEntity agentExistent = new AgentEntity();
-        agentExistent.setDni("12345678A");
+        agentExistent.setDni("12345678Z");
         agentExistent.setPassword("encodedOldPassword");
 
-        agentExemple.setDni("12345678A");
-        agentExemple.setPassword(""); // En blanco indica no modificar
+        agentExemple.setDni("12345678Z");
+        agentExemple.setPassword("");
 
-        when(agentRepository.findById("12345678A")).thenReturn(Optional.of(agentExistent));
+        when(agentRepository.findById("12345678Z")).thenReturn(Optional.of(agentExistent));
 
-        // Act
         agentService.guardarAgent(agentExemple);
 
-        // Assert
         assertEquals("encodedOldPassword", agentExemple.getPassword());
         verify(passwordEncoder, never()).encode(anyString());
         verify(agentRepository, times(1)).save(agentExemple);
@@ -89,21 +133,18 @@ class AgentServiceTest {
     @Test
     @DisplayName("guardarAgent existente con nueva contraseña debe encriptarla y guardar")
     void guardarAgent_ExistentAmbNovaPassword_EncriptaNovaPassword() {
-        // Arrange
         AgentEntity agentExistent = new AgentEntity();
-        agentExistent.setDni("12345678A");
+        agentExistent.setDni("12345678Z");
         agentExistent.setPassword("encodedOldPassword");
 
-        agentExemple.setDni("12345678A");
+        agentExemple.setDni("12345678Z");
         agentExemple.setPassword("novaPass123");
 
-        when(agentRepository.findById("12345678A")).thenReturn(Optional.of(agentExistent));
+        when(agentRepository.findById("12345678Z")).thenReturn(Optional.of(agentExistent));
         when(passwordEncoder.encode("novaPass123")).thenReturn("encodedNovaPass");
 
-        // Act
         agentService.guardarAgent(agentExemple);
 
-        // Assert
         assertEquals("encodedNovaPass", agentExemple.getPassword());
         verify(agentRepository, times(1)).save(agentExemple);
     }
@@ -114,14 +155,11 @@ class AgentServiceTest {
     @Test
     @DisplayName("llistarAgents debe retornar la lista completa de agentes")
     void llistarAgents_RetornaLlistaCompleta() {
-        // Arrange
         List<AgentEntity> agentsEsperats = List.of(agentExemple, new AgentEntity());
         when(agentRepository.findAll()).thenReturn(agentsEsperats);
 
-        // Act
         List<AgentEntity> resultat = agentService.llistarAgents();
 
-        // Assert
         assertNotNull(resultat);
         assertEquals(2, resultat.size());
         verify(agentRepository, times(1)).findAll();
@@ -130,14 +168,11 @@ class AgentServiceTest {
     @Test
     @DisplayName("obtenirPerDni debe retornar Optional con el agente si existe")
     void obtenirPerDni_QuanExisteix_RetornaAgent() {
-        // Arrange
-        String dni = "12345678A";
+        String dni = "12345678Z";
         when(agentRepository.findById(dni)).thenReturn(Optional.of(agentExemple));
 
-        // Act
         Optional<AgentEntity> resultat = agentService.obtenirPerDni(dni);
 
-        // Assert
         assertTrue(resultat.isPresent());
         assertEquals(agentExemple, resultat.get());
         verify(agentRepository, times(1)).findById(dni);
@@ -146,14 +181,11 @@ class AgentServiceTest {
     @Test
     @DisplayName("obtenirPerDni debe retornar Optional vacío si no existe")
     void obtenirPerDni_QuanNoExisteix_RetornaOptionalBuit() {
-        // Arrange
         String dni = "99999999Z";
         when(agentRepository.findById(dni)).thenReturn(Optional.empty());
 
-        // Act
         Optional<AgentEntity> resultat = agentService.obtenirPerDni(dni);
 
-        // Assert
         assertFalse(resultat.isPresent());
         verify(agentRepository, times(1)).findById(dni);
     }
@@ -164,13 +196,10 @@ class AgentServiceTest {
     @Test
     @DisplayName("eliminarAgent debe invocar deleteById() con el DNI proporcionado")
     void eliminarAgent_Exit() {
-        // Arrange
-        String dni = "12345678A";
+        String dni = "12345678Z";
 
-        // Act
         agentService.eliminarAgent(dni);
 
-        // Assert
         verify(agentRepository, times(1)).deleteById(dni);
     }
 
@@ -180,14 +209,11 @@ class AgentServiceTest {
     @Test
     @DisplayName("llistarOFiltrarAgents con parámetro null debe llamar a findAll()")
     void llistarOFiltrarAgents_CercaNull_CridaFindAll() {
-        // Arrange
         List<AgentEntity> agentsEsperats = List.of(agentExemple);
         when(agentRepository.findAll()).thenReturn(agentsEsperats);
 
-        // Act
         List<AgentEntity> resultat = agentService.llistarOFiltrarAgents(null);
 
-        // Assert
         assertEquals(1, resultat.size());
         verify(agentRepository, times(1)).findAll();
         verify(agentRepository, never()).cercarPerDniNomEmail(anyString());
@@ -196,14 +222,11 @@ class AgentServiceTest {
     @Test
     @DisplayName("llistarOFiltrarAgents con texto de espacios en blanco debe llamar a findAll()")
     void llistarOFiltrarAgents_CercaEspaisEnBlanc_CridaFindAll() {
-        // Arrange
         List<AgentEntity> agentsEsperats = List.of(agentExemple);
         when(agentRepository.findAll()).thenReturn(agentsEsperats);
 
-        // Act
         List<AgentEntity> resultat = agentService.llistarOFiltrarAgents("    ");
 
-        // Assert
         assertEquals(1, resultat.size());
         verify(agentRepository, times(1)).findAll();
         verify(agentRepository, never()).cercarPerDniNomEmail(anyString());
@@ -212,17 +235,14 @@ class AgentServiceTest {
     @Test
     @DisplayName("llistarOFiltrarAgents con texto válido debe aplicar trim() y llamar al método de búsqueda")
     void llistarOFiltrarAgents_CercaValida_CridaCercarPerDniNomEmailAmbTrim() {
-        // Arrange
-        String cercaAmbEspais = "  12345678A  ";
-        String cercaNeta = "12345678A";
+        String cercaAmbEspais = "  12345678Z  ";
+        String cercaNeta = "12345678Z";
         List<AgentEntity> agentsEsperats = List.of(agentExemple);
 
         when(agentRepository.cercarPerDniNomEmail(cercaNeta)).thenReturn(agentsEsperats);
 
-        // Act
         List<AgentEntity> resultat = agentService.llistarOFiltrarAgents(cercaAmbEspais);
 
-        // Assert
         assertEquals(1, resultat.size());
         verify(agentRepository, times(1)).cercarPerDniNomEmail(cercaNeta);
         verify(agentRepository, never()).findAll();

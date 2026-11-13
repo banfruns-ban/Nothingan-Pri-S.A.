@@ -53,7 +53,6 @@ class InformeReservesControllerTest {
         llistaClientsValidats = List.of(new ClientEntity());
         informeMock = mock(InformeReserves.class);
 
-        // Stubbing por defecto para clientLogic ya que el controlador lo ejecuta siempre al inicio
         when(clientLogic.llistar(null, null, "VALIDAT", null, null)).thenReturn(llistaClientsValidats);
     }
 

@@ -75,7 +75,6 @@ class InformeReservesServiceTest {
         lenient().when(reservaCancelada.getImportTotal()).thenReturn(new BigDecimal("80.00"));
         lenient().when(reservaCancelada.getEstat()).thenReturn(EstatHistoric.CANCELADA);
 
-        // Reserva eliminada (NO cuenta a vigentes, NI a precio, NI a canceladas)
         reservaEliminada = mock(HistoricReserva.class);
         lenient().when(reservaEliminada.getClientDni()).thenReturn("87654321B");
         lenient().when(reservaEliminada.getClientNom()).thenReturn("Maria Garcia");

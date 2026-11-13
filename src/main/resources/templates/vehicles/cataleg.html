@@ -24,13 +24,17 @@
 
         <div class="nav-header">
             <a th:href="@{/cataleg}" class="active">Catàleg</a>
-            
-            <!-- Només visible si l'usuari ha iniciat sessió -->
-            <a sec:authorize="isAuthenticated()" th:href="@{/reserves-client}">Les meves reserves</a>
-            
+
+            <!-- Agent o Admin: va al dashboard -->
+            <a sec:authorize="hasAnyRole('ADMIN','AGENT')" th:href="@{/dashboard}">Dashboard</a>
+
+            <!-- Client: les seves reserves -->
+            <a sec:authorize="hasRole('CLIENT')" th:href="@{/reserves-client}">Les meves reserves</a>
+
             <div class="accés-usuaris" style="display: flex; align-items: center; gap: 12px;">
-                <!-- Si l'usuari SÍ ha iniciat sessió -->
-                <th:block sec:authorize="isAuthenticated()">
+
+                <!-- Client amb sessió: cercle amb inicial + tancar sessió -->
+                <th:block sec:authorize="hasRole('CLIENT')">
                     <a th:href="@{/perfil}" title="El meu perfil"
                        style="width: 36px; height: 36px; border-radius: 50%; background: #2563eb; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; text-decoration: none; border: 2px solid #93c5fd;">
                         <span th:text="${inicialUsuari != null ? inicialUsuari : 'C'}">C</span>
@@ -43,7 +47,16 @@
                     </form>
                 </th:block>
 
-                <!-- Si l'usuari NO ha iniciat sessió -->
+                <!-- Agent o Admin amb sessió: només tancar sessió -->
+                <th:block sec:authorize="hasAnyRole('ADMIN','AGENT')">
+                    <form th:action="@{/logout}" method="post" style="display: inline; margin: 0;">
+                        <button type="submit" class="btn btn-login" style="cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                            <i class="fa-solid fa-right-from-bracket"></i> Tancar sessió
+                        </button>
+                    </form>
+                </th:block>
+
+                <!-- Visitant sense sessió -->
                 <th:block sec:authorize="!isAuthenticated()">
                     <a th:href="@{/login}" class="btn btn-login">Iniciar sessió</a>
                     <a th:href="@{/registre}" class="btn btn-login">Registrar-se</a>
@@ -116,7 +129,7 @@
 
                 <!-- Missatge si la llista està buida -->
                 <div th:if="${vehicles == null or #lists.isEmpty(vehicles)}" class="sense-vehicles">
-                    No hi ha vehicles disponibles a la base de dades.
+                    No hi ha vehicles disponibles per a aquest període o tipus.
                 </div>
 
                 <!-- Recorregut dinàmic -->
@@ -124,7 +137,7 @@
                     <img th:if="${v.foto != null and !v.foto.isBlank()}" 
                          th:src="@{'/uploads/vehicles/' + ${v.foto}}" alt="Foto Vehicle">
                     <img th:unless="${v.foto != null and !v.foto.isBlank()}" 
-                         src="/images/default-car.png" alt="Sense imatge">
+                         th:src="@{/images/default-car.png}" alt="Sense imatge">
 
                     <div class="cos-vehicle">
                         <span class="categoria-v" th:text="${v.tipusVehicle}"></span>
@@ -132,8 +145,8 @@
 
                         <div class="desglos-preus">
                             <div class="linia-preu">
-                                <span>Taxa diària:</span>
-                                <strong th:text="${#numbers.formatDecimal(v.preuHora, 1, 2) + ' €'}"></strong>
+                                <span>Taxa horària:</span>
+                                <strong th:text="${#numbers.formatDecimal(v.preuHora, 1, 2) + ' €/h'}"></strong>
                             </div>
                             <div class="linia-preu">
                                 <span>Fiança (Dipòsit):</span>
@@ -141,7 +154,15 @@
                             </div>
                         </div>
 
-                        <a th:href="@{/reserves-client/nova(matricula=${v.matricula})}" class="btn-reservar">
+                        <!-- Agent o Admin: va a la fitxa del vehicle al dashboard -->
+                        <a sec:authorize="hasAnyRole('ADMIN','AGENT')"
+                           th:href="@{'/dashboard/vehicles/detall/' + ${v.matricula}}" class="btn-reservar">
+                            Gestionar vehicle
+                        </a>
+
+                        <!-- Client o visitant: reservar -->
+                        <a sec:authorize="!hasAnyRole('ADMIN','AGENT')"
+                           th:href="@{/reserves-client/nova(matricula=${v.matricula})}" class="btn-reservar">
                             Reservar vehicle
                         </a>
                     </div>

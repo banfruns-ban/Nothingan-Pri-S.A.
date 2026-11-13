@@ -27,8 +27,17 @@
                 <a class="btn btn-primari" th:href="@{/registre}">Registrar-se</a>
             </th:block>
 
-            <!-- Si l'usuari SÍ ha iniciat sessió -->
-            <th:block sec:authorize="isAuthenticated()">
+            <!-- Agent o Admin -->
+            <th:block sec:authorize="hasAnyRole('ADMIN','AGENT')">
+                <a class="btn" th:href="@{/dashboard}">Dashboard</a>
+
+                <form th:action="@{/logout}" method="post" style="display: inline; margin: 0;">
+                    <button type="submit" class="btn btn-primari" style="cursor: pointer;">Tancar sessió</button>
+                </form>
+            </th:block>
+
+            <!-- Client -->
+            <th:block sec:authorize="hasRole('CLIENT')">
                 <a class="btn" th:href="@{/reserves-client}">Les meves reserves</a>
                 
                 <a th:href="@{/perfil}" title="El meu perfil"

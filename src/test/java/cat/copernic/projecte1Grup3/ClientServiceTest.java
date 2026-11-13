@@ -255,4 +255,35 @@ class ClientServiceTest {
         assertEquals(1, resultat.size());
         assertEquals("87654321X", resultat.get(0).getDni());
     }
+
+    @Test
+    @DisplayName("Comprovar que el filtratge de clients combina els camps")
+    void testFiltrarClientsPerCamps() {
+        clientExemple.setAdreca("Carrer Major 12, Terrassa");
+
+        ClientEntity altra = new ClientEntity();
+        altra.setDni("87654321X");
+        altra.setNom("Maria Soler");
+        altra.setNacionalitat("Francesa");
+        altra.setTelefon("699111222");
+        altra.setAdreca("Carrer Nou 4, Girona");
+
+        when(clientRepository.findAll()).thenReturn(List.of(clientExemple, altra));
+
+        List<ClientEntity> resultat = clientService.filtrarClients(
+                "espanyola", "joan garcia", "612 345", "terrassa", "12345678z");
+
+        assertEquals(List.of(clientExemple), resultat);
+    }
+
+    @Test
+    @DisplayName("Comprovar que el filtre de ciutat cerca dins de l'adreça")
+    void testFiltrarClientsPerCiutat() {
+        clientExemple.setAdreca("Carrer Major 12, Terrassa");
+        when(clientRepository.findAll()).thenReturn(List.of(clientExemple));
+
+        List<ClientEntity> resultat = clientService.filtrarClients(null, null, null, "TERRASSA", null);
+
+        assertEquals(List.of(clientExemple), resultat);
+    }
 }

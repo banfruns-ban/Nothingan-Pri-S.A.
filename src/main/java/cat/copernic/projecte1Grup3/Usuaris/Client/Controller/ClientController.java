@@ -6,12 +6,10 @@ import cat.copernic.projecte1Grup3.Usuaris.Client.Service.ClientService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.time.LocalDate;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -72,19 +70,19 @@ public class ClientController {
     // LISTADO Y DETALLE
     // =====================================================
     @GetMapping("/dashboard/clients")
-    public String llistar(@RequestParam(required = false) String q,
+    public String llistar(@RequestParam(required = false) String nacionalitat,
+            @RequestParam(required = false) String nom,
+            @RequestParam(required = false) String telefon,
+            @RequestParam(required = false) String ciutat,
             @RequestParam(required = false) String dni,
-            @RequestParam(required = false) String estat,
-            @RequestParam(required = false) String email,
-            @RequestParam(required = false)
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataNaixement,
             Model model) {
-        model.addAttribute("clients", clientLogic.llistar(q, dni, estat, email, dataNaixement));
-        model.addAttribute("q", q);
+        model.addAttribute("clients",
+                clientLogic.filtrarClients(nacionalitat, nom, telefon, ciutat, dni));
+        model.addAttribute("nacionalitat", nacionalitat);
+        model.addAttribute("nom", nom);
+        model.addAttribute("telefon", telefon);
+        model.addAttribute("ciutat", ciutat);
         model.addAttribute("dni", dni);
-        model.addAttribute("estat", estat);
-        model.addAttribute("dataNaixement", dataNaixement);
-        model.addAttribute("email", email);
         return "client/llistaClients";
     }
 

@@ -44,22 +44,34 @@
         <!-- Targeta de Filtres -->
         <div class="filter-card shadow-sm mb-4">
             <form th:action="@{/dashboard/clients}" method="get" class="row g-3 align-items-end">
-                <div class="col-md-10">
-                    <label for="q" class="form-label">Cerca per nom, DNI o correu electrònic</label>
-                    <input type="text" id="q" name="q" class="form-control" 
-                           placeholder="Ex. Joan Garcia, 12345678Z..." 
-                           th:value="${q}">
+                <div class="col-md-4">
+                    <label for="nom" class="form-label">Nom i cognoms</label>
+                    <input type="text" id="nom" name="nom" class="form-control"
+                           placeholder="Ex. Joan Garcia" th:value="${nom}">
                 </div>
-                <div class="col-md-2 d-flex gap-2">
-                    <button type="submit" class="btn btn-primary w-100 fw-semibold">
-                        <i class="fa-solid fa-filter me-1"></i> Filtrar
-                    </button>
-                    <a th:if="${q != null and !#strings.isEmpty(q)}" 
-                       th:href="@{/dashboard/clients}"
-                       class="btn btn-outline-danger" 
-                       title="Netejar filtre">
-                        <i class="fa-solid fa-xmark"></i>
-                    </a>
+                <div class="col-md-4">
+                    <label for="dni" class="form-label">DNI / NIE</label>
+                    <input type="text" id="dni" name="dni" class="form-control"
+                           placeholder="Ex. 12345678Z" th:value="${dni}">
+                </div>
+                <div class="col-md-4">
+                    <label for="telefon" class="form-label">Telèfon</label>
+                    <input type="text" id="telefon" name="telefon" class="form-control"
+                           placeholder="Ex. 612345678" th:value="${telefon}">
+                </div>
+                <div class="col-md-4">
+                    <label for="ciutat" class="form-label">Ciutat</label>
+                    <input type="text" id="ciutat" name="ciutat" class="form-control"
+                           placeholder="Ciutat de l'adreça" th:value="${ciutat}">
+                </div>
+                <div class="col-md-4">
+                    <label for="nacionalitat" class="form-label">Nacionalitat</label>
+                    <input type="text" id="nacionalitat" name="nacionalitat" class="form-control"
+                           placeholder="Ex. Espanyola" th:value="${nacionalitat}">
+                </div>
+                <div class="col-md-4 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary fw-semibold">Filtrar</button>
+                    <a th:href="@{/dashboard/clients}" class="btn btn-outline-secondary">Netejar</a>
                 </div>
             </form>
         </div>

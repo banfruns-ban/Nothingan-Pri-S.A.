@@ -56,29 +56,42 @@
             </div>
         </div>
 
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm mb-4" role="alert" th:if="${error}">
+            <i class="fa-solid fa-triangle-exclamation me-2"></i>
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
         <div class="form-card shadow-sm">
             <form th:action="@{/dashboard/vehicles/guardar}" th:object="${vehicle}" method="post" enctype="multipart/form-data">
                 
+                <!-- Guardem la matrícula original per detectar si s'ha modificat -->
+                <input type="hidden" name="matriculaOriginal" th:value="${matriculaOriginal != null ? matriculaOriginal : vehicle.matricula}">
+
                 <h5 class="fw-bold text-primary mb-3 border-bottom pb-2">1. Especificacions del vehicle</h5>
                 <div class="row g-3 mb-4">
                     <div class="col-md-6">
                         <label class="form-label">Matrícula</label>
-                        <input type="text" th:field="*{matricula}" class="form-control" readonly>
+                        <input type="text" th:field="*{matricula}" class="form-control text-uppercase" required>
+                        <div class="text-danger small mt-1" th:if="${#fields.hasErrors('matricula')}" th:errors="*{matricula}"></div>
                     </div>
 
                     <div class="col-md-6">
                         <label class="form-label">Marca</label>
                         <input type="text" th:field="*{marca}" class="form-control" required>
+                        <div class="text-danger small mt-1" th:if="${#fields.hasErrors('marca')}" th:errors="*{marca}"></div>
                     </div>
 
                     <div class="col-md-6">
                         <label class="form-label">Model</label>
                         <input type="text" th:field="*{model}" class="form-control" required>
+                        <div class="text-danger small mt-1" th:if="${#fields.hasErrors('model')}" th:errors="*{model}"></div>
                     </div>
 
                     <div class="col-md-6">
                         <label class="form-label">Any de matriculació</label>
                         <input type="number" th:field="*{anyMatriculacio}" class="form-control" required>
+                        <div class="text-danger small mt-1" th:if="${#fields.hasErrors('anyMatriculacio')}" th:errors="*{anyMatriculacio}"></div>
                     </div>
 
                     <div class="col-md-6">
@@ -126,6 +139,7 @@
                     <div class="col-md-6">
                         <label class="form-label">Màxim de dies</label>
                         <input type="number" th:field="*{maxDiesLloguer}" class="form-control" required>
+                        <div class="text-danger small mt-1" th:if="${#fields.hasErrors('maxDiesLloguer')}" th:errors="*{maxDiesLloguer}"></div>
                     </div>
                 </div>
 

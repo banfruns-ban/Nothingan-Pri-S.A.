@@ -84,6 +84,49 @@ public class ClientService {
         return clients;
     }
 
+    public List<ClientEntity> filtrarClients(String nacionalitat, String nom, String telefon,
+                                             String ciutat, String dni) {
+        List<ClientEntity> clients = clientRepository.findAll();
+
+        if (nacionalitat != null && !nacionalitat.isBlank()) {
+            String filtre = nacionalitat.trim().toLowerCase();
+            clients = clients.stream()
+                    .filter(c -> conte(c.getNacionalitat(), filtre))
+                    .toList();
+        }
+
+        if (nom != null && !nom.isBlank()) {
+            String filtre = nom.trim().toLowerCase();
+            clients = clients.stream()
+                    .filter(c -> conte(c.getNom(), filtre))
+                    .toList();
+        }
+
+        if (telefon != null && !telefon.isBlank()) {
+            String filtre = telefon.replaceAll("\\s+", "");
+            clients = clients.stream()
+                    .filter(c -> c.getTelefon() != null
+                            && c.getTelefon().replaceAll("\\s+", "").contains(filtre))
+                    .toList();
+        }
+
+        if (ciutat != null && !ciutat.isBlank()) {
+            String filtre = ciutat.trim().toLowerCase();
+            clients = clients.stream()
+                    .filter(c -> conte(c.getAdreca(), filtre))
+                    .toList();
+        }
+
+        if (dni != null && !dni.isBlank()) {
+            String filtre = dni.trim().toLowerCase();
+            clients = clients.stream()
+                    .filter(c -> conte(c.getDni(), filtre))
+                    .toList();
+        }
+
+        return clients;
+    }
+
     private boolean conte(String valor, String text) {
         return valor != null && valor.toLowerCase().contains(text);
     }

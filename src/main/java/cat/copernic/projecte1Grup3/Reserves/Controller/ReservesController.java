@@ -168,7 +168,7 @@ public class ReservesController {
             log.error("Error eliminant la reserva {}", codi, e);
             ra.addFlashAttribute("error", "No s'ha pogut eliminar la reserva");
         }
-        return "redirect:/dashboard";
+        return "redirect:/dashboard/reserves";
     }
 
     // GET: Obrir pantalla de lliurament

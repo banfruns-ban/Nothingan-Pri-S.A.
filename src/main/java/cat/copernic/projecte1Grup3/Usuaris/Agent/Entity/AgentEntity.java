@@ -1,34 +1,36 @@
-// ===== CABECERA =====
 package cat.copernic.projecte1Grup3.Usuaris.Agent.Entity;
 
-import cat.copernic.projecte1Grup3.Usuaris.Entity.UsuariEntity; // Clase padre (dni, nom, email, password)
-import jakarta.persistence.Column;     // Configura una columna (nullable, etc.)
-import jakarta.persistence.Entity;     // Marca la clase como entidad JPA
-import jakarta.persistence.EnumType;   // Forma de guardar el enum (STRING u ORDINAL)
-import jakarta.persistence.Enumerated; // Indica que un campo es un enum
-import jakarta.persistence.Table;      // Define el nombre de la tabla
+import cat.copernic.projecte1Grup3.Usuaris.Entity.UsuariEntity;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Table;
+import java.time.LocalDate;
+import org.springframework.format.annotation.DateTimeFormat;
 
-// ===== DECLARACIÓN DE LA CLASE =====
-@Entity                 // Esta clase se mapea a una tabla: cada objeto es una fila (tabla en SQL)
-@Table(name = "agents") // Nombre de la tabla (si no, se llamaría AgentEntity) (Nombre de la tabla creada)
-public class AgentEntity extends UsuariEntity { // Un agente ES un usuario: hereda dni, nom, email y password
+@Entity
+@Table(name = "agents")
+public class AgentEntity extends UsuariEntity {
 
-    // ===== ATRIBUTOS (columnas de la tabla) =====
-    @Column(nullable = false)   // Obligatorio: NOT NULL en la BD
+    @Column(nullable = false)
     private String hora_entrada;
 
-    @Column(nullable = false)   // Obligatorio
+    @Column(nullable = false)
     private String hora_sortida;
 
-    @Enumerated(EnumType.STRING) // Guarda el enum como texto ("ADMIN"), no como número:
-    @Column(nullable = false)    // si reordenas el enum, los datos antiguos no se estropean
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private Rol rol;
 
-    @Column(nullable = true)    // Opcional
-    private String foto; // Guarda el nom o ruta del fitxer de la imatge (la imagen está en disco, no en la BD)
+    @Column(nullable = true)
+    private String foto;
+
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    @Column(name = "data_naixement", nullable = true)
+    private LocalDate dataNaixement;
 
     // ===== GETTERS Y SETTERS =====
-    // Los campos son private; Spring y Thymeleaf usan estos métodos para leer y rellenar el formulario
     public String getHora_entrada() {
         return hora_entrada;
     }
@@ -55,23 +57,37 @@ public class AgentEntity extends UsuariEntity { // Un agente ES un usuario: here
 
     public String getFoto() {
         return foto;
-    } // El controlador lo usa al editar para no perder la foto anterior
+    }
 
     public void setFoto(String foto) {
         this.foto = foto;
     }
 
+    public LocalDate getDataNaixement() {
+        return dataNaixement;
+    }
+
+    public void setDataNaixement(LocalDate dataNaixement) {
+        this.dataNaixement = dataNaixement;
+    }
+
     // ===== CONSTRUCTORES =====
-    // Vacío: lo exige JPA para leer de la BD, y Spring MVC para crear el objeto del formulario
     public AgentEntity() {
         super();
     }
 
-    // Completo: super(...) inicializa primero la parte de usuariEntity y después se asignan los campos propios
     public AgentEntity(String hora_entrada, String hora_sortida, Rol rol, String dni, String nom, String email, String password) {
         super(dni, nom, email, password);
         this.hora_entrada = hora_entrada;
         this.hora_sortida = hora_sortida;
         this.rol = rol;
+    }
+
+    public AgentEntity(String hora_entrada, String hora_sortida, Rol rol, LocalDate dataNaixement, String dni, String nom, String email, String password) {
+        super(dni, nom, email, password);
+        this.hora_entrada = hora_entrada;
+        this.hora_sortida = hora_sortida;
+        this.rol = rol;
+        this.dataNaixement = dataNaixement;
     }
 }

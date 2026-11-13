@@ -80,6 +80,12 @@ public class Reserves {
             model.addAttribute("reserva", new ReservesEntity());
         }
 
+        // Aviso del 25% para clientes premium (AJUSTA getPremium() al campo real de ClientEntity)
+        model.addAttribute("esPremium",
+                reservesClientService.obtenirClient(authentication.getName())
+                        .map(c -> Boolean.TRUE.equals(c.isPremium()))
+                        .orElse(false));
+
         return "reserves/crearReservaClient";
     }
 

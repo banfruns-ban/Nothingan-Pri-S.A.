@@ -35,7 +35,7 @@ import cat.copernic.projecte1Grup3.Usuaris.Client.Repository.ClientRepository;
 public class ReservesService {
 
     private static final Logger log = LoggerFactory.getLogger(ReservesService.class);
-
+    private static final BigDecimal DESCOMPTE_PREMIUM = new BigDecimal("0.25");
     public static final String PENDENT = "PENDENT";
     public static final String CONFIRMADA = "CONFIRMADA";
     public static final String EN_CURS = "EN_CURS";
@@ -72,12 +72,12 @@ public class ReservesService {
             String text = q.trim().toLowerCase();
             reserves = reserves.stream()
                     .filter(r -> conte(String.valueOf(r.getCodiReserva()), text)
-                    || (r.getClient() != null
-                    && (conte(r.getClient().getNom(), text) || conte(r.getClient().getDni(), text)))
-                    || (r.getVehicle() != null
-                    && (conte(r.getVehicle().getMatricula(), text)
-                    || conte(r.getVehicle().getMarca(), text)
-                    || conte(r.getVehicle().getModel(), text))))
+                            || (r.getClient() != null
+                            && (conte(r.getClient().getNom(), text) || conte(r.getClient().getDni(), text)))
+                            || (r.getVehicle() != null
+                            && (conte(r.getVehicle().getMatricula(), text)
+                            || conte(r.getVehicle().getMarca(), text)
+                            || conte(r.getVehicle().getModel(), text))))
                     .toList();
         }
 
@@ -98,8 +98,8 @@ public class ReservesService {
         if (dataReserva != null) {
             reserves = reserves.stream()
                     .filter(r -> r.getDataInici() != null && r.getDataFi() != null
-                    && !dataReserva.isBefore(r.getDataInici())
-                    && !dataReserva.isAfter(r.getDataFi()))
+                            && !dataReserva.isBefore(r.getDataInici())
+                            && !dataReserva.isAfter(r.getDataFi()))
                     .toList();
         }
 
@@ -131,6 +131,10 @@ public class ReservesService {
 
     private boolean conte(String valor, String text) {
         return valor != null && valor.toLowerCase().contains(text);
+    }
+
+    private boolean esPremium(ClientEntity client) {
+        return Boolean.TRUE.equals(client.isPremium());
     }
 
     public Optional<ReservesEntity> obtenir(Long codi) {
@@ -206,9 +210,14 @@ public class ReservesService {
         reserva.setHoraInici(horaInici);
         reserva.setDataFi(dataFi);
         reserva.setHoraFi(horaFi);
-        reserva.setCostTotal(vehicle.getPreuHora()
-                .multiply(BigDecimal.valueOf(hores))
-                .setScale(2, RoundingMode.HALF_UP));
+        BigDecimal cost = vehicle.getPreuHora().multiply(BigDecimal.valueOf(hores));
+
+        if (esPremium(client)) {
+            cost = cost.multiply(BigDecimal.ONE.subtract(DESCOMPTE_PREMIUM));
+            log.info("Descompte premium (25%) aplicat al client {}", client.getDni());
+        }
+
+        reserva.setCostTotal(cost.setScale(2, RoundingMode.HALF_UP));
         reserva.setFianca(vehicle.getFianca());
         reserva.setEstat(PENDENT);
         reserva.setObservacions(observacions == null || observacions.isBlank()
@@ -493,10 +502,10 @@ public class ReservesService {
         if (reserva == null) {
             throw new IllegalArgumentException("La reserva no pot ser nul·la");
         }
-        
+
         String dni = (reserva.getClient() != null) ? reserva.getClient().getDni() : null;
         String matricula = (reserva.getVehicle() != null) ? reserva.getVehicle().getMatricula() : null;
-        
+
         return crear(
                 dni,
                 matricula,

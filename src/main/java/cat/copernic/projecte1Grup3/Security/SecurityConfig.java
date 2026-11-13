@@ -7,6 +7,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -60,6 +61,13 @@ public class SecurityConfig {
                 .formLogin(form -> form
                 .loginPage("/login")
                 .successHandler(customSuccessHandler(requestCache())) // Redirección dinámica según rol
+                .failureHandler((request, response, exception) -> {
+                    if (exception instanceof DisabledException) {
+                        response.sendRedirect(request.getContextPath() + "/login?notValidated");
+                    } else {
+                        response.sendRedirect(request.getContextPath() + "/login?error");
+                    }
+                })
                 .permitAll())
                 // Configuración del cierre de sesión
                 .logout(logout -> logout

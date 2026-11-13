@@ -35,10 +35,14 @@ public class UsuariDetailsService implements UserDetailsService {
 
         ClientEntity client = clienRepository.findByEmailIgnoreCase(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuari no trobat: " + email));
-        return construir(client, "CLIENT");
+        return construir(client, "CLIENT", "VALIDAT".equals(client.getEstatValidacio()));
     }
 
     private UserDetails construir(UsuariEntity usuari, String rol) {
+        return construir(usuari, rol, true);
+    }
+
+    private UserDetails construir(UsuariEntity usuari, String rol, boolean habilitat) {
         if (usuari.getPassword() == null || usuari.getPassword().isBlank()) {
             throw new UsernameNotFoundException(
                     "L'usuari no té contrasenya configurada: " + usuari.getEmail());
@@ -47,6 +51,7 @@ public class UsuariDetailsService implements UserDetailsService {
                 .username(usuari.getEmail())
                 .password(usuari.getPassword())
                 .roles(rol)
+                .disabled(!habilitat)
                 .build();
     }
 }

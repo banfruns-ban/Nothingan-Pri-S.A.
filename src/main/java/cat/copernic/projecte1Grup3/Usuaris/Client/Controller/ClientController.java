@@ -49,22 +49,23 @@ public class ClientController {
             @RequestParam("fotoDniFrontal") MultipartFile fotoDniFrontal,
             @RequestParam("fotoDniPosterior") MultipartFile fotoDniPosterior,
             @RequestParam("fotoCarnet") MultipartFile fotoCarnet,
+            Model model,
             RedirectAttributes ra) {
+        String error;
         try {
             clientLogic.alta(client, fotoDniFrontal, fotoDniPosterior, fotoCarnet);
             ra.addFlashAttribute("missatge", "Client donat d'alta correctament!");
             return "redirect:/dashboard/clients";
         } catch (IllegalArgumentException e) {
-            ra.addFlashAttribute("error", e.getMessage());
+            error = e.getMessage();
         } catch (Exception e) {
             log.error("Error en l'alta del client", e);
-            ra.addFlashAttribute("error", "No s'ha pogut completar el registre");
+            error = "No s'ha pogut completar el registre";
         }
 
-        // Conservem les dades escrites (mai la contrasenya)
         client.setPassword(null);
-        ra.addFlashAttribute("client", client);
-        return "redirect:/dashboard/clients/alta";
+        model.addAttribute("error", error);
+        return "client/altaUsuari";
     }
 
     // =====================================================

@@ -31,16 +31,42 @@ public class VehiclesService {
     }
 
     /**
-     * Filtra els vehicles segons el text de cerca, categoria (tipus) i estat d'activació.
+     * RF45: Filtra els vehicles combinant matrícula, marca, model, any de matriculació,
+     * categoria, estat d'activació i disponibilitat entre data mínima i data màxima.
      */
     @Transactional(readOnly = true)
-    public List<VehiclesEntity> filtrarVehicles(String cerca, String tipus, Boolean actiu) {
-        if ((cerca == null || cerca.isBlank()) && 
-            (tipus == null || tipus.isBlank()) && 
-            actiu == null) {
+    public List<VehiclesEntity> filtrarVehicles(
+            String matricula,
+            String marca,
+            String model,
+            Integer anyMatriculacio,
+            String tipus,
+            Boolean actiu,
+            LocalDateTime dataInici,
+            LocalDateTime dataFi) {
+
+        boolean senseFiltres = (matricula == null || matricula.isBlank()) &&
+                               (marca == null || marca.isBlank()) &&
+                               (model == null || model.isBlank()) &&
+                               anyMatriculacio == null &&
+                               (tipus == null || tipus.isBlank()) &&
+                               actiu == null &&
+                               dataInici == null &&
+                               dataFi == null;
+
+        if (senseFiltres) {
             return vehiclesRepository.findAll();
         }
-        return vehiclesRepository.filtrarVehicles(cerca, tipus, actiu);
+
+        return vehiclesRepository.filtrarVehicles(
+                matricula != null ? matricula.trim() : null,
+                marca != null ? marca.trim() : null,
+                model != null ? model.trim() : null,
+                anyMatriculacio,
+                tipus,
+                actiu,
+                dataInici,
+                dataFi);
     }
 
     @Transactional(readOnly = true)
@@ -61,9 +87,6 @@ public class VehiclesService {
         return vehiclesRepository.save(vehicle);
     }
 
-    /**
-     * Actualitza un vehicle existent permetent també modificar la seva matrícula (PK).
-     */
     @Transactional
     public VehiclesEntity actualitzarVehicle(String matriculaOriginal, VehiclesEntity dadesActualitzades) {
         VehiclesEntity antic = vehiclesRepository.findById(matriculaOriginal)
@@ -76,49 +99,39 @@ public class VehiclesService {
             dadesActualitzades.setActiu(antic.getActiu());
         }
 
-        // Si la matrícula NO ha canviat, actualitzem directament
         if (matriculaOriginal.equalsIgnoreCase(novaMatricula)) {
             dadesActualitzades.setReserves(antic.getReserves());
             return vehiclesRepository.save(dadesActualitzades);
         }
 
-        // Si la matrícula SÍ ha canviat, comprovem que la nova no estigui ocupada
         if (vehiclesRepository.existsById(novaMatricula)) {
             throw new IllegalArgumentException("La matrícula " + novaMatricula + " ja està registrada en un altre vehicle.");
         }
 
-        // 1. Creem el nou registre amb la nova matrícula
         VehiclesEntity nouVehicle = vehiclesRepository.saveAndFlush(dadesActualitzades);
 
-        // 2. Reassignem les reserves associades al vehicle antic cap al nou
         List<ReservesEntity> reservesAssociades = new ArrayList<>(antic.getReserves());
         for (ReservesEntity reserva : reservesAssociades) {
             reserva.setVehicle(nouVehicle);
         }
         antic.getReserves().clear();
 
-        // 3. Reassignem possibles ressenyes vinculades a l'antiga matrícula (si n'hi ha)
         try {
             entityManager.createQuery("UPDATE RessenyaEntity r SET r.vehicle = :nou WHERE r.vehicle = :antic")
                     .setParameter("nou", nouVehicle)
                     .setParameter("antic", antic)
                     .executeUpdate();
         } catch (Exception ignored) {
-            // Si RessenyaEntity no té relació directa amb VehiclesEntity, ho ignorem
         }
 
         entityManager.flush();
 
-        // 4. Eliminem el registre amb la matrícula antiga
         vehiclesRepository.delete(antic);
         vehiclesRepository.flush();
 
         return nouVehicle;
     }
 
-    /**
-     * Modifica l'estat d'activació (Actiu / Inactiu) del vehicle.
-     */
     @Transactional
     public void canviarEstatActiu(String matricula, Boolean nouEstat) {
         Optional<VehiclesEntity> vehicleOpt = vehiclesRepository.findById(matricula);
@@ -147,10 +160,6 @@ public class VehiclesService {
         return vehiclesRepository.findByActiuTrueAndTipusVehicle(tipus);
     }
 
-    /**
-     * Retorna els vehicles disponibles tenint en compte les dates de la reserva i el tipus.
-     * Si les dates són nul·les, es mostren tots els vehicles actius per defecte.
-     */
     @Transactional(readOnly = true)
     public List<VehiclesEntity> llistarDisponibles(LocalDateTime dataInici, LocalDateTime dataFi, String tipus) {
         if (dataInici == null || dataFi == null) {

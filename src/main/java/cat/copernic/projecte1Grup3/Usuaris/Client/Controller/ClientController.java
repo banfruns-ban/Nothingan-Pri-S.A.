@@ -33,9 +33,8 @@ public class ClientController {
     }
 
     // =====================================================
-    // ALTA DE CLIENTE
+    // ALTA DE CLIENTE (PANEL AGENTS)
     // =====================================================
-
     @GetMapping({"/dashboard/clients/alta", "/dashboard/clients/altaUsuari", "/dashboard/clients/nou"})
     public String mostrarFormulari(Model model) {
         if (!model.containsAttribute("client")) {
@@ -61,21 +60,24 @@ public class ClientController {
             log.error("Error en l'alta del client", e);
             ra.addFlashAttribute("error", "No s'ha pogut completar el registre");
         }
+
+        // Conservem les dades escrites (mai la contrasenya)
+        client.setPassword(null);
+        ra.addFlashAttribute("client", client);
         return "redirect:/dashboard/clients/alta";
     }
 
     // =====================================================
     // LISTADO Y DETALLE
     // =====================================================
-
     @GetMapping("/dashboard/clients")
     public String llistar(@RequestParam(required = false) String q,
-                          @RequestParam(required = false) String dni,
-                          @RequestParam(required = false) String estat,
-                          @RequestParam(required = false) String email,
-                          @RequestParam(required = false)
-                          @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataNaixement,
-                          Model model) {
+            @RequestParam(required = false) String dni,
+            @RequestParam(required = false) String estat,
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataNaixement,
+            Model model) {
         model.addAttribute("clients", clientLogic.llistar(q, dni, estat, email, dataNaixement));
         model.addAttribute("q", q);
         model.addAttribute("dni", dni);
@@ -136,7 +138,6 @@ public class ClientController {
     // =====================================================
     // EDICIÓN Y ELIMINACIÓN
     // =====================================================
-
     @GetMapping("/dashboard/clients/{dni}/editar")
     public String formulariEditar(@PathVariable String dni, Model model, RedirectAttributes ra) {
         return clientLogic.obtenir(dni).map(c -> {
@@ -150,13 +151,13 @@ public class ClientController {
 
     @PostMapping("/dashboard/clients/{dni}/editar")
     public String editar(@PathVariable String dni,
-                         @ModelAttribute("client") ClientEntity dades,
-                         @RequestParam String estatValidacio,
-                         @RequestParam(defaultValue = "false") boolean premium,
-                         @RequestParam(value = "fotoDniFrontal", required = false) MultipartFile fotoDniFrontal,
-                         @RequestParam(value = "fotoDniPosterior", required = false) MultipartFile fotoDniPosterior,
-                         @RequestParam(value = "fotoCarnet", required = false) MultipartFile fotoCarnet,
-                         RedirectAttributes ra) {
+            @ModelAttribute("client") ClientEntity dades,
+            @RequestParam String estatValidacio,
+            @RequestParam(defaultValue = "false") boolean premium,
+            @RequestParam(value = "fotoDniFrontal", required = false) MultipartFile fotoDniFrontal,
+            @RequestParam(value = "fotoDniPosterior", required = false) MultipartFile fotoDniPosterior,
+            @RequestParam(value = "fotoCarnet", required = false) MultipartFile fotoCarnet,
+            RedirectAttributes ra) {
         try {
             clientLogic.actualitzar(dni, dades, estatValidacio, premium,
                     fotoDniFrontal, fotoDniPosterior, fotoCarnet);
@@ -190,7 +191,6 @@ public class ClientController {
     // =====================================================
     // VALIDACIÓN Y ESTADO (RF82)
     // =====================================================
-
     @PostMapping("/dashboard/clients/{dni}/validacio")
     public String validar(@PathVariable String dni, @RequestParam String estat, RedirectAttributes ra) {
         clientLogic.canviarEstat(dni, estat);
@@ -208,7 +208,6 @@ public class ClientController {
     // =====================================================
     // REGISTRE DES DEL PORTAL CLIENT (RF81)
     // =====================================================
-
     @GetMapping("/registre")
     public String mostrarFormulariRegistre(Model model) {
         if (!model.containsAttribute("client")) {
@@ -238,13 +237,16 @@ public class ClientController {
             ra.addFlashAttribute("client", client);
             ra.addFlashAttribute("error", "No s'ha pogut completar el registre. Revisa que les dades i fitxers siguin correctes.");
         }
+
+        // Conservem les dades escrites (mai la contrasenya)
+        client.setPassword(null);
+        ra.addFlashAttribute("client", client);
         return "redirect:/registre";
     }
 
     // =====================================================
     // EL MEU PERFIL (PORTAL CLIENT)
     // =====================================================
-
     @GetMapping("/perfil")
     public String veurePerfil(Authentication auth, Model model, RedirectAttributes ra) {
         if (auth == null || !auth.isAuthenticated()) {
@@ -261,10 +263,10 @@ public class ClientController {
 
     @PostMapping("/perfil")
     public String guardarPerfil(@ModelAttribute("client") ClientEntity dades,
-                                Authentication auth,
-                                HttpServletRequest request,
-                                HttpServletResponse response,
-                                RedirectAttributes ra) {
+            Authentication auth,
+            HttpServletRequest request,
+            HttpServletResponse response,
+            RedirectAttributes ra) {
         String emailActual = auth.getName();
         try {
             clientLogic.actualitzarPerfilClient(emailActual, dades);

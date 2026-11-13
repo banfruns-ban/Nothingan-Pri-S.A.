@@ -31,9 +31,8 @@
             <div class="accés-usuaris" style="display: flex; align-items: center; gap: 12px;">
                 <!-- Si l'usuari SÍ ha iniciat sessió -->
                 <th:block sec:authorize="isAuthenticated()">
-                    <a th:href="@{/perfil}" title="El meu perfil"
-                       style="width: 36px; height: 36px; border-radius: 50%; background: #2563eb; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; text-decoration: none; border: 2px solid #93c5fd;">
-                        <span th:text="${inicialUsuari != null ? inicialUsuari : 'C'}">C</span>
+                    <a th:href="@{/reserves-client/perfil}" title="Veure usuari">
+                        <i class="fa-solid fa-user"></i> Veure usuari
                     </a>
 
                     <form th:action="@{/logout}" method="post" style="display: inline; margin: 0;">
@@ -67,7 +66,7 @@
             <img th:if="${vehicleSeleccionat.foto != null and !vehicleSeleccionat.foto.isBlank()}" 
                  th:src="@{'/uploads/vehicles/' + ${vehicleSeleccionat.foto}}" alt="Vehicle" style="width: 120px; height: 80px; object-fit: cover; border-radius: 6px;">
             <img th:unless="${vehicleSeleccionat.foto != null and !vehicleSeleccionat.foto.isBlank()}" 
-                 src="https://via.placeholder.com/120x80?text=Sense+Imatge" alt="Vehicle" style="width: 120px; height: 80px; object-fit: cover; border-radius: 6px;">
+                 th:src="@{/images/default-car.png}" alt="Sense imatge" style="width: 120px; height: 80px; object-fit: cover; border-radius: 6px;">
 
             <div>
                 <span style="font-size: 10px; color: #2563eb; font-weight: 700; text-transform: uppercase;" th:text="${vehicleSeleccionat.tipusVehicle}">TURISME</span>
@@ -76,6 +75,9 @@
                     Matrícula: <strong th:text="${vehicleSeleccionat.matricula}">1234ABC</strong> | 
                     Preu: <strong th:text="${#numbers.formatDecimal(vehicleSeleccionat.preuHora, 1, 2) + ' €/h'}">15.00 €/h</strong> | 
                     Fiança: <strong th:text="${#numbers.formatDecimal(vehicleSeleccionat.fianca, 1, 2) + ' €'}">150.00 €</strong>
+                </p>
+                <p th:if="${esPremium}" style="margin: 6px 0 0; color: #16a34a; font-size: 12px; font-weight: 600;">
+                    <i class="fa-solid fa-crown"></i> Client premium: 25% de descompte en el preu de lloguer.
                 </p>
             </div>
         </div>
@@ -91,6 +93,7 @@
             <div class="form-grup">
                 <label>Data d'inici *</label>
                 <input type="date" name="dataInici" required
+                       th:min="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}"
                        th:value="${reserva.dataInici != null ? #temporals.format(reserva.dataInici, 'yyyy-MM-dd') : #temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}">
             </div>
 
@@ -103,6 +106,7 @@
             <div class="form-grup">
                 <label>Data de devolució *</label>
                 <input type="date" name="dataFi" required
+                       th:min="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}"
                        th:value="${reserva.dataFi != null ? #temporals.format(reserva.dataFi, 'yyyy-MM-dd') : ''}">
             </div>
 
@@ -119,6 +123,24 @@
                 <input type="text" name="observacions"
                        placeholder="Ex: Sella per a nadó, recollida en horari especial..."
                        th:value="${reserva.observacions}">
+            </div>
+
+            <!-- Resum de cost estimat (s'actualitza en triar les dates) -->
+            <div class="form-grup full-width" th:if="${vehicleSeleccionat != null}"
+                 id="resum-cost"
+                 th:attr="data-preu=${vehicleSeleccionat.preuHora},data-fianca=${vehicleSeleccionat.fianca},data-premium=${esPremium != null and esPremium}"
+                 style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:14px; font-size:13px;">
+                <div style="display:flex; justify-content:space-between;"><span>Durada</span><strong id="r-durada">-</strong></div>
+                <div style="display:flex; justify-content:space-between;"><span>Lloguer</span><strong id="r-lloguer">-</strong></div>
+                <div id="r-fila-descompte" style="display:none; justify-content:space-between; color:#16a34a;">
+                    <span>Descompte premium (25%)</span><strong id="r-descompte">-</strong>
+                </div>
+                <div style="display:flex; justify-content:space-between; border-top:1px solid #e2e8f0; margin-top:8px; padding-top:8px;">
+                    <span>Total estimat</span><strong id="r-total" style="font-size:15px;">-</strong>
+                </div>
+                <div style="display:flex; justify-content:space-between; color:#64748b; margin-top:4px;">
+                    <span>Fiança (dipòsit, es retorna)</span><strong id="r-fianca">-</strong>
+                </div>
             </div>
 
             <div class="form-grup full-width" style="margin-top: 16px; display: flex; gap: 12px;">
@@ -154,6 +176,51 @@
             </div>
         </div>
     </div>
+
+<script>
+(function () {
+    const box = document.getElementById('resum-cost');
+    if (!box) return;
+
+    const preu = parseFloat(box.dataset.preu);
+    const fianca = parseFloat(box.dataset.fianca);
+    const premium = box.dataset.premium === 'true';
+    const f = document.querySelector('form.form-grid');
+    const camps = ['dataInici', 'horaInici', 'dataFi', 'horaFi']
+        .map(n => f.querySelector('[name="' + n + '"]'));
+    const eur = n => n.toFixed(2).replace('.', ',') + ' €';
+
+    function calcula() {
+        const [di, hi, df, hf] = camps.map(c => c.value);
+        document.getElementById('r-fianca').textContent = eur(fianca);
+        if (!di || !hi || !df || !hf) return;
+
+        const ini = new Date(di + 'T' + hi);
+        const fi = new Date(df + 'T' + hf);
+        const minuts = (fi - ini) / 60000;
+        if (!(minuts > 0)) {
+            document.getElementById('r-durada').textContent = 'Dates no vàlides';
+            document.getElementById('r-lloguer').textContent = '-';
+            document.getElementById('r-total').textContent = '-';
+            return;
+        }
+        // Mateixa lògica que el servidor: hores arrodonides amunt
+        const hores = Math.ceil(minuts / 60);
+        const dies = Math.ceil(hores / 24);
+        const lloguer = preu * hores;
+        const descompte = premium ? lloguer * 0.25 : 0;
+
+        document.getElementById('r-durada').textContent = dies + ' dia(es) · ' + hores + ' h';
+        document.getElementById('r-lloguer').textContent = eur(lloguer);
+        document.getElementById('r-fila-descompte').style.display = premium ? 'flex' : 'none';
+        document.getElementById('r-descompte').textContent = '-' + eur(descompte);
+        document.getElementById('r-total').textContent = eur(lloguer - descompte);
+    }
+
+    camps.forEach(c => c.addEventListener('input', calcula));
+    calcula();
+})();
+</script>
 
 </body>
 </html>

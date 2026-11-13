@@ -13,7 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,20 +28,33 @@ import cat.copernic.projecte1Grup3.Ressenya.Service.RessenyaService;
 import cat.copernic.projecte1Grup3.Vehicles.Entity.VehiclesEntity;
 import cat.copernic.projecte1Grup3.Vehicles.Service.VehiclesService;
 import jakarta.validation.Valid;
+import java.beans.PropertyEditorSupport;
 
-@Controller // Indica que la classe es un controlador **
-@RequestMapping("/dashboard/vehicles") // Base de las url de todas las rutas del doc
+@Controller
+@RequestMapping("/dashboard/vehicles")
 public class VehiclesController {
     private static final Logger log = LoggerFactory.getLogger(VehiclesController.class);
     private final VehiclesService vehiclesService;
     private final RessenyaService ressenyaLogic;
+
     @Autowired
     public VehiclesController(VehiclesService vehiclesService, RessenyaService ressenyaLogic) {
         this.vehiclesService = vehiclesService;
         this.ressenyaLogic = ressenyaLogic; 
     }
 
-    @GetMapping//Protocolo http que ejecuta la orden GET (Listar,ver,detalle,cargar vista,formularios, etc...)
+    // Normalitza la matrícula a majúscules i sense espais abans de validar el @Pattern
+    @InitBinder
+    public void initBinder(WebDataBinder binder) {
+        binder.registerCustomEditor(String.class, "matricula", new PropertyEditorSupport() {
+            @Override
+            public void setAsText(String text) {
+                setValue(text == null ? null : text.trim().toUpperCase());
+            }
+        });
+    }
+
+    @GetMapping
     public String llistarVehicles(
             @RequestParam(name = "cerca", required = false) String cerca,
             @RequestParam(name = "tipus", required = false) String tipus,
@@ -51,7 +66,6 @@ public class VehiclesController {
         model.addAttribute("cerca", cerca);
         model.addAttribute("tipus", tipus);
         model.addAttribute("estat", estat);
-       
         
         return "vehicles/llistat";
     }
@@ -69,7 +83,7 @@ public class VehiclesController {
     }
 
     @GetMapping("/nou")
-    public String formulariNouVehicle(Model model) {//Conecta la capa controller directamente con la capa vista
+    public String formulariNouVehicle(Model model) {
         model.addAttribute("vehicle", new VehiclesEntity());
         return "vehicles/altaVehicle";
     }
@@ -79,26 +93,37 @@ public class VehiclesController {
         Optional<VehiclesEntity> vehicle = vehiclesService.buscarPerMatricula(matricula);
         if (vehicle.isPresent()) {
             model.addAttribute("vehicle", vehicle.get());
+            model.addAttribute("matriculaOriginal", vehicle.get().getMatricula());
             return "vehicles/editarVehicle";
         }
         redirect.addFlashAttribute("error", "No s'ha trobat el vehicle per editar.");
         return "redirect:/dashboard/vehicles";
     }
 
-    @PostMapping("/guardar")//Protocolo http que ejecuta la orden POST (Modificar,Guardar,Eliminar,etc..)
+    @PostMapping("/guardar")
     public String guardarVehicle(
             @Valid @ModelAttribute("vehicle") VehiclesEntity vehicle,
             BindingResult result,
+            @RequestParam(name = "matriculaOriginal", required = false) String matriculaOriginal,
             @RequestParam(name = "file", required = false) MultipartFile file,
             Model model,
             RedirectAttributes redirect) {
-        //Asegura que no da problemas en atributos que pueden ser nulos
-        Optional<VehiclesEntity> existentOpt = vehiclesService.buscarPerMatricula(vehicle.getMatricula());
-        boolean existeixBDD = vehicle.getMatricula() != null && existentOpt.isPresent();
 
-        if (!existeixBDD && vehicle.getMatricula() != null && !vehicle.getMatricula().isBlank()) {
-            if (vehiclesService.buscarPerMatricula(vehicle.getMatricula()).isPresent()) {
-                result.rejectValue("matricula", "error.vehicle", "Aquesta matrícula ja està registrada.");
+        boolean esEdicio = matriculaOriginal != null && !matriculaOriginal.isBlank();
+        Optional<VehiclesEntity> existentOpt = esEdicio
+                ? vehiclesService.buscarPerMatricula(matriculaOriginal)
+                : Optional.empty();
+
+        // Validar duplicats de matrícula
+        if (vehicle.getMatricula() != null && !vehicle.getMatricula().isBlank()) {
+            if (!esEdicio) {
+                if (vehiclesService.buscarPerMatricula(vehicle.getMatricula()).isPresent()) {
+                    result.rejectValue("matricula", "error.vehicle", "Aquesta matrícula ja està registrada.");
+                }
+            } else if (!matriculaOriginal.equalsIgnoreCase(vehicle.getMatricula())) {
+                if (vehiclesService.buscarPerMatricula(vehicle.getMatricula()).isPresent()) {
+                    result.rejectValue("matricula", "error.vehicle", "Aquesta nova matrícula ja pertany a un altre vehicle.");
+                }
             }
         }
 
@@ -109,7 +134,11 @@ public class VehiclesController {
         }
 
         if (result.hasErrors()) {
-            return existeixBDD ? "vehicles/editarVehicle" : "vehicles/altaVehicle";
+            if (esEdicio) {
+                model.addAttribute("matriculaOriginal", matriculaOriginal);
+                return "vehicles/editarVehicle";
+            }
+            return "vehicles/altaVehicle";
         }
 
         // Gestió de la foto
@@ -126,16 +155,26 @@ public class VehiclesController {
                 log.error("Error pujant la foto del vehicle {}", vehicle.getMatricula(), e);
                 redirect.addFlashAttribute("error", "Error en carregar la imatge del vehicle.");
             }
-        } else if (existeixBDD) {
-            // Si estem editant i no s'ha pujat cap foto nova, mantenim la foto existent
+        } else if (esEdicio && existentOpt.isPresent()) {
             vehicle.setFoto(existentOpt.get().getFoto());
         }
 
-        vehiclesService.guardarVehicle(vehicle);
-        log.info("Vehicle {}: {}", existeixBDD ? "actualitzat" : "donat d'alta", vehicle.getMatricula());
-        redirect.addFlashAttribute("succes", "Vehicle desat correctament.");
+        try {
+            if (esEdicio) {
+                vehiclesService.actualitzarVehicle(matriculaOriginal, vehicle);
+                log.info("Vehicle actualitzat: {} -> {}", matriculaOriginal, vehicle.getMatricula());
+            } else {
+                vehiclesService.guardarVehicle(vehicle);
+                log.info("Vehicle donat d'alta: {}", vehicle.getMatricula());
+            }
+            redirect.addFlashAttribute("succes", "Vehicle desat correctament.");
+        } catch (IllegalArgumentException e) {
+            model.addAttribute("error", e.getMessage());
+            model.addAttribute("matriculaOriginal", matriculaOriginal);
+            return "vehicles/editarVehicle";
+        }
+
         return "redirect:/dashboard/vehicles";
-        
     }
 
     @PostMapping("/canviar-estat/{matricula}")
@@ -149,7 +188,7 @@ public class VehiclesController {
             
             redirect.addFlashAttribute("succes", "L'estat del vehicle s'ha actualitzat correctament.");
         } catch (Exception e) {
-              log.error("Error canviant l'estat del vehicle {}", matricula, e);
+            log.error("Error canviant l'estat del vehicle {}", matricula, e);
             redirect.addFlashAttribute("error", "Error en canviar l'estat del vehicle.");
         }
         return "redirect:/dashboard/vehicles";
@@ -165,7 +204,7 @@ public class VehiclesController {
             log.warn("No s'ha pogut eliminar el vehicle {}: {}", matricula, e.getMessage());
             redirect.addFlashAttribute("error", e.getMessage());
         } catch (Exception e) {
-             log.error("Error eliminant el vehicle {}", matricula, e);
+            log.error("Error eliminant el vehicle {}", matricula, e);
             redirect.addFlashAttribute("error", "Error en intentar eliminar el vehicle.");
         }
         return "redirect:/dashboard/vehicles";

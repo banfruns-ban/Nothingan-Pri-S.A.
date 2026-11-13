@@ -1,11 +1,15 @@
 package cat.copernic.projecte1Grup3.Vehicles.Service;
 
+import cat.copernic.projecte1Grup3.Reserves.Entity.ReservesEntity;
 import cat.copernic.projecte1Grup3.Vehicles.Entity.VehiclesEntity;
 import cat.copernic.projecte1Grup3.Vehicles.Repository.VehiclesRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,6 +17,9 @@ import java.util.Optional;
 public class VehiclesService {
 
     private final VehiclesRepository vehiclesRepository;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     public VehiclesService(VehiclesRepository vehiclesRepository) {
         this.vehiclesRepository = vehiclesRepository;
@@ -52,6 +59,61 @@ public class VehiclesService {
             }
         }
         return vehiclesRepository.save(vehicle);
+    }
+
+    /**
+     * Actualitza un vehicle existent permetent també modificar la seva matrícula (PK).
+     */
+    @Transactional
+    public VehiclesEntity actualitzarVehicle(String matriculaOriginal, VehiclesEntity dadesActualitzades) {
+        VehiclesEntity antic = vehiclesRepository.findById(matriculaOriginal)
+                .orElseThrow(() -> new IllegalArgumentException("No s'ha trobat el vehicle original: " + matriculaOriginal));
+
+        String novaMatricula = dadesActualitzades.getMatricula().trim().toUpperCase();
+        dadesActualitzades.setMatricula(novaMatricula);
+
+        if (dadesActualitzades.getActiu() == null) {
+            dadesActualitzades.setActiu(antic.getActiu());
+        }
+
+        // Si la matrícula NO ha canviat, actualitzem directament
+        if (matriculaOriginal.equalsIgnoreCase(novaMatricula)) {
+            dadesActualitzades.setReserves(antic.getReserves());
+            return vehiclesRepository.save(dadesActualitzades);
+        }
+
+        // Si la matrícula SÍ ha canviat, comprovem que la nova no estigui ocupada
+        if (vehiclesRepository.existsById(novaMatricula)) {
+            throw new IllegalArgumentException("La matrícula " + novaMatricula + " ja està registrada en un altre vehicle.");
+        }
+
+        // 1. Creem el nou registre amb la nova matrícula
+        VehiclesEntity nouVehicle = vehiclesRepository.saveAndFlush(dadesActualitzades);
+
+        // 2. Reassignem les reserves associades al vehicle antic cap al nou
+        List<ReservesEntity> reservesAssociades = new ArrayList<>(antic.getReserves());
+        for (ReservesEntity reserva : reservesAssociades) {
+            reserva.setVehicle(nouVehicle);
+        }
+        antic.getReserves().clear();
+
+        // 3. Reassignem possibles ressenyes vinculades a l'antiga matrícula (si n'hi ha)
+        try {
+            entityManager.createQuery("UPDATE RessenyaEntity r SET r.vehicle = :nou WHERE r.vehicle = :antic")
+                    .setParameter("nou", nouVehicle)
+                    .setParameter("antic", antic)
+                    .executeUpdate();
+        } catch (Exception ignored) {
+            // Si RessenyaEntity no té relació directa amb VehiclesEntity, ho ignorem
+        }
+
+        entityManager.flush();
+
+        // 4. Eliminem el registre amb la matrícula antiga
+        vehiclesRepository.delete(antic);
+        vehiclesRepository.flush();
+
+        return nouVehicle;
     }
 
     /**

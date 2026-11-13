@@ -99,6 +99,7 @@ public class ClientService {
                     "El DNI ha de tenir 8 xifres i una lletra al final (o ser un NIE vàlid)");
         }
         client.setDni(dni);
+        client.setTelefon(validaTelefon(client.getTelefon()));
 
         if (clientRepository.existsById(dni)) {
             throw new IllegalArgumentException("Ja existeix un client amb aquest DNI");
@@ -111,11 +112,11 @@ public class ClientService {
         if (!hiHa(fotoDniFrontal) || !hiHa(fotoDniPosterior) || !hiHa(fotoCarnet)) {
             throw new IllegalArgumentException("Cal pujar les 3 imatges (PNG o JPG, màxim 5MB)");
         }
-        
+
         if (client.getDataCaducitatCarnet() == null || client.getDataCaducitatCarnet().isBefore(LocalDate.now())) {
             throw new IllegalArgumentException("El carnet de conduir no pot estar caducat");
         }
-        
+
         validaImatge(fotoDniFrontal);
         validaImatge(fotoDniPosterior);
         validaImatge(fotoCarnet);
@@ -168,6 +169,8 @@ public class ClientService {
             throw new IllegalArgumentException("Aquest correu ja està en ús per un altre client");
         }
 
+        String telefon = validaTelefon(dades.getTelefon());
+
         validaImatge(fotoDniFrontal);
         validaImatge(fotoDniPosterior);
         validaImatge(fotoCarnet);
@@ -177,7 +180,7 @@ public class ClientService {
         if (dades.getPassword() != null && !dades.getPassword().isBlank()) {
             c.setPassword(passwordEncoder.encode(dades.getPassword()));
         }
-        c.setTelefon(dades.getTelefon());
+        c.setTelefon(telefon);
         c.setNacionalitat(dades.getNacionalitat());
         c.setAdreca(dades.getAdreca());
         c.setTipusLlicencia(dades.getTipusLlicencia());
@@ -235,6 +238,8 @@ public class ClientService {
             throw new IllegalArgumentException("Aquest correu ja està en ús per un altre client");
         }
 
+        String telefon = validaTelefon(dades.getTelefon());
+
         c.setNom(dades.getNom());
         c.setEmail(nouEmail);
         if (dades.getPassword() != null && !dades.getPassword().isBlank()) {
@@ -243,7 +248,7 @@ public class ClientService {
             }
             c.setPassword(passwordEncoder.encode(dades.getPassword()));
         }
-        c.setTelefon(dades.getTelefon());
+        c.setTelefon(telefon);
         c.setNacionalitat(dades.getNacionalitat());
         c.setAdreca(dades.getAdreca());
         c.setTipusLlicencia(dades.getTipusLlicencia());
@@ -261,6 +266,15 @@ public class ClientService {
 
     private boolean hiHa(MultipartFile f) {
         return f != null && !f.isEmpty();
+    }
+
+
+    private String validaTelefon(String telefon) {
+        String t = telefon == null ? "" : telefon.replaceAll("\\s+", "");
+        if (!t.matches("^[0-9]{9}$")) {
+            throw new IllegalArgumentException("El telèfon no es valit");
+        }
+        return t;
     }
 
     private void validaImatge(MultipartFile f) {
@@ -295,7 +309,7 @@ public class ClientService {
         }
         ClientEntity c = clientRepository.findById(dni)
                 .orElseThrow(() -> new IllegalArgumentException("Client no trobat"));
-        
+
         c.setEstatValidacio(estat);
         clientRepository.save(c);
     }

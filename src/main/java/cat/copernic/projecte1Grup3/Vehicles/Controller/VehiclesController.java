@@ -1,15 +1,20 @@
 package cat.copernic.projecte1Grup3.Vehicles.Controller;
 
+import java.beans.PropertyEditorSupport;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -28,7 +33,6 @@ import cat.copernic.projecte1Grup3.Ressenya.Service.RessenyaService;
 import cat.copernic.projecte1Grup3.Vehicles.Entity.VehiclesEntity;
 import cat.copernic.projecte1Grup3.Vehicles.Service.VehiclesService;
 import jakarta.validation.Valid;
-import java.beans.PropertyEditorSupport;
 
 @Controller
 @RequestMapping("/dashboard/vehicles")
@@ -43,7 +47,6 @@ public class VehiclesController {
         this.ressenyaLogic = ressenyaLogic; 
     }
 
-    // Normalitza la matrícula a majúscules i sense espais abans de validar el @Pattern
     @InitBinder
     public void initBinder(WebDataBinder binder) {
         binder.registerCustomEditor(String.class, "matricula", new PropertyEditorSupport() {
@@ -56,17 +59,52 @@ public class VehiclesController {
 
     @GetMapping
     public String llistarVehicles(
-            @RequestParam(name = "cerca", required = false) String cerca,
+            @RequestParam(name = "matricula", required = false) String matricula,
+            @RequestParam(name = "marca", required = false) String marca,
+            @RequestParam(name = "model", required = false) String modelVehicle,
+            @RequestParam(name = "anyMatriculacio", required = false) Integer anyMatriculacio,
             @RequestParam(name = "tipus", required = false) String tipus,
             @RequestParam(name = "estat", required = false) Boolean estat,
+            @RequestParam(name = "dataInici", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataInici,
+            @RequestParam(name = "dataFi", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataFi,
             Model model) {
-        
-        List<VehiclesEntity> vehicles = vehiclesService.filtrarVehicles(cerca, tipus, estat);
+
+        LocalDateTime iniciDT = null;
+        LocalDateTime fiDT = null;
+
+        if (dataInici != null && dataFi != null && dataInici.isAfter(dataFi)) {
+            model.addAttribute("error", "La data mínima de disponibilitat no pot ser posterior a la data màxima.");
+        } else {
+            iniciDT = (dataInici != null) ? dataInici.atStartOfDay() : null;
+            fiDT = (dataFi != null) ? dataFi.atTime(LocalTime.MAX) : null;
+        }
+
+        List<VehiclesEntity> vehicles = vehiclesService.filtrarVehicles(
+                matricula, marca, modelVehicle, anyMatriculacio, tipus, estat, iniciDT, fiDT);
+
+        boolean teFiltresAvancats = (marca != null && !marca.isBlank()) ||
+                                    (modelVehicle != null && !modelVehicle.isBlank()) ||
+                                    anyMatriculacio != null ||
+                                    dataInici != null ||
+                                    dataFi != null;
+
+        boolean teAlgunFiltre = teFiltresAvancats ||
+                                (matricula != null && !matricula.isBlank()) ||
+                                (tipus != null && !tipus.isBlank()) ||
+                                estat != null;
+
         model.addAttribute("vehicles", vehicles);
-        model.addAttribute("cerca", cerca);
+        model.addAttribute("matricula", matricula);
+        model.addAttribute("marca", marca);
+        model.addAttribute("modelVehicle", modelVehicle);
+        model.addAttribute("anyMatriculacio", anyMatriculacio);
         model.addAttribute("tipus", tipus);
         model.addAttribute("estat", estat);
-        
+        model.addAttribute("dataInici", dataInici);
+        model.addAttribute("dataFi", dataFi);
+        model.addAttribute("teFiltresAvancats", teFiltresAvancats);
+        model.addAttribute("teAlgunFiltre", teAlgunFiltre);
+
         return "vehicles/llistat";
     }
 
@@ -114,7 +152,6 @@ public class VehiclesController {
                 ? vehiclesService.buscarPerMatricula(matriculaOriginal)
                 : Optional.empty();
 
-        // Validar duplicats de matrícula
         if (vehicle.getMatricula() != null && !vehicle.getMatricula().isBlank()) {
             if (!esEdicio) {
                 if (vehiclesService.buscarPerMatricula(vehicle.getMatricula()).isPresent()) {
@@ -141,7 +178,6 @@ public class VehiclesController {
             return "vehicles/altaVehicle";
         }
 
-        // Gestió de la foto
         if (file != null && !file.isEmpty()) {
             try {
                 String fileName = vehicle.getMatricula() + "_" + file.getOriginalFilename();

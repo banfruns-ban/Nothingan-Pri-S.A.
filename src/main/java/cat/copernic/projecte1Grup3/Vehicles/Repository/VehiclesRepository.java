@@ -15,32 +15,44 @@ import java.util.List;
 @Repository
 public interface VehiclesRepository extends JpaRepository<VehiclesEntity, String> {
 
-    /**
-     * Retorna la llista de vehicles filtrats per l'estat d'activació.
-     */
     List<VehiclesEntity> findByActiu(Boolean actiu);
 
     /**
-     * Cerca de vehicles per text (matrícula, marca o model), tipus (categoria) i estat actiu.
+     * RF45: Filtrat combinat per matrícula, marca, model, any de matriculació,
+     * categoria (tipus), estat (actiu/inactiu) i disponibilitat entre data mínima i màxima.
      */
     @Query("SELECT v FROM VehiclesEntity v WHERE " +
-           "(:cerca IS NULL OR :cerca = '' OR " +
-           "LOWER(v.matricula) LIKE LOWER(CONCAT('%', :cerca, '%')) OR " +
-           "LOWER(v.marca) LIKE LOWER(CONCAT('%', :cerca, '%')) OR " +
-           "LOWER(v.model) LIKE LOWER(CONCAT('%', :cerca, '%'))) " +
+           "(:matricula IS NULL OR :matricula = '' OR LOWER(v.matricula) LIKE LOWER(CONCAT('%', :matricula, '%'))) " +
+           "AND (:marca IS NULL OR :marca = '' OR LOWER(v.marca) LIKE LOWER(CONCAT('%', :marca, '%'))) " +
+           "AND (:model IS NULL OR :model = '' OR LOWER(v.model) LIKE LOWER(CONCAT('%', :model, '%'))) " +
+           "AND (:anyMatriculacio IS NULL OR v.anyMatriculacio = :anyMatriculacio) " +
            "AND (:tipus IS NULL OR :tipus = '' OR v.tipusVehicle = :tipus) " +
-           "AND (:actiu IS NULL OR v.actiu = :actiu)")
+           "AND (:actiu IS NULL OR v.actiu = :actiu) " +
+           "AND (" +
+           "   (:dataInici IS NULL AND :dataFi IS NULL) OR (" +
+           "       v.actiu = true AND v.estat = 'DISPONIBLE' AND v.matricula NOT IN (" +
+           "           SELECT r.vehicle.matricula FROM ReservesEntity r " +
+           "           WHERE r.estat NOT IN ('CANCELADA', 'ANULLADA', 'FINALITZADA') " +
+           "           AND (:dataFi IS NULL OR CAST(r.dataInici AS timestamp) < :dataFi) " +
+           "           AND (:dataInici IS NULL OR CAST(r.dataFi AS timestamp) > :dataInici)" +
+           "       )" +
+           "   )" +
+           ")")
     List<VehiclesEntity> filtrarVehicles(
-            @Param("cerca") String cerca, 
-            @Param("tipus") String tipus, 
-            @Param("actiu") Boolean actiu);
+            @Param("matricula") String matricula,
+            @Param("marca") String marca,
+            @Param("model") String model,
+            @Param("anyMatriculacio") Integer anyMatriculacio,
+            @Param("tipus") String tipus,
+            @Param("actiu") Boolean actiu,
+            @Param("dataInici") LocalDateTime dataInici,
+            @Param("dataFi") LocalDateTime dataFi);
 
     List<VehiclesEntity> findByActiuTrue();
     List<VehiclesEntity> findByActiuTrueAndTipusVehicle(String tipusVehicle);
 
     /**
-     * Cerca els vehicles actius disponibles excloent aquells que tenen reserves solapades.
-     * Si no s'especifiquen dates, la subconsulta s'omple i no s'exclou cap vehicle per reserva.
+     * Cerca els vehicles actius disponibles excloent aquells que tenen reserves solapades (Catàleg públic).
      */
     @Query("SELECT v FROM VehiclesEntity v WHERE v.actiu = true " +
            "AND (:tipus IS NULL OR :tipus = '' OR v.tipusVehicle = :tipus) " +

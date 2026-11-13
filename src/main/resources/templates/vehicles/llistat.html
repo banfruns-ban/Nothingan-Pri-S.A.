@@ -64,47 +64,101 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
 
-        <!-- Targeta de Filtres -->
+        <!-- Targeta de Filtres (RF45) -->
         <div class="filter-card shadow-sm">
-            <form th:action="@{/dashboard/vehicles}" method="get" class="row g-3 align-items-end">
+            <form th:action="@{/dashboard/vehicles}" method="get">
                 
-                <div class="col-md-5">
-                    <label for="cerca">Cerca per model o matrícula</label>
-                    <input type="text" id="cerca" name="cerca" class="form-control" 
-                           placeholder="Ex. Toyota Yaris..." 
-                           th:value="${cerca}">
+                <!-- Fila principal -->
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-3">
+                        <label for="matricula" class="form-label">Matrícula</label>
+                        <input type="text" id="matricula" name="matricula" class="form-control text-uppercase" 
+                               placeholder="Ex. 1234ABC" 
+                               th:value="${matricula}">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label for="tipus" class="form-label">Categoria</label>
+                        <select id="tipus" name="tipus" class="form-select">
+                            <option value="" th:selected="${tipus == null or tipus.isBlank()}">Tots els tipus</option>
+                            <option value="Turisme" th:selected="${tipus == 'Turisme'}">Turisme</option>
+                            <option value="Furgoneta" th:selected="${tipus == 'Furgoneta'}">Furgoneta</option>
+                            <option value="SUV" th:selected="${tipus == 'SUV'}">SUV</option>
+                            <option value="Motocicleta" th:selected="${tipus == 'Motocicleta'}">Motocicleta</option>
+                            <option value="Elèctric" th:selected="${tipus == 'Elèctric'}">Elèctric</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label for="estat" class="form-label">Estat</label>
+                        <select id="estat" name="estat" class="form-select">
+                            <option value="" th:selected="${estat == null}">Tots</option>
+                            <option value="true" th:selected="${estat == true}">Actius</option>
+                            <option value="false" th:selected="${estat == false}">Inactius</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4 d-flex gap-2 justify-content-end">
+                        <button type="button" 
+                                class="btn btn-outline-secondary fw-semibold" 
+                                data-bs-toggle="collapse" 
+                                data-bs-target="#filtresAvancats" 
+                                th:aria-expanded="${teFiltresAvancats}"
+                                aria-controls="filtresAvancats">
+                            <i class="fa-solid fa-sliders me-1"></i> Més filtres
+                        </button>
+
+                        <button type="submit" class="btn btn-primary fw-semibold px-3" title="Filtrar">
+                            <i class="fa-solid fa-filter me-1"></i> Filtrar
+                        </button>
+
+                        <a th:if="${teAlgunFiltre}" 
+                           th:href="@{/dashboard/vehicles}"
+                           class="btn btn-outline-danger" 
+                           title="Netejar tots els filtres">
+                            <i class="fa-solid fa-xmark"></i>
+                        </a>
+                    </div>
                 </div>
 
-                <div class="col-md-3">
-                    <label for="tipus">Categoria</label>
-                    <select id="tipus" name="tipus" class="form-select">
-                        <option value="" th:selected="${tipus == null or tipus.isBlank()}">Tots els tipus</option>
-                        <option value="Turisme" th:selected="${tipus == 'Turisme'}">Turisme</option>
-                        <option value="Furgoneta" th:selected="${tipus == 'Furgoneta'}">Furgoneta</option>
-                        <option value="SUV" th:selected="${tipus == 'SUV'}">SUV</option>
-                        <option value="Motocicleta" th:selected="${tipus == 'Motocicleta'}">Motocicleta</option>
-                    </select>
-                </div>
+                <!-- Desplegable de Filtres Avançats (Marca, Model, Any, Disponibilitat per dates) -->
+                <div class="collapse mt-3 pt-3 border-top" 
+                     id="filtresAvancats" 
+                     th:classappend="${teFiltresAvancats ? 'show' : ''}">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label for="marca" class="form-label">Marca</label>
+                            <input type="text" id="marca" name="marca" class="form-control" 
+                                   placeholder="Ex. Toyota, Seat..." 
+                                   th:value="${marca}">
+                        </div>
 
-                <div class="col-md-3">
-                    <label for="estat">Estat</label>
-                    <select id="estat" name="estat" class="form-select">
-                        <option value="" th:selected="${estat == null}">Actius i Inactius</option>
-                        <option value="true" th:selected="${estat == true}">Actius</option>
-                        <option value="false" th:selected="${estat == false}">Inactius</option>
-                    </select>
-                </div>
+                        <div class="col-md-3">
+                            <label for="model" class="form-label">Model</label>
+                            <input type="text" id="model" name="model" class="form-control" 
+                                   placeholder="Ex. Yaris, Ibiza..." 
+                                   th:value="${modelVehicle}">
+                        </div>
 
-                <div class="col-md-1 d-flex gap-1">
-                    <button type="submit" class="btn btn-primary w-100" title="Filtrar">
-                        <i class="fa-solid fa-filter"></i>
-                    </button>
-                    <a th:if="${(cerca != null and !#strings.isEmpty(cerca)) or (tipus != null and !#strings.isEmpty(tipus)) or estat != null}" 
-                       th:href="@{/dashboard/vehicles}"
-                       class="btn btn-outline-danger" 
-                       title="Netejar filtre">
-                        <i class="fa-solid fa-xmark"></i>
-                    </a>
+                        <div class="col-md-2">
+                            <label for="anyMatriculacio" class="form-label">Any matrícula</label>
+                            <input type="number" id="anyMatriculacio" name="anyMatriculacio" class="form-control" 
+                                   min="1900" max="2100" placeholder="Ex. 2024" 
+                                   th:value="${anyMatriculacio}">
+                        </div>
+
+                        <div class="col-md-2">
+                            <label for="dataInici" class="form-label">Disponible des de</label>
+                            <input type="date" id="dataInici" name="dataInici" class="form-control" 
+                                   th:value="${dataInici}">
+                        </div>
+
+                        <div class="col-md-2">
+                            <label for="dataFi" class="form-label">Disponible fins a</label>
+                            <input type="date" id="dataFi" name="dataFi" class="form-control" 
+                                   th:value="${dataFi}">
+                        </div>
+                    </div>
                 </div>
 
             </form>
@@ -177,7 +231,7 @@
                     
                     <tr th:if="${#lists.isEmpty(vehicles)}">
                         <td colspan="9" class="text-center py-4 text-muted">
-                            No s'han trobat vehicles que coincideixin amb el filtre seleccionat.
+                            No s'han trobat vehicles que coincideixin amb els criteris de cerca seleccionats.
                         </td>
                     </tr>
                 </tbody>

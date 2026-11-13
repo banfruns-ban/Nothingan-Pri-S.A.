@@ -39,6 +39,8 @@
         <!-- Avisos d'error -->
         <div th:if="${error}" class="alert-error">
             <i class="fa-solid fa-triangle-exclamation"></i> <span th:text="${error}">Error</span>
+            <br>
+            <small>Les teves dades s'han conservat, però has de tornar a escriure la contrasenya i a adjuntar les tres fotos.</small>
         </div>
 
         <form th:action="@{/registre}" th:object="${client}" method="post" enctype="multipart/form-data" class="form-grid">
@@ -95,7 +97,7 @@
             <div class="form-grup">
                 <label>Tipus de llicència *</label>
                 <select th:field="*{tipusLlicencia}" required>
-                    <option value="" disabled selected>Selecciona un tipus</option>
+                    <option value="" th:selected="${client.tipusLlicencia == null or client.tipusLlicencia == ''}" disabled>Selecciona un tipus</option>
                     <option value="B">B (Automòbils)</option>
                     <option value="A">A (Motocicletes)</option>
                     <option value="C">C (Camions)</option>

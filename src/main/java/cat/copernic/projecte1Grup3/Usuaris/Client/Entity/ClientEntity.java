@@ -6,17 +6,18 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import java.time.LocalDate;
 import org.springframework.format.annotation.DateTimeFormat;
 
 @Entity // Marca la clase como entidad persistente de JPA
 @Table(name = "Clients") // Asocia esta entidad con la tabla "Clients" en la base de datos MySQL
 @PrimaryKeyJoinColumn(
-    name = "DNI",
-    referencedColumnName = "dni"
+        name = "DNI",
+        referencedColumnName = "dni"
 ) // Mapeo de herencia: comparte la clave primaria 'dni' con la entidad padre usuariEntity
 public class ClientEntity extends UsuariEntity {
-    
+
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     @Column(name = "data_caducitat_DNI", nullable = false)
     private LocalDate dataCaducitatDNI;
@@ -29,9 +30,9 @@ public class ClientEntity extends UsuariEntity {
 
     @Column(name = "tipus_llicencia", nullable = false)
     private String tipusLlicencia;
-    
+
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-    @Column(name = "data_caducitat_carnet",nullable = false)
+    @Column(name = "data_caducitat_carnet", nullable = false)
     private LocalDate dataCaducitatCarnet;
 
     @Column(name = "premium", nullable = false)
@@ -44,11 +45,27 @@ public class ClientEntity extends UsuariEntity {
     @Column(name = "telefon")
     private String telefon;
 
+    @Column(name = "poblacio")
+    private String poblacio;
+
+    // Només es guarden els 4 últims dígits de la targeta
+    @Column(name = "targeta_ultims4", length = 4)
+    private String targetaUltims4;
+
+    // Format yyyy-MM
+    @Column(name = "targeta_caducitat", length = 7)
+    private String targetaCaducitat;
+
+    // Només per rebre dades del formulari: NO es guarden a la base de dades
+    @Transient
+    private String numTargeta;
+
+    @Transient
+    private String cvv;
+
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-    @Column(name = "data_naixement",nullable = false)
+    @Column(name = "data_naixement", nullable = false)
     private LocalDate dataNaixement;
-    
-    
 
     @Column(name = "data_registre")
     private LocalDate dataRegistre;
@@ -68,14 +85,14 @@ public class ClientEntity extends UsuariEntity {
 
     // Constructor completo que inicializa también la superclase (usuariEntity)
     public ClientEntity(LocalDate dataCaducitatDNI,
-                        String nacionalitat,
-                        String adreca,
-                        String tipusLlicencia,
-                        boolean premium,
-                        String estatValidacio,
-                        String dni,
-                        String nom,
-                        String email) {
+            String nacionalitat,
+            String adreca,
+            String tipusLlicencia,
+            boolean premium,
+            String estatValidacio,
+            String dni,
+            String nom,
+            String email) {
 
         super(dni, nom, email);
 
@@ -88,33 +105,123 @@ public class ClientEntity extends UsuariEntity {
     }
 
     // Getters y Setters
-    public LocalDate getDataCaducitatDNI() { return dataCaducitatDNI; }
-    public void setDataCaducitatDNI(LocalDate dataCaducitatDNI) { this.dataCaducitatDNI = dataCaducitatDNI; }
+    public LocalDate getDataCaducitatDNI() {
+        return dataCaducitatDNI;
+    }
 
-    public String getNacionalitat() { return nacionalitat; }
-    public void setNacionalitat(String nacionalitat) { this.nacionalitat = nacionalitat; }
+    public void setDataCaducitatDNI(LocalDate dataCaducitatDNI) {
+        this.dataCaducitatDNI = dataCaducitatDNI;
+    }
 
-    public String getAdreca() { return adreca; }
-    public void setAdreca(String adreca) { this.adreca = adreca; }
+    public String getNacionalitat() {
+        return nacionalitat;
+    }
 
-    public String getTipusLlicencia() { return tipusLlicencia; }
-    public void setTipusLlicencia(String tipusLlicencia) { this.tipusLlicencia = tipusLlicencia; }
+    public void setNacionalitat(String nacionalitat) {
+        this.nacionalitat = nacionalitat;
+    }
 
-    public boolean isPremium() { return premium; }
-    public void setPremium(boolean premium) { this.premium = premium; }
+    public String getAdreca() {
+        return adreca;
+    }
 
-    public String getEstatValidacio() { return estatValidacio; }
-    public void setEstatValidacio(String estatValidacio) { this.estatValidacio = estatValidacio; }
+    public void setAdreca(String adreca) {
+        this.adreca = adreca;
+    }
 
-    public String getTelefon() { return telefon; }
-    public void setTelefon(String telefon) { this.telefon = telefon; }
+    public String getTipusLlicencia() {
+        return tipusLlicencia;
+    }
 
-    public LocalDate getDataNaixement() { return dataNaixement; }
-    public void setDataNaixement(LocalDate dataNaixement) { this.dataNaixement = dataNaixement; }
+    public void setTipusLlicencia(String tipusLlicencia) {
+        this.tipusLlicencia = tipusLlicencia;
+    }
 
-    public LocalDate getDataRegistre() { return dataRegistre; }
-    public void setDataRegistre(LocalDate dataRegistre) { this.dataRegistre = dataRegistre; }
-    
-    public LocalDate getDataCaducitatCarnet() { return dataCaducitatCarnet; }
-    public void setDataCaducitatCarnet(LocalDate dataCaducitatCarnet) { this.dataCaducitatCarnet = dataCaducitatCarnet; }
+    public boolean isPremium() {
+        return premium;
+    }
+
+    public void setPremium(boolean premium) {
+        this.premium = premium;
+    }
+
+    public String getEstatValidacio() {
+        return estatValidacio;
+    }
+
+    public void setEstatValidacio(String estatValidacio) {
+        this.estatValidacio = estatValidacio;
+    }
+
+    public String getTelefon() {
+        return telefon;
+    }
+
+    public void setTelefon(String telefon) {
+        this.telefon = telefon;
+    }
+
+    public String getPoblacio() {
+        return poblacio;
+    }
+
+    public void setPoblacio(String poblacio) {
+        this.poblacio = poblacio;
+    }
+
+    public String getTargetaUltims4() {
+        return targetaUltims4;
+    }
+
+    public void setTargetaUltims4(String targetaUltims4) {
+        this.targetaUltims4 = targetaUltims4;
+    }
+
+    public String getTargetaCaducitat() {
+        return targetaCaducitat;
+    }
+
+    public void setTargetaCaducitat(String targetaCaducitat) {
+        this.targetaCaducitat = targetaCaducitat;
+    }
+
+    public String getNumTargeta() {
+        return numTargeta;
+    }
+
+    public void setNumTargeta(String numTargeta) {
+        this.numTargeta = numTargeta;
+    }
+
+    public String getCvv() {
+        return cvv;
+    }
+
+    public void setCvv(String cvv) {
+        this.cvv = cvv;
+    }
+
+    public LocalDate getDataNaixement() {
+        return dataNaixement;
+    }
+
+    public void setDataNaixement(LocalDate dataNaixement) {
+        this.dataNaixement = dataNaixement;
+    }
+
+    public LocalDate getDataRegistre() {
+        return dataRegistre;
+    }
+
+    public void setDataRegistre(LocalDate dataRegistre) {
+        this.dataRegistre = dataRegistre;
+    }
+
+    public LocalDate getDataCaducitatCarnet() {
+        return dataCaducitatCarnet;
+    }
+
+    public void setDataCaducitatCarnet(LocalDate dataCaducitatCarnet) {
+        this.dataCaducitatCarnet = dataCaducitatCarnet;
+    }
 }

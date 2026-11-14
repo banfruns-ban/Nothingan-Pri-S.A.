@@ -61,7 +61,10 @@ public class ClientController {
             error = "No s'ha pogut completar el registre";
         }
 
+        // Mai es retorna la contrasenya ni les dades de la targeta
         client.setPassword(null);
+        client.setNumTargeta(null);
+        client.setCvv(null);
         model.addAttribute("error", error);
         return "client/altaUsuari";
     }
@@ -69,22 +72,26 @@ public class ClientController {
     // =====================================================
     // LISTADO Y DETALLE
     // =====================================================
-    @GetMapping("/dashboard/clients")
-    public String llistar(@RequestParam(required = false) String nacionalitat,
-            @RequestParam(required = false) String nom,
-            @RequestParam(required = false) String telefon,
-            @RequestParam(required = false) String ciutat,
-            @RequestParam(required = false) String dni,
-            Model model) {
-        model.addAttribute("clients",
-                clientLogic.filtrarClients(nacionalitat, nom, telefon, ciutat, dni));
-        model.addAttribute("nacionalitat", nacionalitat);
-        model.addAttribute("nom", nom);
-        model.addAttribute("telefon", telefon);
-        model.addAttribute("ciutat", ciutat);
-        model.addAttribute("dni", dni);
-        return "client/llistaClients";
-    }
+   @GetMapping("/dashboard/clients")
+public String llistar(@RequestParam(required = false) String nacionalitat,
+        @RequestParam(required = false) String nom,
+        @RequestParam(required = false) String telefon,
+        @RequestParam(required = false) String ciutat,
+        @RequestParam(required = false) String dni,
+        @RequestParam(required = false) String poblacio,
+        @RequestParam(required = false) String email,
+        Model model) {
+    model.addAttribute("clients",
+            clientLogic.filtrarClients(nacionalitat, nom, telefon, ciutat, dni, poblacio, email));
+    model.addAttribute("nacionalitat", nacionalitat);
+    model.addAttribute("nom", nom);
+    model.addAttribute("telefon", telefon);
+    model.addAttribute("ciutat", ciutat);
+    model.addAttribute("dni", dni);
+    model.addAttribute("poblacio", poblacio);
+    model.addAttribute("email", email);
+    return "client/llistaClients";
+}
 
     @GetMapping({"/dashboard/clients/{dni}", "/dashboard/clients/detall/{dni}"})
     public String detall(@PathVariable String dni, Model model, RedirectAttributes ra) {
@@ -222,24 +229,24 @@ public class ClientController {
             @RequestParam("fotoDniPosterior") MultipartFile fotoDniPosterior,
             @RequestParam("fotoCarnet") MultipartFile fotoCarnet,
             RedirectAttributes ra) {
+        String error;
         try {
             clientLogic.alta(client, fotoDniFrontal, fotoDniPosterior, fotoCarnet);
             ra.addFlashAttribute("missatge", "Sol·licitud de registre enviada amb èxit! L'administrador ha de validar el teu compte.");
             return "redirect:/cataleg";
         } catch (IllegalArgumentException e) {
-            client.setPassword(null);
-            ra.addFlashAttribute("client", client);
-            ra.addFlashAttribute("error", e.getMessage());
+            error = e.getMessage();
         } catch (Exception e) {
             log.error("Error en el registre del client extern", e);
-            client.setPassword(null);
-            ra.addFlashAttribute("client", client);
-            ra.addFlashAttribute("error", "No s'ha pogut completar el registre. Revisa que les dades i fitxers siguin correctes.");
+            error = "No s'ha pogut completar el registre. Revisa que les dades i fitxers siguin correctes.";
         }
 
-        // Conservem les dades escrites (mai la contrasenya)
+        // Conservem les dades escrites (mai la contrasenya ni la targeta)
         client.setPassword(null);
+        client.setNumTargeta(null);
+        client.setCvv(null);
         ra.addFlashAttribute("client", client);
+        ra.addFlashAttribute("error", error);
         return "redirect:/registre";
     }
 

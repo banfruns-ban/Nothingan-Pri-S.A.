@@ -6,6 +6,7 @@ import cat.copernic.projecte1Grup3.Usuaris.Client.Documents.ClientDocuments;
 import cat.copernic.projecte1Grup3.Usuaris.Client.Entity.ClientEntity;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,48 +85,53 @@ public class ClientService {
         return clients;
     }
 
-    public List<ClientEntity> filtrarClients(String nacionalitat, String nom, String telefon,
-                                             String ciutat, String dni) {
-        List<ClientEntity> clients = clientRepository.findAll();
+public List<ClientEntity> filtrarClients(String nacionalitat, String nom, String telefon,
+                                         String ciutat, String dni,
+                                         String poblacio, String email) {
+    List<ClientEntity> clients = clientRepository.findAll();
 
-        if (nacionalitat != null && !nacionalitat.isBlank()) {
-            String filtre = nacionalitat.trim().toLowerCase();
-            clients = clients.stream()
-                    .filter(c -> conte(c.getNacionalitat(), filtre))
-                    .toList();
-        }
-
-        if (nom != null && !nom.isBlank()) {
-            String filtre = nom.trim().toLowerCase();
-            clients = clients.stream()
-                    .filter(c -> conte(c.getNom(), filtre))
-                    .toList();
-        }
-
-        if (telefon != null && !telefon.isBlank()) {
-            String filtre = telefon.replaceAll("\\s+", "");
-            clients = clients.stream()
-                    .filter(c -> c.getTelefon() != null
-                            && c.getTelefon().replaceAll("\\s+", "").contains(filtre))
-                    .toList();
-        }
-
-        if (ciutat != null && !ciutat.isBlank()) {
-            String filtre = ciutat.trim().toLowerCase();
-            clients = clients.stream()
-                    .filter(c -> conte(c.getAdreca(), filtre))
-                    .toList();
-        }
-
-        if (dni != null && !dni.isBlank()) {
-            String filtre = dni.trim().toLowerCase();
-            clients = clients.stream()
-                    .filter(c -> conte(c.getDni(), filtre))
-                    .toList();
-        }
-
-        return clients;
+    if (nacionalitat != null && !nacionalitat.isBlank()) {
+        String filtre = nacionalitat.trim().toLowerCase();
+        clients = clients.stream().filter(c -> conte(c.getNacionalitat(), filtre)).toList();
     }
+
+    if (nom != null && !nom.isBlank()) {
+        String filtre = nom.trim().toLowerCase();
+        clients = clients.stream().filter(c -> conte(c.getNom(), filtre)).toList();
+    }
+
+    if (telefon != null && !telefon.isBlank()) {
+        String filtre = telefon.replaceAll("\\s+", "");
+        clients = clients.stream()
+                .filter(c -> c.getTelefon() != null
+                        && c.getTelefon().replaceAll("\\s+", "").contains(filtre))
+                .toList();
+    }
+
+    if (ciutat != null && !ciutat.isBlank()) {
+        String filtre = ciutat.trim().toLowerCase();
+        clients = clients.stream()
+                .filter(c -> conte(c.getPoblacio(), filtre) || conte(c.getAdreca(), filtre))
+                .toList();
+    }
+
+    if (poblacio != null && !poblacio.isBlank()) {
+        String filtre = poblacio.trim().toLowerCase();
+        clients = clients.stream().filter(c -> conte(c.getPoblacio(), filtre)).toList();
+    }
+
+    if (email != null && !email.isBlank()) {
+        String filtre = email.trim().toLowerCase();
+        clients = clients.stream().filter(c -> conte(c.getEmail(), filtre)).toList();
+    }
+
+    if (dni != null && !dni.isBlank()) {
+        String filtre = dni.trim().toLowerCase();
+        clients = clients.stream().filter(c -> conte(c.getDni(), filtre)).toList();
+    }
+
+    return clients;
+}
 
     private boolean conte(String valor, String text) {
         return valor != null && valor.toLowerCase().contains(text);
@@ -144,6 +150,11 @@ public class ClientService {
         client.setDni(dni);
         client.setTelefon(validaTelefon(client.getTelefon()));
 
+        if (client.getPoblacio() == null || client.getPoblacio().isBlank()) {
+            throw new IllegalArgumentException("Cal indicar la població");
+        }
+        client.setPoblacio(client.getPoblacio().trim());
+
         if (clientRepository.existsById(dni)) {
             throw new IllegalArgumentException("Ja existeix un client amb aquest DNI");
         }
@@ -151,7 +162,6 @@ public class ClientService {
         if (password == null || password.length() < 8) {
             throw new IllegalArgumentException("La contrasenya ha de tenir com a mínim 8 caràcters");
         }
-        client.setPassword(passwordEncoder.encode(password));
         if (!hiHa(fotoDniFrontal) || !hiHa(fotoDniPosterior) || !hiHa(fotoCarnet)) {
             throw new IllegalArgumentException("Cal pujar les 3 imatges (PNG o JPG, màxim 5MB)");
         }
@@ -164,24 +174,22 @@ public class ClientService {
         validaImatge(fotoDniPosterior);
         validaImatge(fotoCarnet);
 
+        // Valida la targeta i descarta número complet i CVV (només queden els 4 últims dígits)
+        validaTargeta(client);
+
+        client.setPassword(passwordEncoder.encode(password));
         client.setPremium(false);
         client.setEstatValidacio(PENDENT);
         clientRepository.saveAndFlush(client);
 
         ClientDocuments doc = new ClientDocuments();
         doc.setDni(dni);
-        if (hiHa(fotoDniFrontal)) {
-            doc.setFotoDniFrontal(fotoDniFrontal.getBytes());
-            doc.setTipusFotoDniFrontal(fotoDniFrontal.getContentType());
-        }
-        if (hiHa(fotoDniPosterior)) {
-            doc.setFotoDniPosterior(fotoDniPosterior.getBytes());
-            doc.setTipusFotoDniPosterior(fotoDniPosterior.getContentType());
-        }
-        if (hiHa(fotoCarnet)) {
-            doc.setFotoCarnet(fotoCarnet.getBytes());
-            doc.setTipusFotoCarnet(fotoCarnet.getContentType());
-        }
+        doc.setFotoDniFrontal(fotoDniFrontal.getBytes());
+        doc.setTipusFotoDniFrontal(fotoDniFrontal.getContentType());
+        doc.setFotoDniPosterior(fotoDniPosterior.getBytes());
+        doc.setTipusFotoDniPosterior(fotoDniPosterior.getContentType());
+        doc.setFotoCarnet(fotoCarnet.getBytes());
+        doc.setTipusFotoCarnet(fotoCarnet.getContentType());
         clientRepositoryMongo.save(doc);
         log.info("Client donat d'alta: {}", dni);
     }
@@ -226,6 +234,9 @@ public class ClientService {
         c.setTelefon(telefon);
         c.setNacionalitat(dades.getNacionalitat());
         c.setAdreca(dades.getAdreca());
+        if (dades.getPoblacio() != null && !dades.getPoblacio().isBlank()) {
+            c.setPoblacio(dades.getPoblacio().trim());
+        }
         c.setTipusLlicencia(dades.getTipusLlicencia());
 
         if (dades.getDataNaixement() != null) {
@@ -294,6 +305,9 @@ public class ClientService {
         c.setTelefon(telefon);
         c.setNacionalitat(dades.getNacionalitat());
         c.setAdreca(dades.getAdreca());
+        if (dades.getPoblacio() != null && !dades.getPoblacio().isBlank()) {
+            c.setPoblacio(dades.getPoblacio().trim());
+        }
         c.setTipusLlicencia(dades.getTipusLlicencia());
 
         if (dades.getDataNaixement() != null) {
@@ -311,13 +325,55 @@ public class ClientService {
         return f != null && !f.isEmpty();
     }
 
-
+    // El telèfon ha de tenir exactament 9 xifres (s'ignoren els espais)
     private String validaTelefon(String telefon) {
         String t = telefon == null ? "" : telefon.replaceAll("\\s+", "");
         if (!t.matches("^[0-9]{9}$")) {
-            throw new IllegalArgumentException("El telèfon no es valit");
+            throw new IllegalArgumentException("El telèfon ha de tenir exactament 9 xifres");
         }
         return t;
+    }
+
+    // Valida la targeta; només es conserven els 4 últims dígits i la caducitat
+    private void validaTargeta(ClientEntity c) {
+        String num = c.getNumTargeta() == null ? "" : c.getNumTargeta().replaceAll("[\\s-]", "");
+        if (!num.matches("^[0-9]{13,19}$") || !luhn(num)) {
+            throw new IllegalArgumentException("El número de targeta no és vàlid");
+        }
+        String cvv = c.getCvv() == null ? "" : c.getCvv().trim();
+        if (!cvv.matches("^[0-9]{3,4}$")) {
+            throw new IllegalArgumentException("El codi de seguretat ha de tenir 3 o 4 xifres");
+        }
+        YearMonth cad;
+        try {
+            cad = YearMonth.parse(c.getTargetaCaducitat());
+        } catch (Exception e) {
+            throw new IllegalArgumentException("La data de caducitat de la targeta no és vàlida");
+        }
+        if (cad.isBefore(YearMonth.now())) {
+            throw new IllegalArgumentException("La targeta està caducada");
+        }
+        c.setTargetaUltims4(num.substring(num.length() - 4));
+        c.setNumTargeta(null);
+        c.setCvv(null);
+    }
+
+    // Algoritme de Luhn: comprova que el número de targeta és matemàticament coherent
+    private boolean luhn(String num) {
+        int suma = 0;
+        boolean doble = false;
+        for (int i = num.length() - 1; i >= 0; i--) {
+            int d = num.charAt(i) - '0';
+            if (doble) {
+                d *= 2;
+                if (d > 9) {
+                    d -= 9;
+                }
+            }
+            suma += d;
+            doble = !doble;
+        }
+        return suma % 10 == 0;
     }
 
     private void validaImatge(MultipartFile f) {

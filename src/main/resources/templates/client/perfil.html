@@ -115,8 +115,13 @@
             </div>
 
             <div class="form-grup">
-                <label>Telèfon</label>
-                <input type="tel" th:field="*{telefon}">
+                <label>Telèfon *</label>
+                <input type="tel" th:field="*{telefon}" required
+                       maxlength="9" minlength="9" inputmode="numeric"
+                       pattern="[0-9]{9}"
+                       title="Introdueix exactament 9 xifres, sense espais ni lletres"
+                       placeholder="Ex: 612345678"
+                       oninput="this.value = this.value.replace(/[^0-9]/g, '')">
             </div>
 
             <div class="form-grup">
@@ -138,7 +143,8 @@
 
             <div class="form-grup">
                 <label>Nova contrasenya <small style="color: #64748b;">(Deixar en blanc per mantenir l'actual)</small></label>
-                <input type="password" name="password" placeholder="Mínim 8 caràcters">
+                <input type="password" name="password" placeholder="Mínim 8 caràcters"
+                       minlength="8" autocomplete="new-password">
             </div>
 
             <div class="form-grup full-width" style="margin-top: 16px; display: flex; gap: 12px; justify-content: flex-end;">

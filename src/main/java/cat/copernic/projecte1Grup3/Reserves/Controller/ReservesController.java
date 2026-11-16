@@ -3,6 +3,7 @@ package cat.copernic.projecte1Grup3.Reserves.Controller;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -185,19 +186,31 @@ public class ReservesController {
             return "redirect:/dashboard";
         }
         model.addAttribute("reserva", r);
+        model.addAttribute("dataAvui", LocalDate.now());
+        model.addAttribute("horaAvui", LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm")));
         return "reserves/lliurarReserva";
     }
 
-    // POST: Confirmar lliurament amb recepció d'imatges
+    // POST: Confirmar lliurament amb data, hora i recepció d'imatges (G3P1-240)
     @PostMapping("/dashboard/reserves/{codi}/lliurar")
     public String processarLliurament(@PathVariable Long codi,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataLliurament,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime horaLliurament,
             @RequestParam(required = false, defaultValue = "14850") Integer kmInicials,
             @RequestParam(required = false, defaultValue = "100%") String nivellCombustible,
             @RequestParam(required = false) String observacions,
             @RequestParam(value = "fotos", required = false) MultipartFile[] fotos,
             RedirectAttributes ra) {
         try {
-            reservesLogic.lliurar(codi, LocalDate.now(), LocalTime.now(), kmInicials, nivellCombustible, observacions, fotos);
+            reservesLogic.lliurar(
+                    codi,
+                    dataLliurament != null ? dataLliurament : LocalDate.now(),
+                    horaLliurament != null ? horaLliurament : LocalTime.now(),
+                    kmInicials,
+                    nivellCombustible,
+                    observacions,
+                    fotos
+            );
             ra.addFlashAttribute("succes", "Reserva #" + codi + " lliurada correctament. Estat canviat a EN_CURS.");
         } catch (IllegalArgumentException e) {
             ra.addFlashAttribute("error", e.getMessage());
@@ -223,7 +236,7 @@ public class ReservesController {
         }
         model.addAttribute("reserva", r);
         model.addAttribute("dataAvui", LocalDate.now());
-        model.addAttribute("horaAvui", LocalTime.now());
+        model.addAttribute("horaAvui", LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm")));
         return "reserves/retornarReserva";
     }
 
@@ -240,21 +253,51 @@ public class ReservesController {
         return "reserves/detallReserva";
     }
 
-    // POST: Confirmar retorn i liquidació de fiança amb recepció d'imatges
+    // POST: Confirmar retorn i liquidació de fiança amb data, hora i fotos addicionals il·limitades (G3P1-238 / G3P1-239)
     @PostMapping("/dashboard/reserves/{codi}/retornar")
     public String processarRetorn(
             @PathVariable Long codi,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataRetorn,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime horaRetorn,
+            @RequestParam(required = false) Integer kmRetorn,
+            @RequestParam(required = false) String nivellCombustible,
             @RequestParam(defaultValue = "false") boolean teDesperfectes,
             @RequestParam(defaultValue = "false") boolean desperfectesImputables,
             @RequestParam(required = false, defaultValue = "0") BigDecimal gravetat,
             @RequestParam(required = false, defaultValue = "0") BigDecimal deduccioCarburant,
             @RequestParam(required = false) String observacions,
             @RequestParam(value = "fotos", required = false) MultipartFile[] fotos,
+            @RequestParam(value = "fotosAddicionals", required = false) MultipartFile[] fotosAddicionals,
+            @RequestParam(value = "titolsFotosAddicionals", required = false) String[] titolsFotosAddicionals,
+            @RequestParam(value = "descripcionsFotosAddicionals", required = false) String[] descripcionsFotosAddicionals,
             RedirectAttributes ra) {
         try {
-            reservesLogic.retornar(codi, dataRetorn, horaRetorn, teDesperfectes, desperfectesImputables, gravetat, deduccioCarburant, observacions, fotos);
+            boolean hiHaDanys = teDesperfectes || (gravetat != null && gravetat.compareTo(BigDecimal.ZERO) > 0);
+            StringBuilder obsCompletes = new StringBuilder();
+            if (kmRetorn != null) {
+                obsCompletes.append("Km retorn: ").append(kmRetorn).append(" km. ");
+            }
+            if (nivellCombustible != null && !nivellCombustible.isBlank()) {
+                obsCompletes.append("Combustible retorn: ").append(nivellCombustible.trim()).append(". ");
+            }
+            if (observacions != null && !observacions.isBlank()) {
+                obsCompletes.append(observacions.trim());
+            }
+
+            reservesLogic.retornar(
+                    codi,
+                    dataRetorn,
+                    horaRetorn,
+                    hiHaDanys,
+                    desperfectesImputables,
+                    gravetat,
+                    deduccioCarburant,
+                    obsCompletes.toString(),
+                    fotos,
+                    fotosAddicionals,
+                    titolsFotosAddicionals,
+                    descripcionsFotosAddicionals
+            );
             ra.addFlashAttribute("succes", "Vehicle de la reserva #" + codi + " retornat correctament i contracte tancat (FINALITZADA).");
         } catch (IllegalArgumentException e) {
             ra.addFlashAttribute("error", e.getMessage());

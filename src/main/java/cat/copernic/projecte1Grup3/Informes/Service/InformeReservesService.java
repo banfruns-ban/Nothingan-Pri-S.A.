@@ -1,3 +1,7 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package cat.copernic.projecte1Grup3.Informes.Service;
 
 import java.math.BigDecimal;
@@ -17,12 +21,22 @@ import cat.copernic.projecte1Grup3.Informes.Entity.InformeReserves;
 import cat.copernic.projecte1Grup3.Informes.Entity.InformeReservesFila;
 import cat.copernic.projecte1Grup3.Informes.Repository.HistoricReservaRepository;
 
+/**
+ * Servei de lògica de negoci per generar l'informe històric de reserves:
+ * Consulta la col·lecció històrica de MongoDB, valida els filtres per DNI i
+ * ordena els resultats per client i data. Calcula els totals agregats de
+ * reserves vigents, l'import econòmic acumulat i el recompte de cancel·lacions.
+ *
+ * @author Grup3
+ */
 @Service
 public class InformeReservesService {
 
     private static final Logger log = LoggerFactory.getLogger(InformeReservesService.class);
 
-    /** Per client i, dins de cada client, la reserva més recent primer. */
+    /**
+     * Per client i, dins de cada client, la reserva més recent primer.
+     */
     private static final Sort ORDRE = Sort.by(
             Sort.Order.asc("clientNom"),
             Sort.Order.asc("clientDni"),
@@ -30,23 +44,29 @@ public class InformeReservesService {
 
     private static final Pattern FORMAT_DNI = Pattern.compile("^[A-Za-z0-9]{5,15}$");
 
-    /** Estats que no compten als totals. */
-    private static final EnumSet<EstatHistoric> NO_COMPTABLES =
-        EnumSet.of(EstatHistoric.CANCELADA, EstatHistoric.ELIMINADA);
+    /**
+     * Estats que no compten als totals.
+     */
+    private static final EnumSet<EstatHistoric> NO_COMPTABLES
+            = EnumSet.of(EstatHistoric.CANCELADA, EstatHistoric.ELIMINADA);
 
     private final HistoricReservaRepository repo;
 
+    /**
+     * Injecció del repositori de l'històric de reserves: Inicialitza el servei
+     * rebent HistoricReservaRepository per consultar els documents històrics
+     * desats a MongoDB.
+     */
     public InformeReservesService(HistoricReservaRepository repo) {
         this.repo = repo;
     }
 
     /**
-     * Genera l'informe de reserves de l'històric.
-     *
-     * @param dnis DNIs dels clients a filtrar; si és null o buit, tots els clients
-     * @return l'informe amb les files ordenades i els totals
-     * @throws IllegalArgumentException si algun DNI té un format invàlid
-     * @throws InformeException si falla l'accés a l'històric
+     * Genera l'informe complet de reserves a partir de l'històric: Valida la
+     * llista de DNIs rebuts, recupera els registres de MongoDB ordenats i els
+     * transforma en files formatades. Calcula el recompte de reserves vigents,
+     * la suma total dels imports (excloent anul·lades/eliminades) i el total de
+     * cancel·lades.
      */
     public InformeReserves generarInforme(List<String> dnis) throws InformeException {
         List<String> filtre = validarDnis(dnis);
@@ -79,7 +99,12 @@ public class InformeReservesService {
         return new InformeReserves(files, vigents.size(), preuTotal, totalAnullades);
     }
 
-    /** Neteja i valida els DNIs rebuts. Retorna llista buida si no hi ha filtre. */
+    /**
+     * Neteja i valida el format dels DNIs rebuts com a filtre: Elimina valors
+     * buits o duplicats, normalitza el text en majúscules i comprova que
+     * compleixin l'expressió regular. Llença una IllegalArgumentException si
+     * detecta algun identificador amb format invàlid.
+     */
     private List<String> validarDnis(List<String> dnis) {
         if (dnis == null) {
             return List.of();
@@ -97,6 +122,12 @@ public class InformeReservesService {
         return nets;
     }
 
+    /**
+     * Converteix un document HistoricReserva en una fila per a l'informe:
+     * Concatena les dades del vehicle (matrícula, marca i model) i del client
+     * (nom i DNI) en cadenes llegibles. Retorna un registre immutable
+     * InformeReservesFila llest per renderitzar a la taula de la vista.
+     */
     private InformeReservesFila aFila(HistoricReserva h) {
         return new InformeReservesFila(
                 h.getDataReserva(),

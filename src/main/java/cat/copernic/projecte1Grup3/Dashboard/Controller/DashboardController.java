@@ -1,3 +1,7 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package cat.copernic.projecte1Grup3.Dashboard.Controller;
 
 // --- Importaciones para manejo de estructuras de datos en JSON y API REST ---
@@ -14,8 +18,12 @@ import cat.copernic.projecte1Grup3.Usuaris.Client.Service.ClientService;
 import cat.copernic.projecte1Grup3.Vehicles.Service.VehiclesService;
 
 /**
- * Controlador para la gestión del Dashboard principal. Incluye renderizado
- * tradicional HTML y un endpoint REST para actualización en tiempo real.
+ * Controlador principal del Dashboard de gestió: Gestiona tant la càrrega
+ * inicial de la vista HTML com l'endpoint API REST per actualitzar les
+ * estadístiques en temps real. Recopila els indicadors clau (KPIs) i els
+ * propers lliuraments des dels serveis de reserves, clients i vehicles.
+ *
+ * @author Grup3
  */
 @Controller
 public class DashboardController {
@@ -25,7 +33,12 @@ public class DashboardController {
     private final ClientService clientLogic;
     private final VehiclesService vehiclesLogic;
 
-    // Inyección de dependencias por constructor
+    /**
+     * Injecció de dependències dels serveis del Dashboard: Inicialitza el
+     * controlador rebent les instàncies de ReservesService, ClientService i
+     * VehiclesService. Permet consultar els comptadors i llistats necessaris
+     * per alimentar el panell de control.
+     */
     public DashboardController(ReservesService reservesLogic,
             ClientService clientLogic,
             VehiclesService vehiclesLogic) {
@@ -38,7 +51,10 @@ public class DashboardController {
     // CARGA INICIAL DE LA PÁGINA (GET /dashboard)
     // ============================================================
     /**
-     * Muestra la vista principal del Dashboard con la carga estática inicial.
+     * Càrrega inicial de la vista principal del Dashboard: Calcula els
+     * comptadors globals de lliuraments pendents, retorns, vehicles actius i
+     * clients registrats. Afegeix aquestes dades i els propers lliuraments al
+     * model per renderitzar la plantilla HTML.
      */
     @GetMapping({"/dashboard"})
     public String mostrarDashboard(Model model) {
@@ -62,11 +78,11 @@ public class DashboardController {
     // ENDPOINT API PARA TIEMPO REAL (GET /dashboard/api/stats)
     // ============================================================
     /**
-     * Endpoint API invocado por JavaScript (Polling) en segundo plano. Ubicado
-     * dentro de /dashboard/api/stats para estar protegido bajo las reglas de
-     * acceso de /dashboard/** en SecurityConfig.
-     *
-     * @return Map con los KPIs actualizados y el listado de entregas activas.
+     * Endpoint API per actualitzar les estadístiques del Dashboard en temps
+     * real: Recopila els KPIs actualitzats i transforma els propers lliuraments
+     * en una estructura JSON lleugera amb dates formatades. Retorna el mapa de
+     * dades en format JSON perquè el JavaScript de la vista (Polling)
+     * l'actualitzi sense recarregar la pàgina.
      */
     @GetMapping("/dashboard/api/stats")
     @ResponseBody

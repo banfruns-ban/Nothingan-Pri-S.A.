@@ -1,3 +1,7 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package cat.copernic.projecte1Grup3.Reserves.Controller;
 
 import java.util.Optional;
@@ -22,6 +26,15 @@ import cat.copernic.projecte1Grup3.Usuaris.Client.Service.ClientService;
 import cat.copernic.projecte1Grup3.Vehicles.Entity.VehiclesEntity;
 import cat.copernic.projecte1Grup3.Vehicles.Service.VehiclesService;
 
+/**
+ * Controlador per a la creació i gestió de reserves des de l'àrea de client:
+ * Gestiona les peticions sota la ruta "/reserves-client" per mostrar el
+ * formulari de reserva i processar el seu guardat. Valida l'autenticació,
+ * l'estat de validació del client, la disponibilitat del vehicle i l'aplicació
+ * d'avantatges prèmium.
+ *
+ * @author Grup3
+ */
 @Controller
 @RequestMapping("/reserves-client")
 public class Reserves {
@@ -32,10 +45,15 @@ public class Reserves {
     private final ReservesClientService reservesClientService;
     private final RessenyaService ressenyaService;
 
+    /**
+     * Injecció de dependències dels serveis de reserves, vehicles, clients i
+     * ressenyes: Inicialitza el controlador rebent tots els serveis necessaris
+     * per validar el client, carregar el vehicle i registrar la reserva.
+     */
     @Autowired
     public Reserves(ReservesService reservesService, VehiclesService vehiclesService,
-                    ClientService clientService, ReservesClientService reservesClientService,
-                    RessenyaService ressenyaService) {
+            ClientService clientService, ReservesClientService reservesClientService,
+            RessenyaService ressenyaService) {
         this.reservesService = reservesService;
         this.vehiclesService = vehiclesService;
         this.clientService = clientService;
@@ -43,6 +61,12 @@ public class Reserves {
         this.ressenyaService = ressenyaService;
     }
 
+    /**
+     * Mostra el formulari de creació d'una nova reserva per al client: Comprova
+     * que l'usuari estigui autenticat i que el seu compte no estigui pendent de
+     * validació. Carrega les dades del vehicle seleccionat, les seves ressenyes
+     * i l'indicador d'usuari prèmium abans de mostrar la vista.
+     */
     // GET /reserves-client/nova
     @GetMapping("/nova")
     public String formulariNovaReserva(
@@ -89,6 +113,13 @@ public class Reserves {
         return "reserves/crearReservaClient";
     }
 
+    /**
+     * Processa i desa una nova reserva realitzada pel client: Verifica la
+     * sessió activa, recupera l'entitat del client autenticat i delega a
+     * ReservesService la creació de la reserva. Redirigeix al llistat de
+     * reserves si tot va bé, o torna al formulari conservant les dades en cas
+     * d'error.
+     */
     // POST /reserves-client/guardar
     @PostMapping("/guardar")
     public String guardarReservaClient(

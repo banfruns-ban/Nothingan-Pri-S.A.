@@ -86,13 +86,14 @@ class VehiclesServiceTest {
     }
 
     @Test
-    @DisplayName("Comprovar que canviarEstatActiu modifica correctament l'estat del vehicle")
-    void testCanviarEstatActiu() {
+    @DisplayName("Comprovar que desactivarVehicle marca el vehicle com a inactiu")
+    void testDesactivarVehicle() {
         when(vehiclesRepository.findById("1234ABC")).thenReturn(Optional.of(vehicleExemple));
 
-        vehiclesService.canviarEstatActiu("1234ABC", false);
+        vehiclesService.desactivarVehicle("1234ABC", null);
 
         assertFalse(vehicleExemple.getActiu());
+        assertEquals("EN MANTENIMENT", vehicleExemple.getEstat());
         verify(vehiclesRepository, times(1)).save(vehicleExemple);
     }
 }

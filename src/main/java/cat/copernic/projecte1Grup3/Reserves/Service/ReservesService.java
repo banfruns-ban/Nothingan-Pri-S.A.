@@ -551,10 +551,14 @@ public class ReservesService {
     }
 
     // ============================================================
-    // MÈTODE PER ANUL·LAR UNA RESERVA DES DE LA VISTA DE CLIENT
+    // MÈTODE PER ANUL·LAR UNA RESERVA DES DEL PANELL D'AGENT
     // ============================================================
     @Transactional
-    public void anularReserva(Long codiReserva) {
+    public void anularReserva(Long codiReserva, String motiu) {
+        if (motiu == null || motiu.isBlank()) {
+            throw new IllegalArgumentException("Cal indicar el motiu de l'anul·lació.");
+        }
+
         ReservesEntity r = reservesRepository.findById(codiReserva)
                 .orElseThrow(() -> new IllegalArgumentException("Reserva no trobada: #" + codiReserva));
 
@@ -563,7 +567,9 @@ public class ReservesService {
         }
 
         r.setEstat(CANCELADA);
-        reservesRepository.save(r);
+        r.setAnulacioMotiu(motiu.trim());
+        ReservesEntity guardada = reservesRepository.save(r);
+        historicService.desar(guardada, EstatHistoric.CANCELADA);
         log.info("Reserva #{} anul·lada correctament.", codiReserva);
     }
 

@@ -64,6 +64,9 @@ public class ReservesEntity {
     @Column(name = "observacions", columnDefinition = "TEXT")
     private String observacions;
 
+    @Column(name = "anulacio_motiu", columnDefinition = "TEXT")
+    private String anulacioMotiu;
+
     public ReservesEntity() {
     }
 
@@ -194,5 +197,13 @@ public class ReservesEntity {
 
     public void setObservacions(String observacions) {
         this.observacions = observacions;
+    }
+
+    public String getAnulacioMotiu() {
+        return anulacioMotiu;
+    }
+
+    public void setAnulacioMotiu(String anulacioMotiu) {
+        this.anulacioMotiu = anulacioMotiu;
     }
 }

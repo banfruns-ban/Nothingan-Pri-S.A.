@@ -47,12 +47,12 @@
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
                             <label for="nom">Nom complet</label>
-                            <input type="text" id="nom" th:field="*{nom}" class="form-control" placeholder="Ex: Joan Garcia i Soler">
+                            <input type="text" id="nom" th:field="*{nom}" class="form-control" placeholder="Ex: Joan Garcia i Soler" minlength="2" maxlength="50" required>
                             <span class="text-danger small" th:if="${#fields.hasErrors('nom')}" th:errors="*{nom}"></span>
                         </div>
                         <div class="col-md-6">
                             <label for="dni">Número d'identificació (DNI / NIE)</label>
-                            <input type="text" id="dni" th:field="*{dni}" th:readonly="${esEdicio}" class="form-control" placeholder="Ex: 12345678Z" maxlength="9">
+                            <input type="text" id="dni" th:field="*{dni}" th:readonly="${esEdicio}" class="form-control" placeholder="Ex: 12345678Z" maxlength="9" required>
                             <span class="text-danger small" th:if="${#fields.hasErrors('dni')}" th:errors="*{dni}"></span>
                         </div>
                     </div>
@@ -60,12 +60,12 @@
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
                             <label for="email">Adreça electrònica corporativa</label>
-                            <input type="email" id="email" th:field="*{email}" class="form-control" placeholder="Ex: empleat@nothingan.com">
+                            <input type="email" id="email" th:field="*{email}" class="form-control" placeholder="Ex: empleat@nothingan.com" required>
                             <span class="text-danger small" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></span>
                         </div>
                         <div class="col-md-6">
                             <label for="password">Contrasenya d'accés</label>
-                            <input type="password" id="password" th:field="*{password}" class="form-control" placeholder="Mínim 8 caràcters">
+                            <input type="password" id="password" th:field="*{password}" class="form-control" placeholder="Mínim 8 caràcters" minlength="8" th:required="${!esEdicio}">
                             <span class="text-danger small" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></span>
                         </div>
                     </div>
@@ -75,7 +75,7 @@
                             <label for="dataNaixement">Data de naixement</label>
                             <input type="date" id="dataNaixement" th:field="*{dataNaixement}"
                                    th:max="${#temporals.format(#temporals.createToday().minusYears(18), 'yyyy-MM-dd')}"
-                                   class="form-control">
+                                   class="form-control" required>
                             <span class="text-danger small" th:if="${#fields.hasErrors('dataNaixement')}" th:errors="*{dataNaixement}"></span>
                         </div>
                     </div>
@@ -92,19 +92,19 @@
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
                             <label for="hora_entrada">Hora d'entrada prevista</label>
-                            <input type="time" id="hora_entrada" th:field="*{hora_entrada}" class="form-control">
+                            <input type="time" id="hora_entrada" th:field="*{hora_entrada}" class="form-control" required>
                             <span class="text-danger small" th:if="${#fields.hasErrors('hora_entrada')}" th:errors="*{hora_entrada}"></span>
                         </div>
                         <div class="col-md-6">
                             <label for="hora_sortida">Hora de sortida prevista</label>
-                            <input type="time" id="hora_sortida" th:field="*{hora_sortida}" class="form-control">
+                            <input type="time" id="hora_sortida" th:field="*{hora_sortida}" class="form-control" required>
                             <span class="text-danger small" th:if="${#fields.hasErrors('hora_sortida')}" th:errors="*{hora_sortida}"></span>
                         </div>
                     </div>
 
                     <div class="mb-4">
                         <label for="rol">Rol al sistema</label>
-                        <select id="rol" th:field="*{rol}" class="form-select">
+                        <select id="rol" th:field="*{rol}" class="form-select" required>
                             <option value="">-- Selecciona un rol --</option>
                             <option value="AGENT">Agent (Gestió de clients i vehicles)</option>
                             <option value="ADMIN">Administrador (Accés total)</option>

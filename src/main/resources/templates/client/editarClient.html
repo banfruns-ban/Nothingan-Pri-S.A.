@@ -79,7 +79,7 @@
 
                         <div class="col-md-6">
                             <label class="form-label">Adreça</label>
-                            <input type="text" th:field="*{adreca}" class="form-control">
+                            <input type="text" th:field="*{adreca}" class="form-control" required>
                         </div>
 
                         <div class="col-md-6">
@@ -89,21 +89,14 @@
 
                         <div class="col-md-6">
                             <label class="form-label">Nacionalitat</label>
-                            <input type="text" th:field="*{nacionalitat}" class="form-control">
+                            <input type="text" th:field="*{nacionalitat}" class="form-control" required>
                         </div>
-                    </div>
 
                     <h5 class="fw-bold text-primary mb-3 border-bottom pb-2">Permís de conduir</h5>
                     <div class="row g-3 mb-4">
                         <div class="col-md-6">
                             <label class="form-label">Tipus de llicència</label>
-                            <select th:field="*{tipusLlicencia}" class="form-select" required>
-                                <option value="B">B (Automòbils)</option>
-                                <option value="A">A (Motocicletes)</option>
-                                <option value="C">C (Camions)</option>
-                                <option th:if="${client.tipusLlicencia != null and client.tipusLlicencia != 'A' and client.tipusLlicencia != 'B' and client.tipusLlicencia != 'C'}"
-                                        th:value="${client.tipusLlicencia}" th:text="${client.tipusLlicencia}"></option>
-                            </select>
+                            <input type="text" th:field="*{tipusLlicencia}" class="form-control">
                         </div>
 
                         <div class="col-md-6">

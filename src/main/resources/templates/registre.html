@@ -40,7 +40,7 @@
             <div th:if="${error}" class="alert-error">
                 <i class="fa-solid fa-triangle-exclamation"></i> <span th:text="${error}">Error</span>
                 <br>
-                <small>Les teves dades s'han conservat, però has de tornar a escriure la contrasenya i a adjuntar les tres fotos.</small>
+                <small>Les teves dades s'han conservat, però has de tornar a escriure la contrasenya, les dades de la targeta i a adjuntar les tres fotos.</small>
             </div>
 
             <form th:action="@{/registre}" th:object="${client}" method="post" enctype="multipart/form-data" class="form-grid">
@@ -49,12 +49,13 @@
 
                 <div class="form-grup full-width">
                     <label>Nom complet (com figura al DNI) *</label>
-                    <input type="text" th:field="*{nom}" required>
+                    <input type="text" th:field="*{nom}" placeholder="Ex: Joan Garcia i Soler" required>
                 </div>
 
                 <div class="form-grup">
                     <label>DNI / NIE / Passaport *</label>
-                    <input type="text" th:field="*{dni}" required>
+                    <input type="text" th:field="*{dni}" placeholder="Ex: 12345678Z" maxlength="9" required
+                           oninput="this.value = this.value.toUpperCase()">
                 </div>
 
                 <div class="form-grup">
@@ -64,12 +65,12 @@
 
                 <div class="form-grup">
                     <label>Adreça electrònica *</label>
-                    <input type="email" th:field="*{email}" required>
+                    <input type="email" th:field="*{email}" placeholder="Ex: joan@gmail.com" required>
                 </div>
 
                 <div class="form-grup">
                     <label>Contrasenya per al portal *</label>
-                    <input type="password" th:field="*{password}" minlength="8" required>
+                    <input type="password" th:field="*{password}" placeholder="Mínim 8 caràcters" minlength="8" required>
                 </div>
 
                 <div class="form-grup">
@@ -89,12 +90,17 @@
 
                 <div class="form-grup">
                     <label>Nacionalitat *</label>
-                    <input type="text" th:field="*{nacionalitat}" required>
+                    <input type="text" th:field="*{nacionalitat}" placeholder="Ex: Espanyola" required>
                 </div>
 
-                <div class="form-grup full-width">
+                <div class="form-grup">
                     <label>Adreça completa *</label>
-                    <input type="text" th:field="*{adreca}" required>
+                    <input type="text" th:field="*{adreca}" placeholder="Ex: Carrer Major 12, Terrassa" required>
+                </div>
+
+                <div class="form-grup">
+                    <label>Població *</label>
+                    <input type="text" th:field="*{poblacio}" placeholder="Ex: Terrassa" required>
                 </div>
 
                 <div class="seccio-títol">2. Permís de conduir</div>
@@ -129,6 +135,37 @@
                 <div class="form-grup full-width">
                     <label>Foto Carnet de Conduir *</label>
                     <input type="file" name="fotoCarnet" accept="image/png, image/jpeg" required>
+                </div>
+
+                <div class="seccio-títol">4. Targeta de crèdit</div>
+
+                <div class="form-grup full-width">
+                    <label>Número de targeta *</label>
+                    <input type="text" name="numTargeta" required
+                           inputmode="numeric" maxlength="19" autocomplete="off"
+                           placeholder="Ex: 4111111111111111"
+                           oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                </div>
+
+                <div class="form-grup">
+                    <label>Data de caducitat (MM/AA) *</label>
+                    <input type="text" name="targetaCaducitat" required
+                           inputmode="numeric" maxlength="5" autocomplete="off"
+                           placeholder="MM/AA"
+                           pattern="(0[1-9]|1[0-2])/[0-9]{2}"
+                           title="Format MM/AA, per exemple 09/28"
+                           oninput="
+                           let v = this.value.replace(/[^0-9]/g, '').slice(0, 4);
+                           if (v.length >= 3) v = v.slice(0, 2) + '/' + v.slice(2);
+                           this.value = v;">
+                </div>
+
+                <div class="form-grup">
+                    <label>Codi de seguretat (CVV) *</label>
+                    <input type="password" name="cvv" required
+                           inputmode="numeric" maxlength="4" minlength="3" autocomplete="off"
+                           placeholder="3 o 4 xifres"
+                           oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                 </div>
 
                 <div class="form-grup full-width">

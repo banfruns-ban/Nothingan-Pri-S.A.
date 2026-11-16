@@ -85,62 +85,72 @@ public class ClientService {
         return clients;
     }
 
-public List<ClientEntity> filtrarClients(String nacionalitat, String nom, String telefon,
-                                         String ciutat, String dni,
-                                         String poblacio, String email) {
-    List<ClientEntity> clients = clientRepository.findAll();
+    public List<ClientEntity> filtrarClients(String nacionalitat, String nom, String telefon,
+                                             String ciutat, String dni,
+                                             String poblacio, String email) {
+        List<ClientEntity> clients = clientRepository.findAll();
 
-    if (nacionalitat != null && !nacionalitat.isBlank()) {
-        String filtre = nacionalitat.trim().toLowerCase();
-        clients = clients.stream().filter(c -> conte(c.getNacionalitat(), filtre)).toList();
+        if (nacionalitat != null && !nacionalitat.isBlank()) {
+            String filtre = nacionalitat.trim().toLowerCase();
+            clients = clients.stream().filter(c -> conte(c.getNacionalitat(), filtre)).toList();
+        }
+
+        if (nom != null && !nom.isBlank()) {
+            String filtre = nom.trim().toLowerCase();
+            clients = clients.stream().filter(c -> conte(c.getNom(), filtre)).toList();
+        }
+
+        if (telefon != null && !telefon.isBlank()) {
+            String filtre = telefon.replaceAll("\\s+", "");
+            clients = clients.stream()
+                    .filter(c -> c.getTelefon() != null
+                            && c.getTelefon().replaceAll("\\s+", "").contains(filtre))
+                    .toList();
+        }
+
+        if (ciutat != null && !ciutat.isBlank()) {
+            String filtre = ciutat.trim().toLowerCase();
+            clients = clients.stream()
+                    .filter(c -> conte(c.getPoblacio(), filtre) || conte(c.getAdreca(), filtre))
+                    .toList();
+        }
+
+        if (poblacio != null && !poblacio.isBlank()) {
+            String filtre = poblacio.trim().toLowerCase();
+            clients = clients.stream().filter(c -> conte(c.getPoblacio(), filtre)).toList();
+        }
+
+        if (email != null && !email.isBlank()) {
+            String filtre = email.trim().toLowerCase();
+            clients = clients.stream().filter(c -> conte(c.getEmail(), filtre)).toList();
+        }
+
+        if (dni != null && !dni.isBlank()) {
+            String filtre = dni.trim().toLowerCase();
+            clients = clients.stream().filter(c -> conte(c.getDni(), filtre)).toList();
+        }
+
+        return clients;
     }
-
-    if (nom != null && !nom.isBlank()) {
-        String filtre = nom.trim().toLowerCase();
-        clients = clients.stream().filter(c -> conte(c.getNom(), filtre)).toList();
-    }
-
-    if (telefon != null && !telefon.isBlank()) {
-        String filtre = telefon.replaceAll("\\s+", "");
-        clients = clients.stream()
-                .filter(c -> c.getTelefon() != null
-                        && c.getTelefon().replaceAll("\\s+", "").contains(filtre))
-                .toList();
-    }
-
-    if (ciutat != null && !ciutat.isBlank()) {
-        String filtre = ciutat.trim().toLowerCase();
-        clients = clients.stream()
-                .filter(c -> conte(c.getPoblacio(), filtre) || conte(c.getAdreca(), filtre))
-                .toList();
-    }
-
-    if (poblacio != null && !poblacio.isBlank()) {
-        String filtre = poblacio.trim().toLowerCase();
-        clients = clients.stream().filter(c -> conte(c.getPoblacio(), filtre)).toList();
-    }
-
-    if (email != null && !email.isBlank()) {
-        String filtre = email.trim().toLowerCase();
-        clients = clients.stream().filter(c -> conte(c.getEmail(), filtre)).toList();
-    }
-
-    if (dni != null && !dni.isBlank()) {
-        String filtre = dni.trim().toLowerCase();
-        clients = clients.stream().filter(c -> conte(c.getDni(), filtre)).toList();
-    }
-
-    return clients;
-}
 
     private boolean conte(String valor, String text) {
         return valor != null && valor.toLowerCase().contains(text);
     }
 
     // ---------- ALTA DE CLIENT (Doble Persistència) ----------
+
+    // Alta des del portal (registre del propi client): queda PENDENT
     @Transactional(rollbackFor = Exception.class)
     public void alta(ClientEntity client, MultipartFile fotoDniFrontal,
                      MultipartFile fotoDniPosterior, MultipartFile fotoCarnet) throws IOException {
+        alta(client, fotoDniFrontal, fotoDniPosterior, fotoCarnet, false);
+    }
+
+    // Alta amb indicador de qui la fa: si la crea el personal (agent/admin), queda VALIDAT
+    @Transactional(rollbackFor = Exception.class)
+    public void alta(ClientEntity client, MultipartFile fotoDniFrontal,
+                     MultipartFile fotoDniPosterior, MultipartFile fotoCarnet,
+                     boolean creatPerPersonal) throws IOException {
 
         String dni = client.getDni() == null ? "" : client.getDni().trim().toUpperCase();
         if (!dni.matches("^([0-9]{8}|[XYZ][0-9]{7})[A-Z]$")) {
@@ -179,7 +189,7 @@ public List<ClientEntity> filtrarClients(String nacionalitat, String nom, String
 
         client.setPassword(passwordEncoder.encode(password));
         client.setPremium(false);
-        client.setEstatValidacio(PENDENT);
+        client.setEstatValidacio(creatPerPersonal ? VALIDAT : PENDENT);
         clientRepository.saveAndFlush(client);
 
         ClientDocuments doc = new ClientDocuments();
@@ -191,7 +201,8 @@ public List<ClientEntity> filtrarClients(String nacionalitat, String nom, String
         doc.setFotoCarnet(fotoCarnet.getBytes());
         doc.setTipusFotoCarnet(fotoCarnet.getContentType());
         clientRepositoryMongo.save(doc);
-        log.info("Client donat d'alta: {}", dni);
+        log.info("Client donat d'alta: {} (estat: {}, creat per personal: {})",
+                dni, client.getEstatValidacio(), creatPerPersonal);
     }
 
     public Optional<ClientEntity> obtenir(String dni) {
@@ -335,6 +346,7 @@ public List<ClientEntity> filtrarClients(String nacionalitat, String nom, String
     }
 
     // Valida la targeta; només es conserven els 4 últims dígits i la caducitat
+        // Valida la targeta; només es conserven els 4 últims dígits i la caducitat
     private void validaTargeta(ClientEntity c) {
         String num = c.getNumTargeta() == null ? "" : c.getNumTargeta().replaceAll("[\\s-]", "");
         if (!num.matches("^[0-9]{13,19}$") || !luhn(num)) {
@@ -344,18 +356,51 @@ public List<ClientEntity> filtrarClients(String nacionalitat, String nom, String
         if (!cvv.matches("^[0-9]{3,4}$")) {
             throw new IllegalArgumentException("El codi de seguretat ha de tenir 3 o 4 xifres");
         }
-        YearMonth cad;
-        try {
-            cad = YearMonth.parse(c.getTargetaCaducitat());
-        } catch (Exception e) {
-            throw new IllegalArgumentException("La data de caducitat de la targeta no és vàlida");
-        }
+
+        YearMonth cad = parseCaducitat(c.getTargetaCaducitat());
         if (cad.isBefore(YearMonth.now())) {
             throw new IllegalArgumentException("La targeta està caducada");
         }
+
+        // Guardamos la caducidad normalizada (2028-05) para que quede siempre en el mismo formato
+        c.setTargetaCaducitat(cad.toString());
         c.setTargetaUltims4(num.substring(num.length() - 4));
         c.setNumTargeta(null);
         c.setCvv(null);
+    }
+
+    // Accepta 2028-05, 2028/05, 05/28, 05-28, 05/2028, 0528 i 052028
+    private YearMonth parseCaducitat(String valor) {
+        String v = valor == null ? "" : valor.trim().replaceAll("\\s+", "");
+        try {
+            // Any-mes: 2028-05 o 2028/05
+            if (v.matches("^\\d{4}[-/]\\d{2}$")) {
+                return YearMonth.of(Integer.parseInt(v.substring(0, 4)),
+                        Integer.parseInt(v.substring(5)));
+            }
+            // Mes-any amb any de 2 xifres: 05/28 o 05-28
+            if (v.matches("^\\d{2}[-/]\\d{2}$")) {
+                return YearMonth.of(2000 + Integer.parseInt(v.substring(3)),
+                        Integer.parseInt(v.substring(0, 2)));
+            }
+            // Mes-any amb any de 4 xifres: 05/2028 o 05-2028
+            if (v.matches("^\\d{2}[-/]\\d{4}$")) {
+                return YearMonth.of(Integer.parseInt(v.substring(3)),
+                        Integer.parseInt(v.substring(0, 2)));
+            }
+            // Sense separador: 0528 o 052028
+            if (v.matches("^\\d{4}$")) {
+                return YearMonth.of(2000 + Integer.parseInt(v.substring(2)),
+                        Integer.parseInt(v.substring(0, 2)));
+            }
+            if (v.matches("^\\d{6}$")) {
+                return YearMonth.of(Integer.parseInt(v.substring(2)),
+                        Integer.parseInt(v.substring(0, 2)));
+            }
+        } catch (Exception e) {
+            // Mes inexistente (13, 00...): cae al error de abajo
+        }
+        throw new IllegalArgumentException("La data de caducitat de la targeta no és vàlida");
     }
 
     // Algoritme de Luhn: comprova que el número de targeta és matemàticament coherent

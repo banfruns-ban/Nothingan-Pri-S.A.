@@ -1,3 +1,7 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package cat.copernic.projecte1Grup3.Reserves.Controller;
 
 import java.math.BigDecimal;
@@ -22,6 +26,14 @@ import cat.copernic.projecte1Grup3.Reserves.Entity.ReservesEntity;
 import cat.copernic.projecte1Grup3.Reserves.Service.ReservesService;
 import cat.copernic.projecte1Grup3.Usuaris.Client.Service.ClientService;
 
+/**
+ * Controlador principal de gestió de reserves al panell d'administració:
+ * Gestiona el cicle de vida complet de les reserves des del dashboard
+ * (consulta, alta, anul·lació, eliminació, lliurament i retorn). Coordina les
+ * interaccions entre les vistes Thymeleaf i els serveis de reserves i clients.
+ *
+ * @author Grup3
+ */
 @Controller
 public class ReservesController {
 
@@ -31,6 +43,11 @@ public class ReservesController {
     private final ReservesService reservesLogic;
     private final ClientService clientLogic;
 
+    /**
+     * Injecció de dependències dels serveis de reserves i clients: Inicialitza
+     * el controlador rebent ReservesService i ClientService per gestionar totes
+     * les operacions de reserva.
+     */
     public ReservesController(
             ReservesService reservesLogic,
             ClientService clientLogic) {
@@ -38,6 +55,13 @@ public class ReservesController {
         this.clientLogic = clientLogic;
     }
 
+    /**
+     * Llista i filtra les reserves registrades al sistema: Aplica els filtres
+     * opcionals rebuts per paràmetre (cerca lliure, DNI, correu, data,
+     * matrícula, codi o estat) mitjançant el servei. Carrega la llista
+     * resultant i conserva els criteris de cerca al model abans de mostrar la
+     * vista HTML.
+     */
     @GetMapping("/dashboard/reserves")
     public String llistar(
             @RequestParam(required = false) String q,
@@ -72,6 +96,12 @@ public class ReservesController {
         return "reserves/llistaReserves";
     }
 
+    /**
+     * Mostra el formulari de creació d'una nova reserva des del dashboard:
+     * Precarrega les dades del client (si s'indica el DNI) o la llista de
+     * clients validats, juntament amb els vehicles actius. Si s'especifica un
+     * DNI inexistent, redirigeix al llistat amb un missatge d'error.
+     */
     @GetMapping("/dashboard/reserves/nova")
     public String mostrarFormulari(
             @RequestParam(required = false) String dni,
@@ -103,6 +133,12 @@ public class ReservesController {
         return "reserves/altaReserva";
     }
 
+    /**
+     * Processa l'alta d'una nova reserva des del panell de gestió: Envia les
+     * dades del client, vehicle, dates, hores i observacions al servei per
+     * validar-les i crear la reserva. Si es produeix algun error, conserva els
+     * valors introduïts com a atributs flash i retorna al formulari d'alta.
+     */
     @PostMapping("/dashboard/reserves/alta")
     public String altaReserva(
             @RequestParam String dni,
@@ -158,6 +194,12 @@ public class ReservesController {
         return "redirect:/dashboard/reserves/nova";
     }
 
+    /**
+     * Elimina definitivament una reserva del sistema: Invoca el servei per
+     * esborrar la reserva identificada pel seu codi i sincronitzar l'estat a
+     * l'històric. Redirigeix al llistat de reserves informant del resultat o de
+     * l'error capturat.
+     */
     @PostMapping("/dashboard/reserves/{codi}/eliminar")
     public String eliminar(@PathVariable Long codi, RedirectAttributes ra) {
         try {
@@ -172,6 +214,12 @@ public class ReservesController {
         return "redirect:/dashboard/reserves";
     }
 
+    /**
+     * Mostra el formulari d'anul·lació per a una reserva específica: Comprova
+     * que la reserva existeixi i que no estigui en curs, finalitzada o ja
+     * cancel·lada. Si compleix les condicions, carrega la reserva al model i
+     * mostra la vista d'anul·lació.
+     */
     @GetMapping("/dashboard/reserves/{codi}/anular")
     public String mostrarFormulariAnulacio(
             @PathVariable Long codi,
@@ -195,6 +243,12 @@ public class ReservesController {
         return "reserves/anularReserva";
     }
 
+    /**
+     * Processa l'anul·lació d'una reserva registrant-ne el motiu: Crida al
+     * servei per canviar l'estat de la reserva a cancel·lada i desar la
+     * justificació proporcionada. Si falla la validació o el procés, retorna al
+     * formulari d'anul·lació mantenint el text del motiu introduït.
+     */
     @PostMapping("/dashboard/reserves/{codi}/anular")
     public String anular(
             @PathVariable Long codi,
@@ -216,6 +270,12 @@ public class ReservesController {
         }
     }
 
+    /**
+     * Mostra la pantalla de lliurament d'un vehicle al client: Verifica que la
+     * reserva existeixi i es trobi en un estat vàlid per ser lliurada (no en
+     * curs, finalitzada ni cancel·lada). Carrega la reserva juntament amb la
+     * data i hora actuals per defecte a la vista de lliurament.
+     */
     // GET: Obrir pantalla de lliurament
     @GetMapping("/dashboard/reserves/{codi}/lliurar")
     public String mostrarFormulariLliurament(@PathVariable Long codi, Model model, RedirectAttributes ra) {
@@ -235,6 +295,13 @@ public class ReservesController {
         return "reserves/lliurarReserva";
     }
 
+    /**
+     * Confirma i registra el lliurament del vehicle passant la reserva a estat
+     * EN_CURS: Recull la data, hora, quilometratge inicial, nivell de
+     * combustible, observacions i fotografies de l'estat del vehicle. Delega
+     * l'operació al servei i redirigeix al dashboard amb un missatge de
+     * confirmació o error.
+     */
     // POST: Confirmar lliurament amb data, hora i recepció d'imatges (G3P1-240)
     @PostMapping("/dashboard/reserves/{codi}/lliurar")
     public String processarLliurament(@PathVariable Long codi,
@@ -265,6 +332,12 @@ public class ReservesController {
         return "redirect:/dashboard";
     }
 
+    /**
+     * Mostra la pantalla de recepció i retorn d'un vehicle llogat: Comprova que
+     * la reserva existeixi i estigui en estat EN_CURS abans de permetre el
+     * registre del retorn. Prepara el model amb les dades de la reserva i la
+     * marca temporal actual per renderitzar el formulari.
+     */
     // GET: Obrir pantalla de retorn
     @GetMapping("/dashboard/reserves/{codi}/retornar")
     public String mostrarFormulariRetorn(@PathVariable Long codi, Model model, RedirectAttributes ra) {
@@ -284,6 +357,12 @@ public class ReservesController {
         return "reserves/retornarReserva";
     }
 
+    /**
+     * Mostra la fitxa amb tota la informació detallada d'una reserva: Busca la
+     * reserva pel seu codi identificatiu i, si existeix, la passa al model per
+     * visualitzar-ne el detall complet. Si no es troba, redirigeix al llistat
+     * general amb un avís d'error.
+     */
     @GetMapping("/dashboard/reserves/{codi}")
     public String detall(@PathVariable Long codi, Model model, RedirectAttributes ra) {
         Optional<ReservesEntity> reserva = reservesLogic.obtenir(codi);
@@ -297,6 +376,13 @@ public class ReservesController {
         return "reserves/detallReserva";
     }
 
+    /**
+     * Processa el retorn del vehicle, la liquidació de la fiança i el tancament
+     * del contracte: Agrupa les dades de quilometratge, combustible,
+     * observacions, possibles desperfectes, deduccions i fotografies aportades.
+     * Delega al servei el càlcul final i el canvi d'estat de la reserva a
+     * FINALITZADA.
+     */
     // POST: Confirmar retorn i liquidació de fiança amb data, hora i fotos addicionals il·limitades (G3P1-238 / G3P1-239)
     @PostMapping("/dashboard/reserves/{codi}/retornar")
     public String processarRetorn(

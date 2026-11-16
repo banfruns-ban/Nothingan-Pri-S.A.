@@ -1,25 +1,21 @@
 package cat.copernic.projecte1Grup3.Vehicles.Service;
 
-import cat.copernic.projecte1Grup3.Reserves.Entity.ReservesEntity;
 import cat.copernic.projecte1Grup3.Vehicles.Entity.VehiclesEntity;
 import cat.copernic.projecte1Grup3.Vehicles.Repository.VehiclesRepository;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class VehiclesService {
 
-    private final VehiclesRepository vehiclesRepository;
+    private static final Set<String> ESTATS_RESERVA_INACTIVA = Set.of("CANCELADA", "ANULLADA", "FINALITZADA");
 
-    @PersistenceContext
-    private EntityManager entityManager;
+    private final VehiclesRepository vehiclesRepository;
 
     public VehiclesService(VehiclesRepository vehiclesRepository) {
         this.vehiclesRepository = vehiclesRepository;
@@ -30,10 +26,6 @@ public class VehiclesService {
         return vehiclesRepository.findAll();
     }
 
-    /**
-     * RF45: Filtra els vehicles combinant matrícula, marca, model, any de matriculació,
-     * categoria, estat d'activació i disponibilitat entre data mínima i data màxima.
-     */
     @Transactional(readOnly = true)
     public List<VehiclesEntity> filtrarVehicles(
             String matricula,
@@ -87,64 +79,41 @@ public class VehiclesService {
         return vehiclesRepository.save(vehicle);
     }
 
-    @Transactional
-    public VehiclesEntity actualitzarVehicle(String matriculaOriginal, VehiclesEntity dadesActualitzades) {
-        VehiclesEntity antic = vehiclesRepository.findById(matriculaOriginal)
-                .orElseThrow(() -> new IllegalArgumentException("No s'ha trobat el vehicle original: " + matriculaOriginal));
-
-        String novaMatricula = dadesActualitzades.getMatricula().trim().toUpperCase();
-        dadesActualitzades.setMatricula(novaMatricula);
-
-        if (dadesActualitzades.getActiu() == null) {
-            dadesActualitzades.setActiu(antic.getActiu());
+    private boolean teReservesActives(VehiclesEntity vehicle) {
+        if (vehicle.getReserves() == null || vehicle.getReserves().isEmpty()) {
+            return false;
         }
-
-        if (matriculaOriginal.equalsIgnoreCase(novaMatricula)) {
-            dadesActualitzades.setReserves(antic.getReserves());
-            return vehiclesRepository.save(dadesActualitzades);
-        }
-
-        if (vehiclesRepository.existsById(novaMatricula)) {
-            throw new IllegalArgumentException("La matrícula " + novaMatricula + " ja està registrada en un altre vehicle.");
-        }
-
-        VehiclesEntity nouVehicle = vehiclesRepository.saveAndFlush(dadesActualitzades);
-
-        List<ReservesEntity> reservesAssociades = new ArrayList<>(antic.getReserves());
-        for (ReservesEntity reserva : reservesAssociades) {
-            reserva.setVehicle(nouVehicle);
-        }
-        antic.getReserves().clear();
-
-        try {
-            entityManager.createQuery("UPDATE RessenyaEntity r SET r.vehicle = :nou WHERE r.vehicle = :antic")
-                    .setParameter("nou", nouVehicle)
-                    .setParameter("antic", antic)
-                    .executeUpdate();
-        } catch (Exception ignored) {
-        }
-
-        entityManager.flush();
-
-        vehiclesRepository.delete(antic);
-        vehiclesRepository.flush();
-
-        return nouVehicle;
+        return vehicle.getReserves().stream()
+                .anyMatch(r -> r.getEstat() == null || !ESTATS_RESERVA_INACTIVA.contains(r.getEstat().toUpperCase()));
     }
 
     @Transactional
     public void canviarEstatActiu(String matricula, Boolean nouEstat) {
-        Optional<VehiclesEntity> vehicleOpt = vehiclesRepository.findById(matricula);
-        if (vehicleOpt.isPresent()) {
-            VehiclesEntity vehicle = vehicleOpt.get();
-            vehicle.setActiu(nouEstat);
-            vehiclesRepository.save(vehicle);
+        VehiclesEntity vehicle = vehiclesRepository.findById(matricula)
+                .orElseThrow(() -> new IllegalArgumentException("No s'ha trobat el vehicle amb matrícula " + matricula));
+
+        if (Boolean.FALSE.equals(nouEstat) && teReservesActives(vehicle)) {
+            throw new IllegalStateException("No es pot donar de baixa el vehicle " + matricula + " perquè té reserves actives o pendents.");
         }
+
+        vehicle.setActiu(nouEstat);
+        vehiclesRepository.save(vehicle);
     }
 
     @Transactional
     public void eliminarVehicle(String matricula) {
-        vehiclesRepository.deleteById(matricula);
+        VehiclesEntity vehicle = vehiclesRepository.findById(matricula)
+                .orElseThrow(() -> new IllegalArgumentException("No s'ha trobat el vehicle amb matrícula " + matricula));
+
+        if (teReservesActives(vehicle)) {
+            throw new IllegalStateException("No es pot donar de baixa ni eliminar el vehicle " + matricula + " perquè té reserves actives o pendents.");
+        }
+
+        if (vehicle.getReserves() != null && !vehicle.getReserves().isEmpty()) {
+            throw new IllegalStateException("No es pot eliminar el vehicle " + matricula + " perquè té historial de reserves. Pots marcar-lo com a Inactiu.");
+        }
+
+        vehiclesRepository.delete(vehicle);
     }
     
     @Transactional(readOnly = true)

@@ -47,7 +47,7 @@
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
                     <h2 class="fw-bold text-dark m-0">Fitxa del Vehicle</h2>
-                    <p class="text-muted small mb-0 mt-1">Especificacions i estat del vehicle de la flota.</p>
+                    <p class="text-muted small mb-0 mt-1">Especificacions completes i estat del vehicle de la flota.</p>
                 </div>
                 <div>
                     <a th:href="@{'/dashboard/reserves/nova?matricula=' + ${vehicle.matricula}}" class="btn btn-primary me-2 fw-semibold px-3 py-2" style="border-radius: 8px;">
@@ -77,36 +77,92 @@
                     <div class="col">
                         <h3 class="fw-bold text-dark m-0" th:text="${vehicle.marca + ' ' + vehicle.model}">Toyota Yaris</h3>
                         <p class="text-muted mb-2" th:text="'Matrícula: ' + ${vehicle.matricula}">4823KLP</p>
-                        <span class="badge" 
-                              th:classappend="${vehicle.actiu ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger'}"
-                              th:text="${vehicle.actiu ? 'Actiu' : 'Inactiu'}">Estat</span>
+                        <div class="d-flex gap-2">
+                            <span class="badge" 
+                                  th:classappend="${vehicle.actiu ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger'}"
+                                  th:text="${vehicle.actiu ? 'Actiu a la flota' : 'Inactiu'}">Actiu</span>
+                            <span class="badge bg-primary-subtle text-primary" th:text="${vehicle.estat}">DISPONIBLE</span>
+                        </div>
                     </div>
                 </div>
 
+                <!-- 1. Especificacions generals -->
+                <h5 class="fw-bold text-primary mb-3">1. Especificacions del vehicle</h5>
                 <div class="row g-4 border-bottom pb-4 mb-4">
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="label-title">Matrícula</div>
-                        <div class="value-text" th:text="${vehicle.matricula}">4823KLP</div>
+                        <div class="value-text fw-semibold" th:text="${vehicle.matricula}">4823KLP</div>
                     </div>
 
-                    <div class="col-md-6">
+                    <div class="col-md-4">
+                        <div class="label-title">Marca</div>
+                        <div class="value-text" th:text="${vehicle.marca}">Toyota</div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="label-title">Model</div>
+                        <div class="value-text" th:text="${vehicle.model}">Yaris</div>
+                    </div>
+
+                    <div class="col-md-4">
                         <div class="label-title">Tipus / Categoria</div>
                         <div class="value-text" th:text="${vehicle.tipusVehicle}">Turisme</div>
                     </div>
 
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="label-title">Any de matriculació</div>
                         <div class="value-text" th:text="${vehicle.anyMatriculacio}">2024</div>
                     </div>
 
-                    <div class="col-md-6">
+                    <div class="col-md-4">
+                        <div class="label-title">Estat operatiu</div>
+                        <div class="value-text" th:text="${vehicle.estat}">DISPONIBLE</div>
+                    </div>
+                </div>
+
+                <!-- 2. Tarifes i condicions de lloguer -->
+                <h5 class="fw-bold text-primary mb-3">2. Tarifes i condicions</h5>
+                <div class="row g-4 border-bottom pb-4 mb-4">
+                    <div class="col-md-4">
                         <div class="label-title">Preu per hora</div>
                         <div class="value-text" th:text="${#numbers.formatDecimal(vehicle.preuHora, 1, 2) + ' €'}">45.00 €</div>
                     </div>
 
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="label-title">Fiança requerida</div>
                         <div class="value-text" th:text="${#numbers.formatDecimal(vehicle.fianca, 1, 2) + ' €'}">300.00 €</div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="label-title">Límit de quilometratge</div>
+                        <div class="value-text" th:text="${vehicle.limitQuilometratge != null ? vehicle.limitQuilometratge + ' km' : 'Sense límit'}">400 km</div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="label-title">Mínim de dies de lloguer</div>
+                        <div class="value-text" th:text="${vehicle.minDiesLloguer + (vehicle.minDiesLloguer == 1 ? ' dia' : ' dies')}">1 dia</div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="label-title">Màxim de dies de lloguer</div>
+                        <div class="value-text" th:text="${vehicle.maxDiesLloguer + (vehicle.maxDiesLloguer == 1 ? ' dia' : ' dies')}">30 dies</div>
+                    </div>
+                </div>
+
+                <!-- 3. Descripció i comentaris interns -->
+                <h5 class="fw-bold text-primary mb-3">3. Descripció i observacions</h5>
+                <div class="row g-4 border-bottom pb-4 mb-4">
+                    <div class="col-12">
+                        <div class="label-title">Descripció pública</div>
+                        <div class="value-text" style="white-space: pre-line;" th:text="${vehicle.descripcio}">Descripció del vehicle</div>
+                    </div>
+
+                    <div class="col-12">
+                        <div class="label-title">Comentaris privats (Ús intern)</div>
+                        <div class="value-text text-muted" style="white-space: pre-line;"
+                             th:text="${(vehicle.comentarisPrivats != null and !vehicle.comentarisPrivats.isBlank()) ? vehicle.comentarisPrivats : 'Sense comentaris privats registrats.'}">
+                            Sense comentaris privats
+                        </div>
                     </div>
                 </div>
 

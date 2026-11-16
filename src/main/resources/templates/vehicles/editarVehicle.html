@@ -65,15 +65,11 @@
         <div class="form-card shadow-sm">
             <form th:action="@{/dashboard/vehicles/guardar}" th:object="${vehicle}" method="post" enctype="multipart/form-data">
                 
-                <!-- Guardem la matrícula original per detectar si s'ha modificat -->
-                <input type="hidden" name="matriculaOriginal" th:value="${matriculaOriginal != null ? matriculaOriginal : vehicle.matricula}">
-
                 <h5 class="fw-bold text-primary mb-3 border-bottom pb-2">1. Especificacions del vehicle</h5>
                 <div class="row g-3 mb-4">
                     <div class="col-md-6">
                         <label class="form-label">Matrícula</label>
-                        <input type="text" th:field="*{matricula}" class="form-control text-uppercase" required>
-                        <div class="text-danger small mt-1" th:if="${#fields.hasErrors('matricula')}" th:errors="*{matricula}"></div>
+                        <input type="text" th:field="*{matricula}" class="form-control bg-light" readonly>
                     </div>
 
                     <div class="col-md-6">

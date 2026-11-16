@@ -172,6 +172,50 @@ public class ReservesController {
         return "redirect:/dashboard/reserves";
     }
 
+    @GetMapping("/dashboard/reserves/{codi}/anular")
+    public String mostrarFormulariAnulacio(
+            @PathVariable Long codi,
+            Model model,
+            RedirectAttributes ra) {
+        Optional<ReservesEntity> optReserva = reservesLogic.obtenir(codi);
+        if (optReserva.isEmpty()) {
+            ra.addFlashAttribute("error", "Reserva #" + codi + " no trobada.");
+            return "redirect:/dashboard/reserves";
+        }
+
+        ReservesEntity reserva = optReserva.get();
+        if (ReservesService.EN_CURS.equals(reserva.getEstat())
+                || ReservesService.FINALITZADA.equals(reserva.getEstat())
+                || ReservesService.CANCELADA.equals(reserva.getEstat())) {
+            ra.addFlashAttribute("error", "Aquesta reserva ja no es pot anul·lar.");
+            return "redirect:/dashboard/reserves/" + codi;
+        }
+
+        model.addAttribute("reserva", reserva);
+        return "reserves/anularReserva";
+    }
+
+    @PostMapping("/dashboard/reserves/{codi}/anular")
+    public String anular(
+            @PathVariable Long codi,
+            @RequestParam("anulacio_motiu") String motiu,
+            RedirectAttributes ra) {
+        try {
+            reservesLogic.anularReserva(codi, motiu);
+            ra.addFlashAttribute("missatge", "Reserva #" + codi + " anul·lada correctament.");
+            return "redirect:/dashboard/reserves";
+        } catch (IllegalArgumentException e) {
+            ra.addFlashAttribute("error", e.getMessage());
+            ra.addFlashAttribute("anulacioMotiu", motiu);
+            return "redirect:/dashboard/reserves/" + codi + "/anular";
+        } catch (Exception e) {
+            log.error("Error anul·lant la reserva {}", codi, e);
+            ra.addFlashAttribute("error", "No s'ha pogut anul·lar la reserva #" + codi);
+            ra.addFlashAttribute("anulacioMotiu", motiu);
+            return "redirect:/dashboard/reserves/" + codi + "/anular";
+        }
+    }
+
     // GET: Obrir pantalla de lliurament
     @GetMapping("/dashboard/reserves/{codi}/lliurar")
     public String mostrarFormulariLliurament(@PathVariable Long codi, Model model, RedirectAttributes ra) {

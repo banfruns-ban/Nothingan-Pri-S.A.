@@ -159,6 +159,11 @@
                                     <a th:href="@{'/dashboard/clients/detall/' + ${r.client.dni}}" class="btn btn-outline-secondary btn-sm fw-semibold" style="border-radius: 6px;">
                                         <i class="fa-solid fa-user me-1"></i> Client
                                     </a>
+                                    <a th:if="${r.estat != 'EN_CURS' and r.estat != 'FINALITZADA' and r.estat != 'CANCELADA'}"
+                                       th:href="@{/dashboard/reserves/{codi}/anular(codi=${r.codiReserva})}"
+                                       class="btn btn-outline-danger btn-sm fw-semibold">
+                                        Anul·lar
+                                    </a>
                                     <form th:if="${r.estat != 'EN_CURS' and r.estat != 'FINALITZADA'}"
                                           th:action="@{'/dashboard/reserves/' + ${r.codiReserva} + '/eliminar'}" method="post" class="d-inline"
                                           onsubmit="return confirm('Segur que vols eliminar aquesta reserva?');">

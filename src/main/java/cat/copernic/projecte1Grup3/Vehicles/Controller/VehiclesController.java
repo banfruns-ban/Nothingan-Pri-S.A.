@@ -2,6 +2,7 @@ package cat.copernic.projecte1Grup3.Vehicles.Controller;
 
 import java.beans.PropertyEditorSupport;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -183,21 +184,41 @@ public class VehiclesController {
         return "redirect:/dashboard/vehicles";
     }
 
-    @PostMapping("/canviar-estat/{matricula}")
-    public String canviarEstatVehicle(
-            @PathVariable("matricula") String matricula, 
-            @RequestParam("actiu") Boolean actiu, 
+    @PostMapping("/desactivar/{matricula}")
+    public String desactivarVehicle(
+            @PathVariable("matricula") String matricula,
+            @RequestParam(name = "dataFiDesactivacio", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataFiDesactivacio,
             RedirectAttributes redirect) {
         try {
-            vehiclesService.canviarEstatActiu(matricula, actiu);
-            log.info("Vehicle {} marcat com a {}", matricula, actiu ? "actiu" : "inactiu");
-            redirect.addFlashAttribute("succes", "L'estat del vehicle s'ha actualitzat correctament.");
-        } catch (IllegalStateException e) {
-            log.warn("No s'ha pogut canviar l'estat del vehicle {}: {}", matricula, e.getMessage());
+            vehiclesService.desactivarVehicle(matricula, dataFiDesactivacio);
+            log.info("Vehicle {} desactivat (data fi: {})", matricula, dataFiDesactivacio);
+            redirect.addFlashAttribute("succes", "Vehicle " + matricula + " desactivat correctament en la data actual.");
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            log.warn("No s'ha pogut desactivar el vehicle {}: {}", matricula, e.getMessage());
             redirect.addFlashAttribute("error", e.getMessage());
         } catch (Exception e) {
-            log.error("Error canviant l'estat del vehicle {}", matricula, e);
-            redirect.addFlashAttribute("error", "Error en canviar l'estat del vehicle.");
+            log.error("Error desactivant el vehicle {}", matricula, e);
+            redirect.addFlashAttribute("error", "Error en intentar desactivar el vehicle.");
+        }
+        return "redirect:/dashboard/vehicles";
+    }
+
+    @PostMapping("/activar/{matricula}")
+    public String activarVehicle(
+            @PathVariable("matricula") String matricula,
+            @RequestParam(name = "motiu", required = false) String motiu,
+            @RequestParam(name = "importCost", required = false) BigDecimal importCost,
+            RedirectAttributes redirect) {
+        try {
+            vehiclesService.activarVehicle(matricula, motiu, importCost);
+            log.info("Vehicle {} activat (motiu: {}, import: {})", matricula, motiu, importCost);
+            redirect.addFlashAttribute("succes", "Vehicle " + matricula + " activat correctament en la data actual.");
+        } catch (IllegalArgumentException e) {
+            log.warn("Dades invàlides activant el vehicle {}: {}", matricula, e.getMessage());
+            redirect.addFlashAttribute("error", e.getMessage());
+        } catch (Exception e) {
+            log.error("Error activant el vehicle {}", matricula, e);
+            redirect.addFlashAttribute("error", "Error en intentar activar el vehicle.");
         }
         return "redirect:/dashboard/vehicles";
     }

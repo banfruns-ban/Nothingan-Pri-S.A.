@@ -16,6 +16,7 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -90,19 +91,29 @@ public class VehiclesEntity {
     @Column(name = "foto", length = 255)
     private String foto;
 
+    // --- CAMPS DE DESACTIVACIÓ I REACTIVACIÓ ---
+    @Column(name = "data_desactivacio")
+    private LocalDate dataDesactivacio;
+
+    @Column(name = "data_fi_desactivacio")
+    private LocalDate dataFiDesactivacio;
+
+    @Column(name = "data_activacio")
+    private LocalDate dataActivacio;
+
+    @Column(name = "motiu_activacio", length = 255)
+    private String motiuActivacio;
+
+    @Column(name = "import_activacio", precision = 10, scale = 2)
+    private BigDecimal importActivacio;
+
     // --- RELACIÓ ONE-TO-MANY AMB RESERVES ---
     @OneToMany(mappedBy = "vehicle", cascade = CascadeType.ALL)
     private List<ReservesEntity> reserves = new ArrayList<>();
 
-    /**
-     * Constructor per defecte requerit per JPA.
-     */
     public VehiclesEntity() {
     }
 
-    /**
-     * Constructor complet sense foto.
-     */
     public VehiclesEntity(String matricula, String marca, String model, Integer anyMatriculacio, 
                           String descripcio, String tipusVehicle, Integer limitQuilometratge, 
                           BigDecimal preuHora, BigDecimal fianca, Integer minDiesLloguer, 
@@ -123,9 +134,6 @@ public class VehiclesEntity {
         this.comentarisPrivats = comentarisPrivats;
     }
 
-    /**
-     * Constructor complet amb foto.
-     */
     public VehiclesEntity(String matricula, String marca, String model, Integer anyMatriculacio, 
                           String descripcio, String tipusVehicle, Integer limitQuilometratge, 
                           BigDecimal preuHora, BigDecimal fianca, Integer minDiesLloguer, 
@@ -255,6 +263,46 @@ public class VehiclesEntity {
 
     public void setFoto(String foto) {
         this.foto = foto;
+    }
+
+    public LocalDate getDataDesactivacio() {
+        return dataDesactivacio;
+    }
+
+    public void setDataDesactivacio(LocalDate dataDesactivacio) {
+        this.dataDesactivacio = dataDesactivacio;
+    }
+
+    public LocalDate getDataFiDesactivacio() {
+        return dataFiDesactivacio;
+    }
+
+    public void setDataFiDesactivacio(LocalDate dataFiDesactivacio) {
+        this.dataFiDesactivacio = dataFiDesactivacio;
+    }
+
+    public LocalDate getDataActivacio() {
+        return dataActivacio;
+    }
+
+    public void setDataActivacio(LocalDate dataActivacio) {
+        this.dataActivacio = dataActivacio;
+    }
+
+    public String getMotiuActivacio() {
+        return motiuActivacio;
+    }
+
+    public void setMotiuActivacio(String motiuActivacio) {
+        this.motiuActivacio = motiuActivacio;
+    }
+
+    public BigDecimal getImportActivacio() {
+        return importActivacio;
+    }
+
+    public void setImportActivacio(BigDecimal importActivacio) {
+        this.importActivacio = importActivacio;
     }
 
     public List<ReservesEntity> getReserves() {

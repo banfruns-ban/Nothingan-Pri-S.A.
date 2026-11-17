@@ -133,8 +133,9 @@ public class ReservesService {
         return valor != null && valor.toLowerCase().contains(text);
     }
 
+    // Client premium: 25% de descompte sobre la fiança
     private boolean esPremium(ClientEntity client) {
-        return Boolean.TRUE.equals(client.isPremium());
+        return client.isPremium();
     }
 
     public Optional<ReservesEntity> obtenir(Long codi) {
@@ -210,15 +211,22 @@ public class ReservesService {
         reserva.setHoraInici(horaInici);
         reserva.setDataFi(dataFi);
         reserva.setHoraFi(horaFi);
-        BigDecimal cost = vehicle.getPreuHora().multiply(BigDecimal.valueOf(hores));
 
+        // El cost del lloguer no porta descompte
+        BigDecimal cost = vehicle.getPreuHora()
+                .multiply(BigDecimal.valueOf(hores))
+                .setScale(2, RoundingMode.HALF_UP);
+        reserva.setCostTotal(cost);
+
+        // El descompte premium (25%) s'aplica sobre la fiança
+        BigDecimal fianca = vehicle.getFianca();
         if (esPremium(client)) {
-            cost = cost.multiply(BigDecimal.ONE.subtract(DESCOMPTE_PREMIUM));
-            log.info("Descompte premium (25%) aplicat al client {}", client.getDni());
+            fianca = fianca.multiply(BigDecimal.ONE.subtract(DESCOMPTE_PREMIUM))
+                    .setScale(2, RoundingMode.HALF_UP);
+            log.info("Descompte premium (25%) aplicat a la fiança del client {}", client.getDni());
         }
+        reserva.setFianca(fianca);
 
-        reserva.setCostTotal(cost.setScale(2, RoundingMode.HALF_UP));
-        reserva.setFianca(vehicle.getFianca());
         reserva.setEstat(PENDENT);
         reserva.setObservacions(observacions == null || observacions.isBlank()
                 ? null : observacions.trim());

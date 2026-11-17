@@ -26,6 +26,10 @@
         <div th:if="${error}" class="alert alert-danger" role="alert" th:text="${error}"></div>
 
         <div class="form-card shadow-sm">
+            <div class="alert alert-info" role="alert">
+                En anul·lar-la, s'enviarà un correu al client amb el càlcul del 25% del cost del lloguer
+                (sense incloure la fiança). El reemborsament s'ha de tramitar fora del sistema.
+            </div>
             <div class="mb-4">
                 <h5 class="fw-bold text-dark" th:text="'Reserva #' + ${reserva.codiReserva}">Reserva</h5>
                 <p class="text-muted mb-0"

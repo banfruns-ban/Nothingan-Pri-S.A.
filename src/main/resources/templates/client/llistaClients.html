@@ -139,15 +139,15 @@
 
                             <td class="text-end">
                                 <div class="d-inline-flex gap-1 align-items-center">
-                                    <a th:href="@{'/dashboard/reserves/nova?dni=' + ${c.dni}}" class="btn btn-primary btn-sm fw-semibold me-1" style="border-radius: 6px;" title="Crear reserva per a aquest client">
+                                    <a th:href="@{'/dashboard/reserves/nova?dni=' + ${c.dni}}" class="btn btn-primary btn-sm fw-semibold me-1" style="border-radius: 6px; padding: 6px 12px;" title="Crear reserva per a aquest client">
                                         <i class="fa-regular fa-calendar-plus me-1"></i> Reserva
                                     </a>
                                     <a th:href="@{'/dashboard/clients/' + ${c.dni} + '/editar'}" class="btn btn-editar me-1">Editar</a>
                                     <a th:href="@{'/dashboard/clients/detall/' + ${c.dni}}" class="btn btn-outline-secondary btn-sm me-1 fw-semibold" style="border-radius: 6px; padding: 6px 14px;">Detall</a>
 
                                     <form th:action="@{'/dashboard/clients/' + ${c.dni} + '/eliminar'}" method="post" class="d-inline"
-                                          onsubmit="return confirm('Estàs segur de voler eliminar aquest client?');">
-                                        <button type="submit" class="btn btn-desactivar">Baixa</button>
+                                          onsubmit="return confirm('Estàs segur de voler eliminar permanentment aquest client?');">
+                                        <button type="submit" class="btn btn-desactivar">Eliminar</button>
                                     </form>
                                 </div>
                             </td>

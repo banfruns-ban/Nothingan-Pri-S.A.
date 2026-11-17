@@ -32,6 +32,8 @@ body {
     top: 0;
     left: 0;
     z-index: 100;
+    display: flex;
+    flex-direction: column;
 }
 .sidebar .brand {
     padding: 24px 20px;
@@ -46,6 +48,15 @@ body {
     color: #6b7280;
     font-weight: 400;
     margin-top: 2px;
+}
+.sidebar nav {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+.sidebar nav form {
+    margin-top: auto;
+    margin-bottom: 16px;
 }
 .sidebar .nav-link {
     color: #9ca3af;
@@ -64,6 +75,14 @@ body {
     background-color: var(--sidebar-active);
     color: #ffffff;
     font-weight: 500;
+}
+.sidebar .nav-link-button {
+    width: calc(100% - 24px);
+    background: transparent;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    font-family: inherit;
 }
 
 /* ---------- Layout principal ---------- */

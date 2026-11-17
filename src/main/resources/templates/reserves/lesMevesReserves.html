@@ -13,7 +13,7 @@
 </head>
 <body>
 
-    <!-- Header corporatiu (Enllaç del logo apunta a Home) -->
+    <!-- Header corporatiu -->
     <header>
         <a th:href="@{/}" class="marca">
             <div class="logo">NP</div>
@@ -25,11 +25,9 @@
 
         <div class="nav-header">
             <a th:href="@{/cataleg}">Catàleg</a>
-            
             <a sec:authorize="isAuthenticated()" th:href="@{/reserves-client}" class="active">Les meves reserves</a>
 
             <div class="accés-usuaris" style="display: flex; align-items: center; gap: 12px;">
-                <!-- Si l'usuari SÍ ha iniciat sessió -->
                 <th:block sec:authorize="isAuthenticated()">
                     <a th:href="@{/perfil}" title="El meu perfil"
                        style="width: 36px; height: 36px; border-radius: 50%; background: #2563eb; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; text-decoration: none; border: 2px solid #93c5fd;">
@@ -43,7 +41,6 @@
                     </form>
                 </th:block>
 
-                <!-- Si l'usuari NO ha iniciat sessió -->
                 <th:block sec:authorize="!isAuthenticated()">
                     <a th:href="@{/login}" class="btn btn-login">Iniciar sessió</a>
                     <a th:href="@{/registre}" class="btn btn-login">Registrar-se</a>
@@ -68,6 +65,36 @@
             <i class="fa-solid fa-triangle-exclamation"></i> <span th:text="${error}"></span>
         </div>
 
+        <!-- Filtres per codi i dates (G3P1-245) -->
+        <div class="filter-card-client">
+            <form th:action="@{/reserves-client}" method="get" class="filter-grid-client">
+                <div class="filter-group-client">
+                    <label for="codi">Codi de reserva</label>
+                    <input type="text" id="codi" name="codi" placeholder="Ex: 12 o #12"
+                           th:value="${codi}" inputmode="numeric">
+                </div>
+                <div class="filter-group-client">
+                    <label for="dataInici">Des de (data d'inici)</label>
+                    <input type="date" id="dataInici" name="dataInici" th:value="${dataInici}">
+                </div>
+                <div class="filter-group-client">
+                    <label for="dataFi">Fins a (data de fi)</label>
+                    <input type="date" id="dataFi" name="dataFi" th:value="${dataFi}">
+                </div>
+                <div class="filter-actions-client">
+                    <button type="submit" class="btn-filtrar-client">
+                        <i class="fa-solid fa-filter"></i> Filtrar
+                    </button>
+                    <a th:if="${(codi != null and !#strings.isEmpty(codi)) or dataInici != null or dataFi != null}"
+                       th:href="@{/reserves-client}"
+                       class="btn-netejar-client"
+                       title="Netejar filtres">
+                        <i class="fa-solid fa-xmark"></i>
+                    </a>
+                </div>
+            </form>
+        </div>
+
         <!-- Taula de Reserves -->
         <div class="card-taula">
             <table class="taula-reserves">
@@ -85,8 +112,14 @@
                 <tbody>
                     <tr th:if="${reserves == null or #lists.isEmpty(reserves)}">
                         <td colspan="7" class="sense-reserves-msg">
-                            No tens cap reserva realitzada actualment.
-                            <a th:href="@{/cataleg}">Explorar el catàleg</a>
+                            <span th:if="${(codi != null and !#strings.isEmpty(codi)) or dataInici != null or dataFi != null}">
+                                No s'ha trobat cap reserva amb els filtres seleccionats.
+                                <a th:href="@{/reserves-client}">Veure totes les reserves</a>
+                            </span>
+                            <span th:unless="${(codi != null and !#strings.isEmpty(codi)) or dataInici != null or dataFi != null}">
+                                No tens cap reserva realitzada actualment.
+                                <a th:href="@{/cataleg}">Explorar el catàleg</a>
+                            </span>
                         </td>
                     </tr>
 
@@ -109,13 +142,18 @@
                         <td th:text="${#numbers.formatDecimal(r.fianca, 1, 2) + ' €'}"></td>
                         <td>
                             <span class="badge-estat"
-                                  th:classappend="${r.estat == 'CONFIRMADA' ? 'badge-actiu' : (r.estat == 'CANCELADA' ? 'badge-inactiu' : 'badge-pendent')}"
+                                  th:classappend="${r.estat == 'CONFIRMADA' or r.estat == 'EN_CURS' or r.estat == 'FINALITZADA' ? 'badge-actiu' : (r.estat == 'CANCELADA' ? 'badge-inactiu' : 'badge-pendent')}"
                                   th:text="${r.estat}"></span>
                         </td>
                         <td>
-                            <a th:href="@{'/reserves-client/valorar/' + ${r.codiReserva}}" class="btn-valorar">
-                                <i class="fa-solid fa-star"></i> Valorar
-                            </a>
+                            <div class="accions-client-cell">
+                                <a th:href="@{'/reserves-client/' + ${r.codiReserva}}" class="btn-detall-client">
+                                    <i class="fa-solid fa-eye"></i> Detall
+                                </a>
+                                <a th:href="@{'/reserves-client/valorar/' + ${r.codiReserva}}" class="btn-valorar">
+                                    <i class="fa-solid fa-star"></i> Valorar
+                                </a>
+                            </div>
                         </td>
                     </tr>
                 </tbody>

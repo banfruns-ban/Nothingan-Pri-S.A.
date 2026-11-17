@@ -1,3 +1,7 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package cat.copernic.projecte1Grup3.Usuaris.Client.Controller;
 
 import cat.copernic.projecte1Grup3.Usuaris.Client.Documents.ClientDocuments;
@@ -21,11 +25,11 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
- * Controlador de clientes. Agrupa dos zonas:
- *  - Panel de agentes/admin (rutas /dashboard/clients...): gestión completa de clientes.
- *  - Portal del cliente (rutas /registre y /perfil): registro y autogestión del propio perfil.
- * El controlador solo recibe la petición y decide qué pantalla mostrar;
- * la lógica de negocio está en ClientService.
+ * Controlador web principal per a la gestió de clients tant al panell intern com al portal públic:
+ * Gestiona les operacions CRUD, validació d'identitat i descàrrega de documents des del dashboard d'agents/administradors.
+ * També controla l'autoregistrament públic (/registre) i l'edició del perfil propi (/perfil) per part dels clients.
+ *
+ * @author Grup3
  */
 @Controller
 public class ClientController {
@@ -33,6 +37,10 @@ public class ClientController {
     private static final Logger log = LoggerFactory.getLogger(ClientController.class);
     private final ClientService clientLogic;
 
+    /**
+     * Injecció del servei de lògica de negoci de clients:
+     * Inicialitza el controlador rebent ClientService per delegar totes les operacions sobre clients i documents.
+     */
     public ClientController(ClientService clientLogic) {
         this.clientLogic = clientLogic;
     }
@@ -42,9 +50,9 @@ public class ClientController {
     // =====================================================
 
     /**
-     * GET: muestra el formulario de alta de cliente del panel.
-     * Si venimos de un error (los datos ya están en el modelo) los conserva;
-     * si no, crea un cliente vacío para rellenar.
+     * Mostra el formulari d'alta de client des del panell de control intern:
+     * Crea una instància buida de ClientEntity si el model no conté ja dades prèvies d'un intent anterior fallit.
+     * Retorna la vista HTML "client/altaUsuari".
      */
     @GetMapping({"/dashboard/clients/alta", "/dashboard/clients/altaUsuari", "/dashboard/clients/nou"})
     public String mostrarFormulari(Model model) {
@@ -55,10 +63,9 @@ public class ClientController {
     }
 
     /**
-     * POST: da de alta un cliente desde el panel (lo hace un agente o un admin).
-     * Pasa "true" al servicio para que el cliente quede VALIDAT directamente,
-     * sin tener que esperar a una validación posterior.
-     * Si hay un error, vuelve al formulario conservando lo escrito.
+     * Processa l'alta directa d'un client realitzada per un agent o administrador:
+     * Desa les dades i les tres imatges documentals marcant el client directament com a VALIDAT.
+     * En cas d'error de validació o sistema, neteja les dades sensibles (contrasenya i targeta) i retorna al formulari.
      */
     @PostMapping({"/dashboard/clients/alta", "/dashboard/clients/altaUsuari"})
     public String altaClient(
@@ -95,9 +102,8 @@ public class ClientController {
     // =====================================================
 
     /**
-     * GET: lista los clientes del panel, con filtros opcionales
-     * (nacionalidad, nombre, teléfono, ciudad, DNI, población, email).
-     * Devuelve a la vista los valores del filtro para que los campos no se vacíen.
+     * Llista i filtra els clients registrats segons múltiples criteris opcionals:
+     * Aplica els filtres de nacionalitat, nom, telèfon, ciutat, DNI, població i correu electrònic, i retorna els paràmetres a la vista.
      */
     @GetMapping("/dashboard/clients")
     public String llistar(@RequestParam(required = false) String nacionalitat,
@@ -121,9 +127,8 @@ public class ClientController {
     }
 
     /**
-     * GET: muestra la ficha de un cliente concreto (por DNI).
-     * Acepta dos rutas para evitar errores 404 si algún enlace usa la antigua.
-     * Si el cliente no existe, vuelve al listado con un aviso.
+     * Mostra la fitxa amb tota la informació detallada d'un client identificat pel seu DNI:
+     * Si el client existeix el carrega al model per mostrar "client/detallClient"; en cas contrari redirigeix al llistat amb un error.
      */
     @GetMapping({"/dashboard/clients/{dni}", "/dashboard/clients/detall/{dni}"})
     public String detall(@PathVariable String dni, Model model, RedirectAttributes ra) {
@@ -137,9 +142,8 @@ public class ClientController {
     }
 
     /**
-     * GET: devuelve una imagen del cliente guardada en MongoDB
-     * (tipus = frontal, posterior o carnet) para mostrarla en la ficha.
-     * Responde 404 si el cliente no tiene documentos, la imagen no existe o el tipo no es válido.
+     * Serveix els bytes binaris d'una imatge documental del client emmagatzemada a MongoDB:
+     * Selecciona la fotografia frontal del DNI, posterior del DNI o del carnet de conduir segons el tipus sol·licitat amb el seu tipus MIME.
      */
     @GetMapping("/dashboard/clients/{dni}/imatge/{tipus}")
     @ResponseBody
@@ -183,8 +187,8 @@ public class ClientController {
     // =====================================================
 
     /**
-     * GET: muestra el formulario de edición con los datos actuales del cliente.
-     * Si el cliente no existe, vuelve al listado con un aviso.
+     * Mostra el formulari d'edició precarregat amb les dades d'un client existent:
+     * Recupera el client pel seu DNI i renderitza "client/editarClient", o redirigeix al llistat si no es troba.
      */
     @GetMapping("/dashboard/clients/{dni}/editar")
     public String formulariEditar(@PathVariable String dni, Model model, RedirectAttributes ra) {
@@ -198,9 +202,9 @@ public class ClientController {
     }
 
     /**
-     * POST: guarda los cambios de un cliente desde el panel.
-     * Permite cambiar el estado de validación y el premium, y subir imágenes nuevas (opcionales).
-     * Siempre redirige al listado, con un aviso de éxito o de error.
+     * Processa l'actualització de les dades, estat de validació, estat premium i documents d'un client:
+     * Delega els canvis al servei capturant possibles errors de negoci, integritat de dades o lectura de fitxers.
+     * Redirigeix sempre al llistat general de clients amb un missatge flash informatiu.
      */
     @PostMapping("/dashboard/clients/{dni}/editar")
     public String editar(@PathVariable String dni,
@@ -231,9 +235,8 @@ public class ClientController {
     }
 
     /**
-     * POST: elimina un cliente (MySQL y sus documentos de MongoDB).
-     * Si el cliente tiene reservas asociadas, la base de datos lo impide
-     * y se muestra un aviso en lugar de borrarlo.
+     * Elimina un client de la base de dades relacional i els seus documents associats a MongoDB:
+     * Captura les restriccions d'integritat referencial en cas que el client tingui reserves vinculades i informa l'usuari.
      */
     @PostMapping("/dashboard/clients/{dni}/eliminar")
     public String eliminar(@PathVariable String dni, RedirectAttributes ra) {
@@ -253,8 +256,8 @@ public class ClientController {
     // =====================================================
 
     /**
-     * POST: cambia el estado de validación de un cliente (PENDENT, VALIDAT o REBUTJAT).
-     * Es la acción rápida del listado, sin pasar por el formulario de edición.
+     * Actualitza ràpidament l'estat de validació d'un client des del llistat (PENDENT, VALIDAT o REBUTJAT):
+     * Invoca el canvi d'estat al servei i redirigeix al llistat amb una notificació de confirmació.
      */
     @PostMapping("/dashboard/clients/{dni}/validacio")
     public String validar(@PathVariable String dni, @RequestParam String estat, RedirectAttributes ra) {
@@ -264,7 +267,8 @@ public class ClientController {
     }
 
     /**
-     * POST: activa o desactiva el estado premium de un cliente.
+     * Activa o desactiva la condició de client prèmium des del panell de gestió:
+     * Actualitza el indicador booleà al servei i retorna al llistat de clients.
      */
     @PostMapping("/dashboard/clients/{dni}/premium")
     public String premium(@PathVariable String dni, @RequestParam boolean premium, RedirectAttributes ra) {
@@ -278,8 +282,8 @@ public class ClientController {
     // =====================================================
 
     /**
-     * GET: muestra el formulario de registro público del portal.
-     * Conserva los datos si venimos de un intento fallido.
+     * Mostra el formulari públic d'autoregistrament per a nous clients:
+     * Inicialitza una entitat buida al model si no prové d'una redirecció amb error i renderitza "registre".
      */
     @GetMapping("/registre")
     public String mostrarFormulariRegistre(Model model) {
@@ -290,10 +294,8 @@ public class ClientController {
     }
 
     /**
-     * POST: procesa el registro de un cliente desde el portal.
-     * Usa el alta de 4 parámetros, así que el cliente queda PENDENT
-     * hasta que un administrador lo valide (RF82).
-     * Si falla, vuelve al formulario con el error y los datos escritos.
+     * Processa la sol·licitud d'alta enviada per un usuari extern des del portal web:
+     * Registra el client amb estat PENDENT fins a la revisió d'un administrador i redirigeix al catàleg, o retorna al formulari si hi ha errors.
      */
     @PostMapping("/registre")
     public String processarRegistreClient(
@@ -328,9 +330,8 @@ public class ClientController {
     // =====================================================
 
     /**
-     * GET: muestra el perfil del cliente que ha iniciado sesión.
-     * Busca al cliente por el email de la sesión; si no hay sesión va al login,
-     * y si no encuentra el perfil vuelve al catálogo con un aviso.
+     * Mostra la vista del perfil personal del client autenticat:
+     * Recupera el client associat al correu electrònic de la sessió activa i renderitza "client/perfil".
      */
     @GetMapping("/perfil")
     public String veurePerfil(Authentication auth, Model model, RedirectAttributes ra) {
@@ -347,9 +348,8 @@ public class ClientController {
     }
 
     /**
-     * POST: guarda los cambios que el propio cliente hace en su perfil.
-     * Si cambia el correo (que es su usuario de acceso), cierra la sesión
-     * y lo manda al login para que entre con el correo nuevo.
+     * Desa les modificacions realitzades pel client al seu propi perfil personal:
+     * Si el client modifica el seu correu electrònic d'accés, tanca la sessió actual de Spring Security i el redirigeix al login.
      */
     @PostMapping("/perfil")
     public String guardarPerfil(@ModelAttribute("client") ClientEntity dades,

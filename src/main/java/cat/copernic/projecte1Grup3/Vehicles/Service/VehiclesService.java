@@ -1,3 +1,7 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package cat.copernic.projecte1Grup3.Vehicles.Service;
 
 import cat.copernic.projecte1Grup3.Vehicles.Entity.VehiclesEntity;
@@ -13,6 +17,15 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+/**
+ * Servei de lògica de negoci per a la gestió integral de la flota de vehicles:
+ * Coordina les operacions de consulta, filtratge avançat i disponibilitat per
+ * al catàleg públic i el panell intern. Gestiona el cicle de vida operatiu de
+ * cada vehicle (alta, edició, desactivació per manteniment, reactivació i
+ * esborrat segur).
+ *
+ * @author Grup3
+ */
 @Service
 public class VehiclesService {
 
@@ -21,15 +34,31 @@ public class VehiclesService {
 
     private final VehiclesRepository vehiclesRepository;
 
+    /**
+     * Constructor amb injecció de dependències del repositori de vehicles:
+     * Inicialitza la instància de VehiclesRepository necessària per interactuar
+     * amb la base de dades.
+     */
     public VehiclesService(VehiclesRepository vehiclesRepository) {
         this.vehiclesRepository = vehiclesRepository;
     }
 
+    /**
+     * Recupera el llistat complet de tots els vehicles registrats a la base de
+     * dades: Executa una consulta transaccional de només lectura sense aplicar
+     * cap criteri de filtratge.
+     */
     @Transactional(readOnly = true)
     public List<VehiclesEntity> llistarTots() {
         return vehiclesRepository.findAll();
     }
 
+    /**
+     * Filtra els vehicles de la flota segons múltiples criteris tècnics,
+     * d'estat i de disponibilitat: Si no s'indica cap filtre, retorna tots els
+     * vehicles; en cas contrari, delega la consulta al repositori netejant els
+     * textos.
+     */
     @Transactional(readOnly = true)
     public List<VehiclesEntity> filtrarVehicles(
             String matricula,
@@ -41,14 +70,14 @@ public class VehiclesService {
             LocalDateTime dataInici,
             LocalDateTime dataFi) {
 
-        boolean senseFiltres = (matricula == null || matricula.isBlank()) &&
-                               (marca == null || marca.isBlank()) &&
-                               (model == null || model.isBlank()) &&
-                               anyMatriculacio == null &&
-                               (tipus == null || tipus.isBlank()) &&
-                               actiu == null &&
-                               dataInici == null &&
-                               dataFi == null;
+        boolean senseFiltres = (matricula == null || matricula.isBlank())
+                && (marca == null || marca.isBlank())
+                && (model == null || model.isBlank())
+                && anyMatriculacio == null
+                && (tipus == null || tipus.isBlank())
+                && actiu == null
+                && dataInici == null
+                && dataFi == null;
 
         if (senseFiltres) {
             return vehiclesRepository.findAll();
@@ -65,11 +94,22 @@ public class VehiclesService {
                 dataFi);
     }
 
+    /**
+     * Cerca un vehicle específic a la base de dades a partir de la seva
+     * matrícula: Retorna un Optional amb l'entitat VehiclesEntity trobada o
+     * buit si no existeix.
+     */
     @Transactional(readOnly = true)
     public Optional<VehiclesEntity> buscarPerMatricula(String matricula) {
         return vehiclesRepository.findById(matricula);
     }
 
+    /**
+     * Crea un nou vehicle o actualitza les dades d'un vehicle existent
+     * preservant-ne l'historial operatiu: Si ja existeix, manté les dates,
+     * motius i costos d'activació/desactivació previs; si és nou, l'activa per
+     * defecte.
+     */
     @Transactional
     public VehiclesEntity guardarVehicle(VehiclesEntity vehicle) {
         Optional<VehiclesEntity> existentOpt = vehiclesRepository.findById(vehicle.getMatricula());
@@ -89,6 +129,11 @@ public class VehiclesService {
         return vehiclesRepository.save(vehicle);
     }
 
+    /**
+     * Comprova si un vehicle té alguna reserva activa, pendent o en curs:
+     * Avalua la col·lecció de reserves associades descartant únicament les
+     * cancel·lades, anul·lades o finalitzades.
+     */
     private boolean teReservesActives(VehiclesEntity vehicle) {
         if (vehicle.getReserves() == null || vehicle.getReserves().isEmpty()) {
             return false;
@@ -97,6 +142,11 @@ public class VehiclesService {
                 .anyMatch(r -> r.getEstat() == null || !ESTATS_RESERVA_INACTIVA.contains(r.getEstat().toUpperCase()));
     }
 
+    /**
+     * Desactiva temporalment un vehicle en la data actual i registra l'acció a
+     * l'historial intern: Impedeix la desactivació si té reserves actives o si
+     * la data prevista de retorn és anterior a avui.
+     */
     /**
      * Desactiva un vehicle en la data actual amb data de finalització opcional.
      * Bloqueja l'acció si té reserves actives o en curs.
@@ -131,7 +181,13 @@ public class VehiclesService {
     }
 
     /**
-     * Activa un vehicle donat de baixa en la data actual, registrant opcionalment un motiu i un import.
+     * Reactiva un vehicle inactiu deixant-lo disponible i desant el motiu i
+     * cost de la intervenció: Valida que l'import no sigui negatiu, actualitza
+     * l'estat a DISPONIBLE i afegeix una entrada als comentaris privats.
+     */
+    /**
+     * Activa un vehicle donat de baixa en la data actual, registrant
+     * opcionalment un motiu i un import.
      */
     @Transactional
     public void activarVehicle(String matricula, String motiu, BigDecimal importCost) {
@@ -165,6 +221,11 @@ public class VehiclesService {
         vehiclesRepository.save(vehicle);
     }
 
+    /**
+     * Afegeix una nova línia de registre al camp de comentaris privats del
+     * vehicle: Concatena el nou text amb un salt de línia respectant les
+     * anotacions anteriors ja existents.
+     */
     private void afegirComentariPrivat(VehiclesEntity vehicle, String novaLinia) {
         String actual = vehicle.getComentarisPrivats();
         if (actual == null || actual.isBlank()) {
@@ -174,6 +235,11 @@ public class VehiclesService {
         }
     }
 
+    /**
+     * Elimina definitivament un vehicle de la base de dades si no té cap
+     * reserva associada: Bloqueja l'esborrat i llança una excepció tant si té
+     * reserves actives com si conserva historial passat.
+     */
     @Transactional
     public void eliminarVehicle(String matricula) {
         VehiclesEntity vehicle = vehiclesRepository.findById(matricula)
@@ -189,12 +255,21 @@ public class VehiclesService {
 
         vehiclesRepository.delete(vehicle);
     }
-    
+
+    /**
+     * Obté tots els vehicles de la flota que es troben actius: Retorna la
+     * llista de VehiclesEntity habilitats per ser mostrades al catàleg.
+     */
     @Transactional(readOnly = true)
     public List<VehiclesEntity> llistarActius() {
         return vehiclesRepository.findByActiuTrue();
     }
 
+    /**
+     * Filtra els vehicles actius segons la seva categoria o tipus de
+     * carrosseria: Si el tipus és nul o buit, retorna la llista completa de
+     * vehicles actius sense filtrar.
+     */
     @Transactional(readOnly = true)
     public List<VehiclesEntity> llistarActiusPerTipus(String tipus) {
         if (tipus == null || tipus.isBlank()) {
@@ -203,6 +278,11 @@ public class VehiclesService {
         return vehiclesRepository.findByActiuTrueAndTipusVehicle(tipus);
     }
 
+    /**
+     * Consulta els vehicles disponibles per a un rang de dates i una categoria
+     * determinats: Si alguna de les dates no s'especifica, retorna els vehicles
+     * actius filtrats únicament per tipus.
+     */
     @Transactional(readOnly = true)
     public List<VehiclesEntity> llistarDisponibles(LocalDateTime dataInici, LocalDateTime dataFi, String tipus) {
         if (dataInici == null || dataFi == null) {

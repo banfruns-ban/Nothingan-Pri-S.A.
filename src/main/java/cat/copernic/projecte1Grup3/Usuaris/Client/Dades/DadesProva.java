@@ -1,3 +1,7 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package cat.copernic.projecte1Grup3.Usuaris.Client.Dades;
 
 import cat.copernic.projecte1Grup3.Usuaris.Client.Entity.ClientEntity;
@@ -9,9 +13,23 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+/**
+ * Configuració per a la càrrega inicial de dades de clients de prova: Executa
+ * un CommandLineRunner a l'inici de l'aplicació per netejar registres orfes i
+ * poblar la base de dades amb clients de mostra. Crea 20 perfils amb diferents
+ * nacionalitats, permisos, estats de validació (VALIDAT/PENDENT), nivell
+ * prèmium i contrasenyes xifrades.
+ *
+ * @author Grup3
+ */
 @Configuration
 public class DadesProva {
 
+    /**
+     * Defineix el bean d'inicialització que inserta els clients de prova a la
+     * base de dades: Elimina prèviament possibles registres de clients sense
+     * fila pare a la taula d'usuaris i dona d'alta els perfils predefinits.
+     */
     @Bean
     CommandLineRunner carregarClients(ClientRepository repo, PasswordEncoder passwordEncoder, JdbcTemplate jdbcTemplate) {
         return args -> {
@@ -103,6 +121,12 @@ public class DadesProva {
         };
     }
 
+    /**
+     * Crea i desa un client individual si no existeix prèviament a la base de
+     * dades: Si el client ja existeix, s'assegura que la seva contrasenya
+     * estigui xifrada amb BCrypt; en cas contrari, construeix la nova entitat
+     * completa.
+     */
     private void crea(ClientRepository repo, PasswordEncoder passwordEncoder,
             String dni, String nom, String email, String password, String tel,
             LocalDate naix, String nac, String adreca, String llicencia,
@@ -139,6 +163,11 @@ public class DadesProva {
         repo.save(c);
     }
 
+    /**
+     * Sobrecàrrega del mètode de creació de clients utilitzant una contrasenya
+     * per defecte: Delega al mètode principal assignant el valor "password123"
+     * com a contrasenya inicial.
+     */
     private void crea(ClientRepository repo, PasswordEncoder passwordEncoder,
             String dni, String nom, String email, String tel,
             LocalDate naix, String nac, String adreca, String llicencia,
@@ -146,6 +175,11 @@ public class DadesProva {
         crea(repo, passwordEncoder, dni, nom, email, "password123", tel, naix, nac, adreca, llicencia, capDni, capCarnet, estat, premium);
     }
 
+    /**
+     * Comprova si una cadena de contrasenya ja té el format d'un hash BCrypt
+     * vàlid: Verifica mitjançant expressió regular el prefix estàndard de
+     * BCrypt ($2a$, $2b$, $2y$) i la seva longitud de 60 caràcters.
+     */
     private boolean esContrasenyaBcrypt(String password) {
         return password.matches("^\\$2[aby]\\$\\d{2}\\$[./A-Za-z0-9]{53}$");
     }

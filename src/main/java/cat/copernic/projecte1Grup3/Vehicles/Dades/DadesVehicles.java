@@ -1,3 +1,7 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package cat.copernic.projecte1Grup3.Vehicles.Dades;
 
 import cat.copernic.projecte1Grup3.Vehicles.Entity.VehiclesEntity;
@@ -13,9 +17,20 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * Configuració per a la càrrega inicial de dades de la flota de vehicles:
+ * Executa un CommandLineRunner en arrencar l'aplicació per poblar la base de dades amb 20 vehicles de mostra.
+ * Assigna automàticament les fotografies disponibles a la carpeta local segons matrícula, marca, model o ordre seqüencial.
+ *
+ * @author Grup3
+ */
 @Configuration
 public class DadesVehicles {
 
+    /**
+     * Defineix el bean d'inicialització que carrega el catàleg inicial de vehicles a la base de dades:
+     * Llegeix les imatges disponibles al directori "uploads/vehicles" i dona d'alta turismes, compactes i furgonetes.
+     */
     @Bean
     CommandLineRunner carregarVehicles(VehiclesRepository repo) {
         return args -> {
@@ -84,6 +99,10 @@ public class DadesVehicles {
         };
     }
 
+    /**
+     * Crea i desa un vehicle a la base de dades si no existeix prèviament:
+     * Si el vehicle ja està registrat però no té foto assignada, li vincula una imatge disponible; en cas contrari, inserta la nova entitat.
+     */
     private void crea(VehiclesRepository repo, List<String> fotos, int[] idx,
             String matricula, String marca, String model, Integer any,
             String descripcio, String tipus, Integer limitKm,
@@ -107,6 +126,10 @@ public class DadesVehicles {
         repo.save(v);
     }
 
+    /**
+     * Selecciona el nom del fitxer d'imatge més adequat per a un vehicle determinat:
+     * Cerca coincidències per matrícula, model o marca dins dels fitxers disponibles i, si no en troba, n'assigna un per torn rotatiu.
+     */
     private String triarFotoVehicle(List<String> fotos, int[] idx, String matricula, String marca, String model) {
         if (fotos.isEmpty()) {
             return null;
@@ -126,6 +149,10 @@ public class DadesVehicles {
         return f;
     }
 
+    /**
+     * Llegeix i retorna ordenats els noms dels fitxers d'imatge d'una subcarpeta d'uploads:
+     * Filtra únicament els fitxers regulars amb extensió JPG, JPEG, PNG o WEBP i retorna una llista buida si hi ha errors d'accés.
+     */
     private List<String> obtenirFotosCarpeta(String subcarpeta) {
         Path dir = Paths.get("uploads", subcarpeta);
         if (!Files.exists(dir) || !Files.isDirectory(dir)) {

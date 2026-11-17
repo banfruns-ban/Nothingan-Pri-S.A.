@@ -1,3 +1,7 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package cat.copernic.projecte1Grup3.Vehicles.Controller;
 
 import java.beans.PropertyEditorSupport;
@@ -35,19 +39,39 @@ import cat.copernic.projecte1Grup3.Vehicles.Entity.VehiclesEntity;
 import cat.copernic.projecte1Grup3.Vehicles.Service.VehiclesService;
 import jakarta.validation.Valid;
 
+/**
+ * Controlador web Spring MVC per a la gestió de la flota de vehicles al panell
+ * d'administració: Gestiona el llistat amb filtres avançats, la consulta de
+ * detall amb ressenyes, les altes i edicions amb pujada d'imatges. També
+ * controla l'activació, desactivació per manteniment i eliminació segura dels
+ * vehicles sota la ruta "/dashboard/vehicles".
+ *
+ * @author Grup3
+ */
 @Controller
 @RequestMapping("/dashboard/vehicles")
 public class VehiclesController {
+
     private static final Logger log = LoggerFactory.getLogger(VehiclesController.class);
     private final VehiclesService vehiclesService;
     private final RessenyaService ressenyaLogic;
 
+    /**
+     * Constructor amb injecció de dependències dels serveis de vehicles i
+     * ressenyes: Inicialitza els components de lògica de negoci necessaris per
+     * gestionar la flota i les seves valoracions.
+     */
     @Autowired
     public VehiclesController(VehiclesService vehiclesService, RessenyaService ressenyaLogic) {
         this.vehiclesService = vehiclesService;
-        this.ressenyaLogic = ressenyaLogic; 
+        this.ressenyaLogic = ressenyaLogic;
     }
 
+    /**
+     * Configura el WebDataBinder per normalitzar automàticament el camp
+     * matrícula: Elimina espais en blanc als extrems i converteix la matrícula
+     * a majúscules abans de vincular-la a l'entitat.
+     */
     @InitBinder
     public void initBinder(WebDataBinder binder) {
         binder.registerCustomEditor(String.class, "matricula", new PropertyEditorSupport() {
@@ -58,6 +82,11 @@ public class VehiclesController {
         });
     }
 
+    /**
+     * Mostra el llistat de vehicles filtrat per criteris bàsics i avançats:
+     * Valida el rang de dates de disponibilitat, aplica els filtres al servei i
+     * passa l'estat de cerca a la vista.
+     */
     @GetMapping
     public String llistarVehicles(
             @RequestParam(name = "matricula", required = false) String matricula,
@@ -83,16 +112,16 @@ public class VehiclesController {
         List<VehiclesEntity> vehicles = vehiclesService.filtrarVehicles(
                 matricula, marca, modelVehicle, anyMatriculacio, tipus, estat, iniciDT, fiDT);
 
-        boolean teFiltresAvancats = (marca != null && !marca.isBlank()) ||
-                                    (modelVehicle != null && !modelVehicle.isBlank()) ||
-                                    anyMatriculacio != null ||
-                                    dataInici != null ||
-                                    dataFi != null;
+        boolean teFiltresAvancats = (marca != null && !marca.isBlank())
+                || (modelVehicle != null && !modelVehicle.isBlank())
+                || anyMatriculacio != null
+                || dataInici != null
+                || dataFi != null;
 
-        boolean teAlgunFiltre = teFiltresAvancats ||
-                                (matricula != null && !matricula.isBlank()) ||
-                                (tipus != null && !tipus.isBlank()) ||
-                                estat != null;
+        boolean teAlgunFiltre = teFiltresAvancats
+                || (matricula != null && !matricula.isBlank())
+                || (tipus != null && !tipus.isBlank())
+                || estat != null;
 
         model.addAttribute("vehicles", vehicles);
         model.addAttribute("matricula", matricula);
@@ -109,6 +138,11 @@ public class VehiclesController {
         return "vehicles/llistat";
     }
 
+    /**
+     * Mostra la fitxa de detall d'un vehicle juntament amb les seves ressenyes
+     * associades: Si la matrícula no existeix a la base de dades, redirigeix al
+     * llistat amb un missatge d'error.
+     */
     @GetMapping("/detall/{matricula}")
     public String mostrarDetall(@PathVariable("matricula") String matricula, Model model, RedirectAttributes redirect) {
         Optional<VehiclesEntity> vehicle = vehiclesService.buscarPerMatricula(matricula);
@@ -121,12 +155,22 @@ public class VehiclesController {
         return "redirect:/dashboard/vehicles";
     }
 
+    /**
+     * Prepara i mostra el formulari d'alta per registrar un nou vehicle a la
+     * flota: Afegeix una instància buida de VehiclesEntity al model i retorna
+     * la vista d'alta.
+     */
     @GetMapping("/nou")
     public String formulariNouVehicle(Model model) {
         model.addAttribute("vehicle", new VehiclesEntity());
         return "vehicles/altaVehicle";
     }
 
+    /**
+     * Carrega les dades d'un vehicle existent per mostrar-les al formulari
+     * d'edició: Redirigeix al llistat amb una notificació d'error si no es
+     * troba cap vehicle amb la matrícula indicada.
+     */
     @GetMapping("/editar/{matricula}")
     public String formulariEditarVehicle(@PathVariable("matricula") String matricula, Model model, RedirectAttributes redirect) {
         Optional<VehiclesEntity> vehicle = vehiclesService.buscarPerMatricula(matricula);
@@ -138,6 +182,11 @@ public class VehiclesController {
         return "redirect:/dashboard/vehicles";
     }
 
+    /**
+     * Processa l'alta o l'actualització d'un vehicle i gestiona la pujada de la
+     * seva fotografia: Valida les restriccions de l'entitat i la coherència
+     * dels dies de lloguer, desa el fitxer al disc i persisteix el registre.
+     */
     @PostMapping("/guardar")
     public String guardarVehicle(
             @Valid @ModelAttribute("vehicle") VehiclesEntity vehicle,
@@ -184,6 +233,11 @@ public class VehiclesController {
         return "redirect:/dashboard/vehicles";
     }
 
+    /**
+     * Desactiva temporalment un vehicle establint una possible data de
+     * finalització de la baixa: Captura les validacions de negoci i informa del
+     * resultat mitjançant missatges flash en redirigir al llistat.
+     */
     @PostMapping("/desactivar/{matricula}")
     public String desactivarVehicle(
             @PathVariable("matricula") String matricula,
@@ -203,6 +257,11 @@ public class VehiclesController {
         return "redirect:/dashboard/vehicles";
     }
 
+    /**
+     * Reactiva un vehicle prèviament desactivat registrant el motiu i l'import
+     * del cost associat: Delega l'operació al servei de vehicles i redirigeix
+     * al llistat principal notificant l'èxit o l'error.
+     */
     @PostMapping("/activar/{matricula}")
     public String activarVehicle(
             @PathVariable("matricula") String matricula,
@@ -223,6 +282,11 @@ public class VehiclesController {
         return "redirect:/dashboard/vehicles";
     }
 
+    /**
+     * Elimina definitivament un vehicle del sistema si no té restriccions
+     * actives que ho impedeixin: Gestiona les excepcions d'estat invàlid i
+     * redirigeix al llistat amb el missatge corresponenent.
+     */
     @PostMapping("/eliminar/{matricula}")
     public String eliminarVehicle(@PathVariable("matricula") String matricula, RedirectAttributes redirect) {
         try {

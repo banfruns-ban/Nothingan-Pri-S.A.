@@ -1,3 +1,7 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package cat.copernic.projecte1Grup3.Security;
 
 import org.springframework.boot.security.autoconfigure.web.servlet.PathRequest;
@@ -20,14 +24,25 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 /**
- * Configuración central de Spring Security. Gestiona el control de acceso por
- * roles (ADMIN, AGENT, CLIENT), la protección de rutas, el inicio/cierre de
- * sesión y las redirecciones inteligentes.
+ * Configuració central de Spring Security per a l'aplicació: Gestiona el
+ * control d'accés basat en rols (ADMIN, AGENT, CLIENT), la protecció de rutes
+ * HTTP i el flux d'inici/tancament de sessió. Defineix també la gestió d'errors
+ * d'autorització (403), la memòria cau de peticions prèvies i l'encriptació de
+ * contrasenyes.
+ *
+ * @author Grup3
  */
 @Configuration
 @EnableMethodSecurity // Habilita las anotaciones @PreAuthorize en los controladores (ej. AgentController)
 public class SecurityConfig {
 
+    /**
+     * Configura la cadena de filtres de seguretat i les regles d'autorització
+     * HTTP: Defineix les rutes públiques, les restriccions per rol per al
+     * panell de control i l'àrea de client, i el formulari de login/logout.
+     * Estableix els gestors personalitzats per a errors d'autenticació (usuari
+     * no validat) i accessos denegats (403).
+     */
     // ============================================================
     // BLOQUE 1: CADENA DE FILTROS Y REGLAS DE AUTORIZACIÓN HTTP
     // ============================================================
@@ -97,6 +112,11 @@ public class SecurityConfig {
         return http.build();
     }
 
+    /**
+     * Crea el bean per emmagatzemar en sessió les peticions HTTP prèvies al
+     * login: Utilitza HttpSessionRequestCache per recordar la URL protegida que
+     * l'usuari intentava visitar abans d'autenticar-se.
+     */
     // ============================================================
     // BLOQUE 3: CACHÉ DE PETICIONES PREVIAS
     // ============================================================
@@ -105,6 +125,12 @@ public class SecurityConfig {
         return new HttpSessionRequestCache();
     }
 
+    /**
+     * Defineix el gestor de redirecció intel·ligent un cop iniciada la sessió
+     * amb èxit: Envia els administradors i agents directament al dashboard,
+     * mentre que als clients els retorna a la seva URL prèvia vàlida o al
+     * catàleg.
+     */
     // ============================================================
     // BLOQUE 4: REDIRECCIÓN INTELIGENTE TRAS INICIAR SESIÓN
     // ============================================================
@@ -142,6 +168,11 @@ public class SecurityConfig {
         };
     }
 
+    /**
+     * Defineix el codificador de contrasenyes basat en l'algorisme BCrypt:
+     * Proporciona el bean PasswordEncoder utilitzat per Spring Security i els
+     * serveis d'usuaris per xifrar i verificar credencials.
+     */
     // ============================================================
     // BLOQUE 5: ENCRIPTACIÓN DE CONTRASEÑAS
     // ============================================================

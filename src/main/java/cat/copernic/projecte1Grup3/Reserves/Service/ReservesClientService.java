@@ -1,5 +1,6 @@
 package cat.copernic.projecte1Grup3.Reserves.Service;
 
+import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -7,8 +8,8 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 import cat.copernic.projecte1Grup3.Reserves.Entity.ReservesEntity;
-import cat.copernic.projecte1Grup3.Usuaris.Client.Entity.ClientEntity;
 import cat.copernic.projecte1Grup3.Reserves.Repository.ReservesRepository;
+import cat.copernic.projecte1Grup3.Usuaris.Client.Entity.ClientEntity;
 import cat.copernic.projecte1Grup3.Usuaris.Client.Repository.ClientRepository;
 
 @Service
@@ -44,6 +45,33 @@ public class ReservesClientService {
                         .sorted(Comparator.comparing(ReservesEntity::getCodiReserva).reversed())
                         .toList())
                 .orElse(List.of());
+    }
+
+    // Filtrar les reserves del client per codi i/o rang de dates (G3P1-245)
+    public List<ReservesEntity> filtrarPerClient(String identificador, String codi, LocalDate dataInici, LocalDate dataFi) {
+        String codiNet = (codi != null) ? codi.replace("#", "").trim() : "";
+
+        return llistarPerClient(identificador).stream()
+                .filter(r -> {
+                    if (!codiNet.isEmpty()) {
+                        String codiStr = String.valueOf(r.getCodiReserva());
+                        if (!codiStr.contains(codiNet)) {
+                            return false;
+                        }
+                    }
+                    if (dataInici != null && r.getDataInici() != null) {
+                        if (r.getDataInici().isBefore(dataInici)) {
+                            return false;
+                        }
+                    }
+                    if (dataFi != null && r.getDataFi() != null) {
+                        if (r.getDataFi().isAfter(dataFi)) {
+                            return false;
+                        }
+                    }
+                    return true;
+                })
+                .toList();
     }
 
     // Una reserva concreta, només si pertany al client loguejat

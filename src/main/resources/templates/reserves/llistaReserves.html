@@ -70,7 +70,7 @@
                             </select>
                         </div>
 
-                        <div class="col-md-2 d-flex gap-1">
+                        <div class="col-md-2 d-flex gap-2">
                             <button type="submit" class="btn btn-primary w-100 fw-semibold">
                                 <i class="fa-solid fa-filter me-1"></i> Filtrar
                             </button>
@@ -153,21 +153,21 @@
                             </td>
                             <td class="text-end">
                                 <div class="d-inline-flex gap-1 align-items-center">
-                                    <a th:href="@{/dashboard/reserves/{codi}(codi=${r.codiReserva})}" class="btn btn-sm btn-primary">
-                                        Veure detalls
+                                    <a th:href="@{/dashboard/reserves/{codi}(codi=${r.codiReserva})}" class="btn btn-sm btn-primary fw-semibold" style="border-radius: 6px; padding: 6px 12px;">
+                                        Detall
                                     </a>
-                                    <a th:href="@{'/dashboard/clients/detall/' + ${r.client.dni}}" class="btn btn-outline-secondary btn-sm fw-semibold" style="border-radius: 6px;">
+                                    <a th:href="@{'/dashboard/clients/detall/' + ${r.client.dni}}" class="btn btn-outline-secondary btn-sm fw-semibold" style="border-radius: 6px; padding: 6px 12px;">
                                         <i class="fa-solid fa-user me-1"></i> Client
                                     </a>
                                     <a th:if="${r.estat != 'EN_CURS' and r.estat != 'FINALITZADA' and r.estat != 'CANCELADA'}"
                                        th:href="@{/dashboard/reserves/{codi}/anular(codi=${r.codiReserva})}"
-                                       class="btn btn-outline-danger btn-sm fw-semibold">
+                                       class="btn btn-outline-danger btn-sm fw-semibold" style="border-radius: 6px; padding: 6px 12px;">
                                         Anul·lar
                                     </a>
                                     <form th:if="${r.estat != 'EN_CURS' and r.estat != 'FINALITZADA'}"
                                           th:action="@{'/dashboard/reserves/' + ${r.codiReserva} + '/eliminar'}" method="post" class="d-inline"
-                                          onsubmit="return confirm('Segur que vols eliminar aquesta reserva?');">
-                                        <button type="submit" class="btn btn-desactivar btn-sm">Baixa</button>
+                                          onsubmit="return confirm('Estàs segur de voler eliminar permanentment aquesta reserva?');">
+                                        <button type="submit" class="btn btn-desactivar">Eliminar</button>
                                     </form>
                                 </div>
                             </td>

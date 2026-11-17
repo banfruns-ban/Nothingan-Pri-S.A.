@@ -1,70 +1,71 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package cat.copernic.projecte1Grup3.Reserves.Controller;
 
+import java.time.LocalDate;
+
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import cat.copernic.projecte1Grup3.Reserves.Service.ReservesClientService;
 import cat.copernic.projecte1Grup3.Ressenya.Service.RessenyaService;
 
-/**
- * Controlador per a la consulta de reserves i valoracions des de l'àrea de
- * client: Gestiona la visualització de l'historial de reserves pròpies i
- * l'accés a la vista de valoració dels vehicles llogats. Verifica en tot moment
- * l'autenticació de l'usuari i que la reserva consultada pertanyi al client
- * connectat.
- *
- * @author Grup3
- */
 @Controller
 public class ReservesClientController {
 
     private final ReservesClientService reservesClientService;
     private final RessenyaService ressenyaService;
 
-    /**
-     * Injecció de dependències dels serveis de reserves de client i ressenyes:
-     * Inicialitza el controlador rebent ReservesClientService i RessenyaService
-     * per consultar les reserves i valoracions.
-     */
     public ReservesClientController(ReservesClientService reservesClientService,
             RessenyaService ressenyaService) {
         this.reservesClientService = reservesClientService;
         this.ressenyaService = ressenyaService;
     }
 
-    /**
-     * Mostra el llistat de reserves associades al client autenticat: Comprova
-     * si la sessió és vàlida i recupera totes les reserves vinculades al correu
-     * de l'usuari connectat. Carrega la llista al model i renderitza la
-     * plantilla HTML "reserves/LesMevesReserves".
-     */
-    // Listado de mis reservas
+    // Llistat de reserves del client amb filtres per codi i dates (G3P1-245)
     @GetMapping("/reserves-client")
-    public String mostrarReserves(Authentication authentication, Model model) {
+    public String mostrarReserves(
+            @RequestParam(required = false) String codi,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataInici,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataFi,
+            Authentication authentication,
+            Model model) {
         if (authentication == null || !authentication.isAuthenticated()) {
             return "redirect:/login";
         }
         model.addAttribute("reserves",
-                reservesClientService.llistarPerClient(authentication.getName()));
+                reservesClientService.filtrarPerClient(authentication.getName(), codi, dataInici, dataFi));
+        model.addAttribute("codi", codi);
+        model.addAttribute("dataInici", dataInici);
+        model.addAttribute("dataFi", dataFi);
         return "reserves/LesMevesReserves";
     }
 
-    /**
-     * Mostra la fitxa de valoració d'una reserva concreta del client: Valida
-     * que la reserva pertanyi al client autenticat i carrega al model el
-     * vehicle, les ressenyes existents i si ja ha valorat. Si la reserva no
-     * existeix o no correspon a l'usuari, redirigeix al llistat principal amb
-     * un missatge d'error.
-     */
-    // Ficha del vehículo + reseñas + formulario de valorar
+    // Vista de detall d'una reserva del client (G3P1-244)
+    @GetMapping("/reserves-client/{codi}")
+    public String detallReserva(@PathVariable("codi") Long codi,
+            Authentication authentication,
+            Model model,
+            RedirectAttributes ra) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return "redirect:/login";
+        }
+        return reservesClientService.obtenirReservaDelClient(codi, authentication.getName())
+                .map(r -> {
+                    model.addAttribute("reserva", r);
+                    return "reserves/detallReservaClient";
+                })
+                .orElseGet(() -> {
+                    ra.addFlashAttribute("error", "No s'ha trobat aquesta reserva o no tens permís per veure-la.");
+                    return "redirect:/reserves-client";
+                });
+    }
+
+    // Fitxa del vehicle + ressenyes + formulari de valorar
     @GetMapping("/reserves-client/valorar/{codi}")
     public String valorarReserva(@PathVariable("codi") Long codi,
             Authentication authentication,

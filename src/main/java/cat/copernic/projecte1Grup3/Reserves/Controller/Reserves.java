@@ -138,12 +138,12 @@ public class Reserves {
             ClientEntity client = reservesClientService.obtenirClient(authentication.getName())
                     .orElseThrow(() -> new IllegalArgumentException("Client no trobat"));
 
-            reservesService.crear(client.getDni(), matricula,
+            ReservesEntity reservaCreada = reservesService.crear(client.getDni(), matricula,
                     reserva.getDataInici(), reserva.getHoraInici(),
                     reserva.getDataFi(), reserva.getHoraFi(),
                     reserva.getObservacions());
 
-            ra.addFlashAttribute("missatge", "Reserva realitzada amb èxit!");
+            ra.addFlashAttribute("missatge", "El teu codi de reserva és #" + reservaCreada.getCodiReserva());
             return "redirect:/reserves-client";
         } catch (Exception e) {
             ra.addFlashAttribute("error", "No s'ha pogut realitzar la reserva: " + e.getMessage());

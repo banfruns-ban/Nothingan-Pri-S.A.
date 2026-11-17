@@ -3,6 +3,7 @@ package cat.copernic.projecte1Grup3.Reserves.Service;
 import cat.copernic.projecte1Grup3.Reserves.Entity.ReservesEntity;
 import cat.copernic.projecte1Grup3.Usuaris.Client.Entity.ClientEntity;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.mail.SimpleMailMessage;
@@ -82,5 +83,63 @@ class ReservaAnulacioEmailServiceTest {
 
         assertThrows(IllegalStateException.class, () -> service.enviarNotificacio(reserva));
         verifyNoInteractions(mailSender);
+    }
+
+    @Test
+    void calcularDevolucioClientAmb48HInclouCostIFianca() {
+        ReservesEntity reserva = reservaClient(LocalDateTime.of(2026, 6, 5, 12, 0));
+
+        ReservaAnulacioEmailService.DevolucioClient devolucio
+                = service.calcularDevolucioClient(
+                        reserva, LocalDateTime.of(2026, 6, 3, 12, 0));
+
+        assertTrue(devolucio.dinsTermini());
+        assertEquals(new BigDecimal("180.65"), devolucio.importDevolucio());
+    }
+
+    @Test
+    void calcularDevolucioClientAmbMenysDe48HNoRetornaRes() {
+        ReservesEntity reserva = reservaClient(LocalDateTime.of(2026, 6, 5, 12, 0));
+
+        ReservaAnulacioEmailService.DevolucioClient devolucio
+                = service.calcularDevolucioClient(
+                        reserva, LocalDateTime.of(2026, 6, 3, 12, 1));
+
+        assertTrue(!devolucio.dinsTermini());
+        assertEquals(new BigDecimal("0.00"), devolucio.importDevolucio());
+    }
+
+    @Test
+    void enviarNotificacioClientIndicaImportCompletOZero() {
+        ClientEntity client = new ClientEntity();
+        client.setNom("Maria");
+        client.setEmail("maria@example.com");
+        ReservesEntity reserva = new ReservesEntity();
+        reserva.setCodiReserva(44L);
+        reserva.setClient(client);
+
+        service.enviarNotificacioClient(
+                reserva, new ReservaAnulacioEmailService.DevolucioClient(
+                        new BigDecimal("180.65"), true));
+        service.enviarNotificacioClient(
+                reserva, new ReservaAnulacioEmailService.DevolucioClient(
+                        new BigDecimal("0.00"), false));
+
+        ArgumentCaptor<SimpleMailMessage> captor
+                = ArgumentCaptor.forClass(SimpleMailMessage.class);
+        verify(mailSender, org.mockito.Mockito.times(2)).send(captor.capture());
+        assertTrue(captor.getAllValues().get(0).getText().contains("180.65 €"));
+        assertTrue(captor.getAllValues().get(0).getText().contains("incloent el cost del lloguer i la fiança"));
+        assertTrue(captor.getAllValues().get(1).getText().contains("0,00 €"));
+        assertTrue(captor.getAllValues().get(1).getText().contains("menys de 2 dies"));
+    }
+
+    private ReservesEntity reservaClient(LocalDateTime dataInici) {
+        ReservesEntity reserva = new ReservesEntity();
+        reserva.setDataInici(dataInici.toLocalDate());
+        reserva.setHoraInici(dataInici.toLocalTime());
+        reserva.setCostTotal(new BigDecimal("80.10"));
+        reserva.setFianca(new BigDecimal("100.55"));
+        return reserva;
     }
 }

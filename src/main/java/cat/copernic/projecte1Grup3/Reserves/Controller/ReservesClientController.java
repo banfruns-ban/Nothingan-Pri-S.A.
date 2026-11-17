@@ -2,27 +2,38 @@ package cat.copernic.projecte1Grup3.Reserves.Controller;
 
 import java.time.LocalDate;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.mail.MailException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import cat.copernic.projecte1Grup3.Reserves.Entity.ReservesEntity;
+import cat.copernic.projecte1Grup3.Reserves.Service.ReservaAnulacioEmailService;
 import cat.copernic.projecte1Grup3.Reserves.Service.ReservesClientService;
 import cat.copernic.projecte1Grup3.Ressenya.Service.RessenyaService;
 
 @Controller
 public class ReservesClientController {
 
+    private static final Logger log = LoggerFactory.getLogger(ReservesClientController.class);
+
     private final ReservesClientService reservesClientService;
+    private final ReservaAnulacioEmailService reservaAnulacioEmailService;
     private final RessenyaService ressenyaService;
 
     public ReservesClientController(ReservesClientService reservesClientService,
+            ReservaAnulacioEmailService reservaAnulacioEmailService,
             RessenyaService ressenyaService) {
         this.reservesClientService = reservesClientService;
+        this.reservaAnulacioEmailService = reservaAnulacioEmailService;
         this.ressenyaService = ressenyaService;
     }
 
@@ -63,6 +74,41 @@ public class ReservesClientController {
                     ra.addFlashAttribute("error", "No s'ha trobat aquesta reserva o no tens permís per veure-la.");
                     return "redirect:/reserves-client";
                 });
+    }
+
+    @PostMapping("/reserves-client/{codi}/anular")
+    public String anularReserva(@PathVariable("codi") Long codi,
+            Authentication authentication,
+            RedirectAttributes ra) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return "redirect:/login";
+        }
+
+        try {
+            ReservesClientService.ResultatAnulacio resultat
+                    = reservesClientService.anularReservaDelClient(codi, authentication.getName());
+            try {
+                reservaAnulacioEmailService.enviarNotificacioClient(
+                        resultat.reserva(), resultat.devolucio());
+            } catch (MailException | IllegalStateException e) {
+                log.error("Reserva #{} anul·lada pel client però no s'ha pogut enviar el correu",
+                        codi, e);
+                ra.addFlashAttribute(
+                        "error",
+                        "La reserva s'ha anul·lat, però no s'ha pogut enviar el correu de confirmació."
+                );
+                return "redirect:/reserves-client";
+            }
+
+            ra.addFlashAttribute("missatge",
+                    "Reserva #" + codi + " anul·lada. S'ha enviat un correu amb l'import de devolució.");
+        } catch (IllegalArgumentException e) {
+            ra.addFlashAttribute("error", e.getMessage());
+        } catch (Exception e) {
+            log.error("Error anul·lant la reserva #{} des del compte del client", codi, e);
+            ra.addFlashAttribute("error", "No s'ha pogut anul·lar la reserva #" + codi + ".");
+        }
+        return "redirect:/reserves-client";
     }
 
     // Fitxa del vehicle + ressenyes + formulari de valorar

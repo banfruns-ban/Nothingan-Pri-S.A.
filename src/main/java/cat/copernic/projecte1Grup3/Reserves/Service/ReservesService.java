@@ -554,7 +554,7 @@ public class ReservesService {
     // MÈTODE PER ANUL·LAR UNA RESERVA DES DEL PANELL D'AGENT
     // ============================================================
     @Transactional
-    public void anularReserva(Long codiReserva, String motiu) {
+    public ReservesEntity anularReserva(Long codiReserva, String motiu) {
         if (motiu == null || motiu.isBlank()) {
             throw new IllegalArgumentException("Cal indicar el motiu de l'anul·lació.");
         }
@@ -571,6 +571,7 @@ public class ReservesService {
         ReservesEntity guardada = reservesRepository.save(r);
         historicService.desar(guardada, EstatHistoric.CANCELADA);
         log.info("Reserva #{} anul·lada correctament.", codiReserva);
+        return guardada;
     }
 
     // ============================================================

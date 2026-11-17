@@ -13,6 +13,7 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.mail.MailException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import cat.copernic.projecte1Grup3.Reserves.Entity.ReservesEntity;
+import cat.copernic.projecte1Grup3.Reserves.Service.ReservaAnulacioEmailService;
 import cat.copernic.projecte1Grup3.Reserves.Service.ReservesService;
 import cat.copernic.projecte1Grup3.Usuaris.Client.Service.ClientService;
 
@@ -41,6 +43,7 @@ public class ReservesController {
             = LoggerFactory.getLogger(ReservesController.class);
 
     private final ReservesService reservesLogic;
+    private final ReservaAnulacioEmailService reservaAnulacioEmailService;
     private final ClientService clientLogic;
 
     /**
@@ -50,8 +53,10 @@ public class ReservesController {
      */
     public ReservesController(
             ReservesService reservesLogic,
+            ReservaAnulacioEmailService reservaAnulacioEmailService,
             ClientService clientLogic) {
         this.reservesLogic = reservesLogic;
+        this.reservaAnulacioEmailService = reservaAnulacioEmailService;
         this.clientLogic = clientLogic;
     }
 
@@ -255,7 +260,17 @@ public class ReservesController {
             @RequestParam("anulacio_motiu") String motiu,
             RedirectAttributes ra) {
         try {
-            reservesLogic.anularReserva(codi, motiu);
+            ReservesEntity reservaAnulada = reservesLogic.anularReserva(codi, motiu);
+            try {
+                reservaAnulacioEmailService.enviarNotificacio(reservaAnulada);
+            } catch (MailException | IllegalStateException e) {
+                log.error("Reserva #{} anul·lada però no s'ha pogut enviar el correu al client", codi, e);
+                ra.addFlashAttribute(
+                        "error",
+                        "La reserva s'ha anul·lat, però no s'ha pogut enviar el correu al client."
+                );
+                return "redirect:/dashboard/reserves";
+            }
             ra.addFlashAttribute("missatge", "Reserva #" + codi + " anul·lada correctament.");
             return "redirect:/dashboard/reserves";
         } catch (IllegalArgumentException e) {

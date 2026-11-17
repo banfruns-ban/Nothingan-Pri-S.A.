@@ -1,11 +1,14 @@
 package cat.copernic.projecte1Grup3.Reserves.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import cat.copernic.projecte1Grup3.Reserves.Entity.ReservesEntity;
 import cat.copernic.projecte1Grup3.Reserves.Repository.ReservesRepository;
@@ -17,11 +20,22 @@ public class ReservesClientService {
 
     private final ReservesRepository reservesRepository;
     private final ClientRepository clientRepository;
+    private final ReservesService reservesService;
+    private final ReservaAnulacioEmailService reservaAnulacioEmailService;
 
     public ReservesClientService(ReservesRepository reservesRepository,
-                                 ClientRepository clientRepository) {
+            ClientRepository clientRepository,
+            ReservesService reservesService,
+            ReservaAnulacioEmailService reservaAnulacioEmailService) {
         this.reservesRepository = reservesRepository;
         this.clientRepository = clientRepository;
+        this.reservesService = reservesService;
+        this.reservaAnulacioEmailService = reservaAnulacioEmailService;
+    }
+
+    public record ResultatAnulacio(
+            ReservesEntity reserva,
+            ReservaAnulacioEmailService.DevolucioClient devolucio) {
     }
 
     // El login pot ser el DNI o l'email: provem tots dos
@@ -80,5 +94,20 @@ public class ReservesClientService {
                 reservesRepository.findById(codi)
                         .filter(r -> r.getClient() != null
                                 && c.getDni().equals(r.getClient().getDni())));
+    }
+
+    @Transactional
+    public ResultatAnulacio anularReservaDelClient(Long codi, String identificador) {
+        ReservesEntity reserva = obtenirReservaDelClient(codi, identificador)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "No s'ha trobat aquesta reserva o no tens permís per anul·lar-la."));
+
+        ReservaAnulacioEmailService.DevolucioClient devolucio
+                = reservaAnulacioEmailService.calcularDevolucioClient(
+                reserva, LocalDateTime.now());
+        ReservesEntity reservaAnulada = reservesService.anularReserva(
+                codi, "Cancel·lada pel client");
+
+        return new ResultatAnulacio(reservaAnulada, devolucio);
     }
 }

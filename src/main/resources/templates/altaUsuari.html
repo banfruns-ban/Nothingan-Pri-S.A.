@@ -125,7 +125,7 @@
                         <div class="ajuda">PNG o JPG d'alta resolució, màxim 5MB</div>
                         <img class="previa" alt="Vista prèvia">
                         <div class="nomfitxer"></div>
-                        <input type="file" name="fotoDniFrontal" accept="image/png,image/jpeg">
+                        <input type="file" name="fotoDniFrontal" accept="image/png,image/jpeg" required>
                     </label>
                 </div>
                 <div>
@@ -135,7 +135,7 @@
                         <div class="ajuda">PNG o JPG d'alta resolució, màxim 5MB</div>
                         <img class="previa" alt="Vista prèvia">
                         <div class="nomfitxer"></div>
-                        <input type="file" name="fotoDniPosterior" accept="image/png,image/jpeg">
+                        <input type="file" name="fotoDniPosterior" accept="image/png,image/jpeg" required>
                     </label>
                 </div>
             </div>
@@ -152,6 +152,12 @@
                     <input type="date" id="dataCaducitatDNI" th:field="*{dataCaducitatDNI}" required>
                 </div>
             </div>
+            <div class="fila">
+                <div>
+                    <label for="dataCaducitatCarnet">Data de caducitat del carnet de conduir</label>
+                    <input type="date" id="dataCaducitatCarnet" th:field="*{dataCaducitatCarnet}" required>
+                </div>
+            </div>
             <div class="fila una">
                 <div>
                     <label>Imatge del carnet de conduir (Frontal)</label>
@@ -160,7 +166,7 @@
                         <div class="ajuda">Ha de veure's clarament el número i la data d'expedició</div>
                         <img class="previa" alt="Vista prèvia">
                         <div class="nomfitxer"></div>
-                        <input type="file" name="fotoCarnet" accept="image/png,image/jpeg">
+                        <input type="file" name="fotoCarnet" accept="image/png,image/jpeg" required>
                     </label>
                 </div>
             </div>

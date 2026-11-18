@@ -24,7 +24,7 @@ class ReservaAnulacioEmailServiceTest {
             = new ReservaAnulacioEmailService(mailSender, "no-reply@example.com");
 
     @Test
-    void enviarNotificacioCalculaElVintICincPerCentIInclouLaReserva() {
+    void enviarNotificacioInclouElsImportsCalculatsAmbElPercentatgeSeleccionat() {
         ClientEntity client = new ClientEntity();
         client.setNom("Maria");
         client.setEmail("maria@example.com");
@@ -33,9 +33,11 @@ class ReservaAnulacioEmailServiceTest {
         reserva.setCodiReserva(42L);
         reserva.setClient(client);
         reserva.setCostTotal(new BigDecimal("80.00"));
+        reserva.setFianca(new BigDecimal("100.55"));
         reserva.setAnulacioMotiu("Canvi de plans");
 
-        service.enviarNotificacio(reserva);
+        service.enviarNotificacio(
+                reserva, new BigDecimal("40"), new BigDecimal("20.00"), new BigDecimal("40.22"));
 
         ArgumentCaptor<SimpleMailMessage> captor
                 = ArgumentCaptor.forClass(SimpleMailMessage.class);
@@ -45,14 +47,14 @@ class ReservaAnulacioEmailServiceTest {
                 new String[]{"maria@example.com"}, missatge.getTo());
         assertEquals(
                 "Anul·lació de la reserva #42", missatge.getSubject());
-        assertTrue(
-                missatge.getText().contains("20.00 €"));
+        assertTrue(missatge.getText().contains("Fiança (40%): 40.22 €"));
+        assertTrue(missatge.getText().contains("Total: 60.22 €"));
         assertTrue(
                 missatge.getText().contains("no es tramita automàticament"));
     }
 
     @Test
-    void enviarNotificacioArrodoneixElCalculeACentims() {
+    void enviarNotificacioArrodoneixElsImportsACentims() {
         ClientEntity client = new ClientEntity();
         client.setNom("Maria");
         client.setEmail("maria@example.com");
@@ -62,7 +64,8 @@ class ReservaAnulacioEmailServiceTest {
         reserva.setClient(client);
         reserva.setCostTotal(new BigDecimal("0.02"));
 
-        service.enviarNotificacio(reserva);
+        service.enviarNotificacio(
+                reserva, BigDecimal.ZERO, new BigDecimal("0.01"), BigDecimal.ZERO);
 
         ArgumentCaptor<SimpleMailMessage> captor
                 = ArgumentCaptor.forClass(SimpleMailMessage.class);
@@ -81,7 +84,9 @@ class ReservaAnulacioEmailServiceTest {
         reserva.setClient(client);
         reserva.setCostTotal(new BigDecimal("80.00"));
 
-        assertThrows(IllegalStateException.class, () -> service.enviarNotificacio(reserva));
+        assertThrows(IllegalStateException.class,
+                () -> service.enviarNotificacio(
+                        reserva, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO));
         verifyNoInteractions(mailSender);
     }
 

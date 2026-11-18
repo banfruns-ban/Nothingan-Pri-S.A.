@@ -75,7 +75,6 @@ class ClientServiceTest {
 
         // Targeta de prova vàlida (Luhn) i caducitat futura
         clientExemple.setNumTargeta("4111 1111 1111 1111");
-        clientExemple.setCvv("123");
         clientExemple.setTargetaCaducitat(YearMonth.now().plusYears(2).toString());
 
         imatge = new MockMultipartFile("foto", "foto.png", "image/png", new byte[]{1, 2, 3});
@@ -280,7 +279,6 @@ class ClientServiceTest {
 
         assertNotEquals("password123", clientExemple.getPassword());
         assertNull(clientExemple.getNumTargeta());
-        assertNull(clientExemple.getCvv());
         assertEquals("1111", clientExemple.getTargetaUltims4());
     }
 

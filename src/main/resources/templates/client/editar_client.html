@@ -43,32 +43,32 @@
                     <h5 class="fw-bold text-primary mb-3 border-bottom pb-2">Dades personals</h5>
                     <div class="row g-3 mb-4">
                         <div class="col-md-6">
-                            <label class="form-label">Nom complet</label>
+                            <label class="form-label">Nom complet *</label>
                             <input type="text" th:field="*{nom}" class="form-control" required>
                         </div>
 
                         <div class="col-md-6">
-                            <label class="form-label">Número d'identificació (DNI / NIE)</label>
+                            <label class="form-label">Número d'identificació (DNI / NIE)*</label>
                             <input type="text" th:value="${client.dni}" class="form-control" readonly disabled>
                         </div>
 
                         <div class="col-md-6">
-                            <label class="form-label" for="dataNaixement">Data de naixement</label>
+                            <label class="form-label" for="dataNaixement">Data de naixement *</label>
                             <input type="date" id="dataNaixement" th:field="*{dataNaixement}" class="form-control" required>
                         </div>
 
                         <div class="col-md-6">
-                            <label class="form-label" for="dataCaducitatDNI">Data de caducitat del DNI</label>
+                            <label class="form-label" for="dataCaducitatDNI">Data de caducitat del DNI *</label>
                             <input type="date" id="dataCaducitatDNI" th:field="*{dataCaducitatDNI}" class="form-control" required>
                         </div>
 
                         <div class="col-md-6">
-                            <label class="form-label">Adreça electrònica</label>
+                            <label class="form-label">Adreça electrònica *</label>
                             <input type="email" th:field="*{email}" class="form-control" required>
                         </div>
 
                         <div class="col-md-6">
-                            <label class="form-label">Telèfon</label>
+                            <label class="form-label">Telèfon *</label>
                             <input type="tel" th:field="*{telefon}" class="form-control" required
                                    maxlength="9" minlength="9" inputmode="numeric"
                                    pattern="[0-9]{9}"
@@ -78,29 +78,29 @@
                         </div>
 
                         <div class="col-md-6">
-                            <label class="form-label">Adreça</label>
+                            <label class="form-label">Adreça*</label>
                             <input type="text" th:field="*{adreca}" class="form-control" required>
                         </div>
 
                         <div class="col-md-6">
-                            <label class="form-label">Població</label>
+                            <label class="form-label">Població *</label>
                             <input type="text" th:field="*{poblacio}" class="form-control" placeholder="Ex: Terrassa" required>
                         </div>
 
                         <div class="col-md-6">
-                            <label class="form-label">Nacionalitat</label>
+                            <label class="form-label">Nacionalitat *</label>
                             <input type="text" th:field="*{nacionalitat}" class="form-control" required>
                         </div>
 
                     <h5 class="fw-bold text-primary mb-3 border-bottom pb-2">Permís de conduir</h5>
                     <div class="row g-3 mb-4">
                         <div class="col-md-6">
-                            <label class="form-label">Tipus de llicència</label>
+                            <label class="form-label">Tipus de llicència *</label>
                             <input type="text" th:field="*{tipusLlicencia}" class="form-control">
                         </div>
 
                         <div class="col-md-6">
-                            <label class="form-label">Data de caducitat del carnet de conduir</label>
+                            <label class="form-label">Data de caducitat del carnet de conduir *</label>
                             <input type="date" th:field="*{dataCaducitatCarnet}" class="form-control" required>
                         </div>
                     </div>
@@ -116,14 +116,14 @@
                     </p>
                     <div class="row g-3 mb-4">
                         <div class="col-md-6">
-                            <label class="form-label">Número de targeta</label>
+                            <label class="form-label">Número de targeta *</label>
                             <input type="text" name="numTargeta" class="form-control"
                                    inputmode="numeric" maxlength="19" autocomplete="off"
                                    placeholder="Deixar en blanc per mantenir l'actual"
                                    oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Caducitat (MM/AA)</label>
+                            <label class="form-label">Caducitat (MM/AA) *</label>
                             <input type="text" name="targetaCaducitat" class="form-control"
                                    inputmode="numeric" maxlength="5" autocomplete="off" placeholder="MM/AA"
                                    pattern="(0[1-9]|1[0-2])/[0-9]{2}"

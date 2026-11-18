@@ -110,7 +110,7 @@ public class Reserves {
                         .map(c -> Boolean.TRUE.equals(c.isPremium()))
                         .orElse(false));
 
-        return "reserves/crearReservaClient";
+        return "reserves/crear_reserva_client";
     }
 
     /**

@@ -98,7 +98,7 @@ public class ReservesController {
         model.addAttribute("codi", codi);
         model.addAttribute("estat", estat);
 
-        return "reserves/llistaReserves";
+        return "reserves/llista_reserves";
     }
 
     /**
@@ -135,7 +135,7 @@ public class ReservesController {
 
         model.addAttribute("vehicles", reservesLogic.vehiclesActius());
 
-        return "reserves/altaReserva";
+        return "reserves/alta_reserva";
     }
 
     /**
@@ -245,7 +245,7 @@ public class ReservesController {
         }
 
         model.addAttribute("reserva", reserva);
-        return "reserves/anularReserva";
+        return "reserves/anular_reserva";
     }
 
        /**
@@ -313,7 +313,7 @@ public class ReservesController {
         model.addAttribute("reserva", r);
         model.addAttribute("dataAvui", LocalDate.now());
         model.addAttribute("horaAvui", LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm")));
-        return "reserves/lliurarReserva";
+        return "reserves/lliurar_reserva";
     }
 
     /**
@@ -375,7 +375,7 @@ public class ReservesController {
         model.addAttribute("reserva", r);
         model.addAttribute("dataAvui", LocalDate.now());
         model.addAttribute("horaAvui", LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm")));
-        return "reserves/retornarReserva";
+        return "reserves/retornar_reserva";
     }
 
     /**
@@ -394,7 +394,7 @@ public class ReservesController {
         }
 
         model.addAttribute("reserva", reserva.get());
-        return "reserves/detallReserva";
+        return "reserves/detall_reserva";
     }
 
     /**

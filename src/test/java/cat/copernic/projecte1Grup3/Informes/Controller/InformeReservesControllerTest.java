@@ -89,7 +89,7 @@ class InformeReservesControllerTest {
 
         String vista = controller.informeReserves(null, model);
 
-        assertEquals("informes/informeReserves", vista);
+        assertEquals("informes/informe_reserves", vista);
         verify(clientLogic, times(1)).llistar(null, null, "VALIDAT", null, null);
         verify(model, times(1)).addAttribute("clients", llistaClientsValidats);
         verify(model, times(1)).addAttribute("dnisSeleccionats", List.of());
@@ -110,7 +110,7 @@ class InformeReservesControllerTest {
 
         String vista = controller.informeReserves(dnis, model);
 
-        assertEquals("informes/informeReserves", vista);
+        assertEquals("informes/informe_reserves", vista);
         verify(model, times(1)).addAttribute("clients", llistaClientsValidats);
         verify(model, times(1)).addAttribute("dnisSeleccionats", dnis);
         verify(informeService, times(1)).generarInforme(dnis);
@@ -135,7 +135,7 @@ class InformeReservesControllerTest {
 
         String vista = controller.informeReserves(dnis, model);
 
-        assertEquals("informes/informeReserves", vista);
+        assertEquals("informes/informe_reserves", vista);
         verify(model, times(1)).addAttribute("clients", llistaClientsValidats);
         verify(model, times(1)).addAttribute("dnisSeleccionats", dnis);
         verify(model, times(1)).addAttribute("error", missatgeError);
@@ -156,7 +156,7 @@ class InformeReservesControllerTest {
 
         String vista = controller.informeReserves(null, model);
 
-        assertEquals("informes/informeReserves", vista);
+        assertEquals("informes/informe_reserves", vista);
         verify(model, times(1)).addAttribute("clients", llistaClientsValidats);
         verify(model, times(1)).addAttribute("dnisSeleccionats", List.of());
         verify(model, times(1)).addAttribute("error", missatgeError);

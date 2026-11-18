@@ -149,7 +149,7 @@ public class VehiclesController {
         if (vehicle.isPresent()) {
             model.addAttribute("vehicle", vehicle.get());
             model.addAttribute("resenyes", ressenyaLogic.llistarPerVehicle(matricula));
-            return "vehicles/detallVehicle";
+            return "vehicles/detall_vehicle";
         }
         redirect.addFlashAttribute("error", "El vehicle amb matrícula " + matricula + " no existeix.");
         return "redirect:/dashboard/vehicles";
@@ -163,7 +163,7 @@ public class VehiclesController {
     @GetMapping("/nou")
     public String formulariNouVehicle(Model model) {
         model.addAttribute("vehicle", new VehiclesEntity());
-        return "vehicles/altaVehicle";
+        return "vehicles/alta_vehicle";
     }
 
     /**
@@ -176,7 +176,7 @@ public class VehiclesController {
         Optional<VehiclesEntity> vehicle = vehiclesService.buscarPerMatricula(matricula);
         if (vehicle.isPresent()) {
             model.addAttribute("vehicle", vehicle.get());
-            return "vehicles/editarVehicle";
+            return "vehicles/editar_vehicle";
         }
         redirect.addFlashAttribute("error", "No s'ha trobat el vehicle per editar.");
         return "redirect:/dashboard/vehicles";
@@ -207,7 +207,7 @@ public class VehiclesController {
         }
 
         if (result.hasErrors()) {
-            return existeixBDD ? "vehicles/editarVehicle" : "vehicles/altaVehicle";
+            return existeixBDD ? "vehicles/editar_vehicle" : "vehicles/alta_vehicle";
         }
 
         if (file != null && !file.isEmpty()) {

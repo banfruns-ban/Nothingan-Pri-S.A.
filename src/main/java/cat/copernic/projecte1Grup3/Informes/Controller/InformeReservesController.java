@@ -56,6 +56,6 @@ public class InformeReservesController {
         } catch (IllegalArgumentException | InformeException e) {
             model.addAttribute("error", e.getMessage());
         }
-        return "informes/informeReserves";
+        return "informes/informe_reserves";
     }
 }

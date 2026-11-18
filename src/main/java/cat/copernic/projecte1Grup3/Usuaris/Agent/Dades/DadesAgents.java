@@ -1,3 +1,7 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package cat.copernic.projecte1Grup3.Usuaris.Agent.Dades;
 
 import cat.copernic.projecte1Grup3.Usuaris.Agent.Entity.AgentEntity;
@@ -15,9 +19,23 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+/**
+ * Configuració per a la càrrega inicial de dades d'agents i administradors:
+ * Executa un CommandLineRunner a l'arrencada de l'aplicació per poblar la base
+ * de dades amb usuaris interns de prova. Assigna rols (ADMIN o AGENT), encripta
+ * les contrasenyes i vincula automàticament les fotografies disponibles al
+ * servidor.
+ *
+ * @author Grup3
+ */
 @Configuration
 public class DadesAgents {
 
+    /**
+     * Defineix el bean d'inicialització que inserta els administradors i agents
+     * per defecte: Llegeix les imatges disponibles a la carpeta d'agents i dona
+     * d'alta 4 administradors i 16 agents amb els seus horaris.
+     */
     @Bean
     CommandLineRunner carregarAgents(AgentRepository repo, PasswordEncoder passwordEncoder) {
         return args -> {
@@ -50,6 +68,12 @@ public class DadesAgents {
         };
     }
 
+    /**
+     * Crea i persisteix un agent individual si encara no existeix a la base de
+     * dades: Si l'agent ja existeix però no té fotografia assignada, li
+     * actualitza la imatge; en cas contrari, construeix la nova entitat amb la
+     * contrasenya xifrada.
+     */
     private void crea(AgentRepository repo, PasswordEncoder passwordEncoder,
             List<String> fotos, int[] idx,
             String dni, String nom, String email, String password,
@@ -80,6 +104,12 @@ public class DadesAgents {
         repo.save(a);
     }
 
+    /**
+     * Selecciona la fotografia més adequada per a un agent dins la llista de
+     * fitxers disponibles: Busca primer una coincidència pel primer nom o pel
+     * DNI de l'agent i, si no n'hi ha cap, assigna la següent imatge de forma
+     * rotativa.
+     */
     private String triarFotoAgent(List<String> fotos, int[] idx, String nom, String dni) {
         if (fotos.isEmpty()) {
             return null;
@@ -96,6 +126,11 @@ public class DadesAgents {
         return f;
     }
 
+    /**
+     * Llista els noms dels fitxers d'imatge vàlids dins d'una subcarpeta
+     * d'uploads: Filtra els fitxers regulars amb extensions gràfiques (.jpg,
+     * .jpeg, .png, .webp) i els retorna ordenats alfabèticament.
+     */
     private List<String> obtenirFotosCarpeta(String subcarpeta) {
         Path dir = Paths.get("uploads", subcarpeta);
         if (!Files.exists(dir) || !Files.isDirectory(dir)) {

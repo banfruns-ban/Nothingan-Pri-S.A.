@@ -1,3 +1,7 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package cat.copernic.projecte1Grup3.Informes.Service;
 
 import cat.copernic.projecte1Grup3.Informes.Entity.EstatHistoric;
@@ -35,6 +39,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+/**
+ * Classe de proves unitàries amb JUnit 5 i Mockito per validar la lògica d'InformeReservesService:
+ * Comprova les consultes al repositori històric amb i sense filtre de DNIs, així com la neteja de formats.
+ * Verifica també el tractament d'excepcions d'accés a dades i l'exactitud dels càlculs acumulats de l'informe.
+ *
+ * @author Grup3
+ */
 @ExtendWith(MockitoExtension.class)
 class InformeReservesServiceTest {
 
@@ -48,6 +59,10 @@ class InformeReservesServiceTest {
     private HistoricReserva reservaEliminada;
     private HistoricReserva reservaSensePreu;
 
+    /**
+     * Inicialitza el servei i els objectes simulats d'històric de reserves abans de cada prova:
+     * Configura quatre escenaris de reserva (vigent, cancel·lada, eliminada i sense import) amb Mockito.
+     */
     @BeforeEach
     void setUp() {
         // Instanciación explícita por constructor para garantizar compatibilidad con Java 23
@@ -100,6 +115,11 @@ class InformeReservesServiceTest {
     // ============================================================
     // TESTS: FILTRADO Y CONSULTA AL REPOSITORIO
     // ============================================================
+
+    /**
+     * Comprova que generar un informe sense indicar DNIs consulta tot l'històric ordenat:
+     * Verifica que s'invoca findAll(Sort) i no s'executa la cerca filtrada per llista de clients.
+     */
     @Test
     @DisplayName("generarInforme sin DNI o con lista vacía debe llamar a findAll(ORDRE)")
     void generarInforme_SenseDnis_CridaFindAll() throws InformeException {
@@ -113,6 +133,10 @@ class InformeReservesServiceTest {
         verify(repo, never()).findByClientDniIn(any(), any());
     }
 
+    /**
+     * Valida la normalització de DNIs abans de consultar el repositori històric:
+     * Comprova que elimina espais, converteix a majúscules, deduplica els valors i crida findByClientDniIn().
+     */
     @Test
     @DisplayName("generarInforme con DNIs válidos debe limpiar, pasar a mayúsculas y llamar a findByClientDniIn")
     void generarInforme_AmbDnisValids_FiltraPerDnisNets() throws InformeException {
@@ -130,6 +154,11 @@ class InformeReservesServiceTest {
     // ============================================================
     // TESTS: VALIDACIÓN DE FORMATO Y EXCEPCIONES
     // ============================================================
+
+    /**
+     * Comprova que s'intercepta un DNI amb format incorrecte abans d'accedir a la base de dades:
+     * Verifica el llançament d'IllegalArgumentException i l'absència total d'interaccions amb el repositori.
+     */
     @Test
     @DisplayName("generarInforme con formato de DNI inválido debe lanzar IllegalArgumentException")
     void generarInforme_DniFormatInvalid_LlancaIllegalArgumentException() {
@@ -145,6 +174,10 @@ class InformeReservesServiceTest {
         verifyNoInteractions(repo);
     }
 
+    /**
+     * Verifica la conversió d'excepcions tècniques de persistència en una excepció de domini InformeException:
+     * Simula una fallada de lectura a Spring Data i comprova el missatge descriptiu resultant.
+     */
     @Test
     @DisplayName("generarInforme cuando falla la BD debe capturar DataAccessException y lanzar InformeException")
     void generarInforme_ErrorBD_LlancaInformeException() {
@@ -162,6 +195,11 @@ class InformeReservesServiceTest {
     // ============================================================
     // TESTS: CÁLCULOS DE TOTALES
     // ============================================================
+
+    /**
+     * Comprova l'exactitud dels càlculs agregats del registre InformeReserves amb diversos estats:
+     * Verifica el recompte de files totals, reserves vigents, import acumulat sense errors per valors nuls i anul·lacions.
+     */
     @Test
     @DisplayName("generarInforme debe calcular correctamente los totales del record InformeReserves")
     void generarInforme_CalculsCorrectes() throws InformeException {

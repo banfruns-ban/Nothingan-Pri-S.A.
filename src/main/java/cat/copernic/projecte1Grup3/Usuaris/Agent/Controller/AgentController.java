@@ -1,3 +1,7 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package cat.copernic.projecte1Grup3.Usuaris.Agent.Controller;
 
 import cat.copernic.projecte1Grup3.Usuaris.Agent.Entity.AgentEntity;
@@ -19,16 +23,33 @@ import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Controlador web per a la gestió d'agents i administradors al panell de
+ * control: Gestiona les operacions CRUD (alta, llistat, detall, edició i baixa)
+ * sota la ruta "/dashboard/agents". Coordina la validació de formularis, la
+ * pujada de fotografies de perfil i la delegació al servei d'agents.
+ *
+ * @author Grup3
+ */
 @Controller
 @RequestMapping("/dashboard/agents")
 public class AgentController {
 
     private final AgentService agentService;
 
+    /**
+     * Injecció del servei de gestió d'agents: Inicialitza el controlador rebent
+     * AgentService per executar les operacions de negoci i persistència.
+     */
     public AgentController(AgentService agentService) {
         this.agentService = agentService;
     }
 
+    /**
+     * Mostra el formulari d'alta per registrar un nou agent: Prepara el model
+     * amb una instància buida d'AgentEntity i marca l'indicador d'edició a
+     * fals. Retorna la vista HTML del formulari "agents/alta_agent".
+     */
     @GetMapping("/alta")
     public String mostrarFormulariAlta(Model model) {
         model.addAttribute("agent", new AgentEntity());
@@ -36,6 +57,13 @@ public class AgentController {
         return "agents/alta_agent";
     }
 
+    /**
+     * Processa el formulari de creació o modificació d'un agent: Valida els
+     * camps de l'entitat, comprova duplicitats de DNI en altes noves i desa la
+     * fotografia al servidor si s'adjunta. Persisteix l'agent mitjançant el
+     * servei i redirigeix al llistat o retorna al formulari mostrant els errors
+     * detectats.
+     */
     @PostMapping("/alta")
     public String processarAlta(
             @Valid @ModelAttribute("agent") AgentEntity agent,
@@ -90,6 +118,12 @@ public class AgentController {
         }
     }
 
+    /**
+     * Llista i filtra els agents registrats al sistema: Recupera tots els
+     * agents o aplica el criteri de cerca opcional rebut per paràmetre. Carrega
+     * la col·lecció resultant al model i renderitza la plantilla
+     * "agents/llistat_agents".
+     */
     @GetMapping({"", "/", "/llista"})
     public String llistarAgents(@RequestParam(name = "cerca", required = false) String cerca, Model model) {
         List<AgentEntity> llista = agentService.llistarOFiltrarAgents(cerca);
@@ -97,6 +131,12 @@ public class AgentController {
         return "agents/llistat_agents";
     }
 
+    /**
+     * Mostra la fitxa amb el detall complet d'un agent: Cerca l'agent pel seu
+     * DNI i, si existeix, el carrega al model per mostrar la vista de detall.
+     * Si no es troba cap registre amb aquest DNI, redirigeix al llistat general
+     * d'agents.
+     */
     @GetMapping("/detall/{dni}")
     public String consultarDetall(@PathVariable("dni") String dni, Model model) {
         Optional<AgentEntity> agent = agentService.obtenirPerDni(dni);
@@ -107,6 +147,13 @@ public class AgentController {
         return "redirect:/dashboard/agents/llista";
     }
 
+    /**
+     * Mostra el formulari d'edició precarregat amb les dades d'un agent
+     * existent: Localitza l'agent pel seu DNI, marca l'indicador d'edició a
+     * cert i reaprofitant la vista d'alta permet modificar-ne les dades.
+     * Redirigeix al llistat d'agents si l'identificador proporcionat no
+     * existeix.
+     */
     @GetMapping("/editar/{dni}")
     public String mostrarFormulariEditar(@PathVariable("dni") String dni, Model model) {
         Optional<AgentEntity> agent = agentService.obtenirPerDni(dni);
@@ -118,6 +165,12 @@ public class AgentController {
         return "redirect:/dashboard/agents/llista";
     }
 
+    /**
+     * Processa la baixa i eliminació d'un agent del sistema: Delega al servei
+     * l'esborrat de l'agent identificat pel DNI i captura possibles
+     * restriccions d'estat o errors. Redirigeix al llistat d'agents amb un
+     * missatge flash informatiu sobre el resultat de l'operació.
+     */
     @PostMapping("/eliminar/{dni}")
     public String eliminarAgent(@PathVariable("dni") String dni, RedirectAttributes redirect) {
         try {

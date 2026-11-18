@@ -1,3 +1,7 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Interface.java to edit this template
+ */
 package cat.copernic.projecte1Grup3.Vehicles.Repository;
 
 import cat.copernic.projecte1Grup3.Vehicles.Entity.VehiclesEntity;
@@ -10,13 +14,25 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * Repositori JPA per a la gestió de la persistència de l'entitat VehiclesEntity.
+ * Repositori JPA per a l'accés a dades i consultes de disponibilitat de l'entitat VehiclesEntity:
+ * Proporciona operacions CRUD estàndard i consultes JPQL personalitzades per al filtratge avançat de la flota.
+ * Permet comprovar la disponibilitat real dels vehicles excloent aquells amb reserves actives solapades en un rang de dates.
+ *
+ * @author Grup3
  */
 @Repository
 public interface VehiclesRepository extends JpaRepository<VehiclesEntity, String> {
 
+    /**
+     * Obté tots els vehicles segons el seu indicador d'activitat operativa:
+     * Retorna la llista de VehiclesEntity amb el valor booleà específic al camp actiu.
+     */
     List<VehiclesEntity> findByActiu(Boolean actiu);
 
+    /**
+     * Filtra la flota de vehicles combinant criteris tècnics, estat i disponibilitat temporal (RF45):
+     * Cerca coincidències parcials per matrícula, marca o model, i filtra per any, tipus, estat actiu i franja de dates lliures.
+     */
     /**
      * RF45: Filtrat combinat per matrícula, marca, model, any de matriculació,
      * categoria (tipus), estat (actiu/inactiu) i disponibilitat entre data mínima i màxima.
@@ -48,9 +64,22 @@ public interface VehiclesRepository extends JpaRepository<VehiclesEntity, String
             @Param("dataInici") LocalDateTime dataInici,
             @Param("dataFi") LocalDateTime dataFi);
 
+    /**
+     * Recupera tots els vehicles de la flota que es troben actualment actius:
+     * Retorna la llista completa de VehiclesEntity on el camp actiu és cert.
+     */
     List<VehiclesEntity> findByActiuTrue();
+
+    /**
+     * Recupera els vehicles actius que pertanyen a una categoria o tipus de carrosseria concret:
+     * Filtra la flota per estat actiu veritable i coincidència exacta amb el tipusVehicle especificat.
+     */
     List<VehiclesEntity> findByActiuTrueAndTipusVehicle(String tipusVehicle);
 
+    /**
+     * Cerca els vehicles actius disponibles per al catàleg públic segons categoria i rang de dates:
+     * Exclou els vehicles que tinguin reserves vigents solapades amb el període sol·licitat.
+     */
     /**
      * Cerca els vehicles actius disponibles excloent aquells que tenen reserves solapades (Catàleg públic).
      */

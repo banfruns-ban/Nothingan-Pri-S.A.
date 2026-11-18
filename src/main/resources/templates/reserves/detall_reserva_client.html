@@ -56,6 +56,15 @@
                     <p class="text-secondary small mb-0 mt-1">Informació detallada de la teva reserva.</p>
                 </div>
                 <div class="d-flex gap-2">
+                    <form th:if="${reserva.estat != 'EN_CURS' and reserva.estat != 'FINALITZADA' and reserva.estat != 'CANCELADA'}"
+                          th:action="@{/reserves-client/{codi}/anular(codi=${reserva.codiReserva})}"
+                          method="post"
+                          onsubmit="return confirm('Vols anul·lar aquesta reserva? Rebràs un correu amb l’import que et correspon.');">
+                        <button type="submit" class="btn btn-outline-danger fw-semibold px-3 py-2"
+                                style="border-radius: 8px;">
+                            <i class="fa-solid fa-ban me-1"></i> Anul·lar reserva
+                        </button>
+                    </form>
                     <a th:href="@{'/reserves-client/valorar/' + ${reserva.codiReserva}}"
                        class="btn btn-outline-primary fw-semibold px-3 py-2" style="border-radius: 8px;">
                         <i class="fa-solid fa-star me-1"></i> Valorar vehicle

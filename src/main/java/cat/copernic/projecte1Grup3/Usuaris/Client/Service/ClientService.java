@@ -1,3 +1,7 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package cat.copernic.projecte1Grup3.Usuaris.Client.Service;
 
 import org.slf4j.Logger;
@@ -18,6 +22,13 @@ import org.springframework.web.multipart.MultipartFile;
 import cat.copernic.projecte1Grup3.Usuaris.Client.Repository.ClientRepository;
 import cat.copernic.projecte1Grup3.Usuaris.Client.Repository.ClientRepositoryMongo;
 
+/**
+ * Servei de lògica de negoci per a la gestió integral de clients i els seus documents:
+ * Implementa la doble persistència coordinant MySQL (dades personals i estat) amb MongoDB (imatges del DNI i carnet).
+ * Inclou les validacions de negoci, xifratge de contrasenyes, verificació de targetes (Luhn) i filtres de cerca.
+ *
+ * @author Grup3
+ */
 @Service
 public class ClientService {
 
@@ -30,12 +41,20 @@ public class ClientService {
     private final ClientRepositoryMongo clientRepositoryMongo;
     private final PasswordEncoder passwordEncoder;
 
+    /**
+     * Constructor principal injectat per Spring per inicialitzar el servei de clients:
+     * Configura els repositoris relacional i documental utilitzant un codificador BCryptPasswordEncoder per defecte.
+     */
     @Autowired
     public ClientService(ClientRepository clientRepository,
                          ClientRepositoryMongo clientRepositoryMongo) {
         this(clientRepository, clientRepositoryMongo, new BCryptPasswordEncoder());
     }
 
+    /**
+     * Constructor complet que permet especificar un codificador de contrasenyes personalitzat:
+     * Inicialitza els repositoris de MySQL i MongoDB i garanteix una instància vàlida de PasswordEncoder.
+     */
     public ClientService(ClientRepository clientRepository,
                          ClientRepositoryMongo clientRepositoryMongo,
                          PasswordEncoder passwordEncoder) {
@@ -45,6 +64,11 @@ public class ClientService {
     }
 
     // ---------- LLISTAR I FILTRAR ----------
+
+    /**
+     * Llista els clients aplicant filtres opcionals de cerca general, DNI, estat, email o data de naixement:
+     * Recupera tots els registres i aplica els predicats de filtratge en memòria sobre els camps proporcionats.
+     */
     public List<ClientEntity> llistar(String q, String dni, String estat, String email,
                                       LocalDate dataNaixement) {
         List<ClientEntity> clients = clientRepository.findAll();
@@ -85,6 +109,10 @@ public class ClientService {
         return clients;
     }
 
+    /**
+     * Filtra el llistat de clients segons els criteris detallats del panell d'administració:
+     * Avalua nacionalitat, nom, telèfon, ciutat/adreça, població, correu electrònic i DNI sense distinció de majúscules.
+     */
     public List<ClientEntity> filtrarClients(String nacionalitat, String nom, String telefon,
                                              String ciutat, String dni,
                                              String poblacio, String email) {
@@ -133,12 +161,20 @@ public class ClientService {
         return clients;
     }
 
+    /**
+     * Comprova de forma segura si un camp de text conté una subcadena en minúscules:
+     * Evita excepcions de punter nul retornant fals si el valor a inspeccionar és nul.
+     */
     private boolean conte(String valor, String text) {
         return valor != null && valor.toLowerCase().contains(text);
     }
 
     // ---------- ALTA DE CLIENT (Doble Persistència) ----------
 
+    /**
+     * Dona d'alta un nou client des del portal públic amb estat inicial PENDENT:
+     * Delega al mètode principal d'alta indicant que el registre no ha estat creat per personal intern.
+     */
     // Alta des del portal (registre del propi client): queda PENDENT
     @Transactional(rollbackFor = Exception.class)
     public void alta(ClientEntity client, MultipartFile fotoDniFrontal,
@@ -146,6 +182,11 @@ public class ClientService {
         alta(client, fotoDniFrontal, fotoDniPosterior, fotoCarnet, false);
     }
 
+    /**
+     * Valida i registra un nou client tant a MySQL com a MongoDB de manera transaccional:
+     * Verifica DNI/NIE, telèfon, població, contrasenya, vigor del carnet, format de les 3 imatges i dades de targeta.
+     * Assigna l'estat VALIDAT si el crea un agent/administrador o PENDENT si prové del registre extern.
+     */
     // Alta amb indicador de qui la fa: si la crea el personal (agent/admin), queda VALIDAT
     @Transactional(rollbackFor = Exception.class)
     public void alta(ClientEntity client, MultipartFile fotoDniFrontal,
@@ -205,15 +246,28 @@ public class ClientService {
                 dni, client.getEstatValidacio(), creatPerPersonal);
     }
 
+    /**
+     * Cerca un client a la base de dades relacional pel seu DNI:
+     * Retorna un Optional amb l'entitat ClientEntity trobada o buit si no existeix.
+     */
     public Optional<ClientEntity> obtenir(String dni) {
         return clientRepository.findById(dni);
     }
 
+    /**
+     * Recupera els documents gràfics associats a un client des de MongoDB:
+     * Retorna un Optional amb l'objecte ClientDocuments indexat pel DNI proporcionat.
+     */
     public Optional<ClientDocuments> obtenirDocuments(String dni) {
         return clientRepositoryMongo.findById(dni);
     }
 
     // ---------- ACTUALITZACIÓ (PANEL AGENT) ----------
+
+    /**
+     * Actualitza les dades d'un client existent des del panell de gestió d'agents:
+     * Valida l'estat, la unicitat del correu electrònic, el telèfon i les noves imatges opcionals abans de desar a MySQL i MongoDB.
+     */
     @Transactional(rollbackFor = Exception.class)
     public void actualitzar(String dni, ClientEntity dades, String estat, boolean premium,
                             MultipartFile fotoDniFrontal, MultipartFile fotoDniPosterior,
@@ -236,6 +290,8 @@ public class ClientService {
         validaImatge(fotoDniFrontal);
         validaImatge(fotoDniPosterior);
         validaImatge(fotoCarnet);
+
+        actualitzarTargeta(c, dades, dades.getTargetaCaducitat());
 
         c.setNom(dades.getNom());
         c.setEmail(email);
@@ -289,10 +345,19 @@ public class ClientService {
     }
 
     // ---------- PERFIL DEL CLIENT (AUTOGESTIÓ) ----------
+
+    /**
+     * Cerca un client pel seu correu electrònic ignorant majúscules i minúscules:
+     * Retorna un Optional amb l'entitat trobada per gestionar la sessió i el perfil personal.
+     */
     public Optional<ClientEntity> obtenirPerEmail(String email) {
         return clientRepository.findByEmailIgnoreCase(email);
     }
 
+    /**
+     * Actualitza les dades personals modificades pel propi client des del seu portal:
+     * Verifica que el nou correu no estigui duplicat, valida el telèfon i xifra la contrasenya si s'ha modificat.
+     */
     @Transactional(rollbackFor = Exception.class)
     public void actualitzarPerfilClient(String emailActual, ClientEntity dades) {
         ClientEntity c = clientRepository.findByEmailIgnoreCase(emailActual)
@@ -304,6 +369,7 @@ public class ClientService {
         }
 
         String telefon = validaTelefon(dades.getTelefon());
+        actualitzarTargeta(c, dades, dades.getNovaCaducitatTargeta());
 
         c.setNom(dades.getNom());
         c.setEmail(nouEmail);
@@ -332,10 +398,18 @@ public class ClientService {
         log.info("Perfil actualitzat pel client: {}", c.getDni());
     }
 
+    /**
+     * Comprova si s'ha adjuntat un fitxer no buit a la petició multiparte:
+     * Retorna cert si l'objecte MultipartFile no és nul i conté dades.
+     */
     private boolean hiHa(MultipartFile f) {
         return f != null && !f.isEmpty();
     }
 
+    /**
+     * Normalitza i valida que el número de telèfon contingui exactament 9 dígits numèrics:
+     * Elimina qualsevol espai en blanc i llança una excepció si no compleix el format espanyol estàndard.
+     */
     // El telèfon ha de tenir exactament 9 xifres (s'ignoren els espais)
     private String validaTelefon(String telefon) {
         String t = telefon == null ? "" : telefon.replaceAll("\\s+", "");
@@ -345,6 +419,28 @@ public class ClientService {
         return t;
     }
 
+    private void actualitzarTargeta(ClientEntity actual, ClientEntity dades, String novaCaducitat) {
+        boolean hiHaNumero = dades.getNumTargeta() != null && !dades.getNumTargeta().isBlank();
+        boolean hiHaCaducitat = novaCaducitat != null && !novaCaducitat.isBlank();
+
+        if (hiHaNumero != hiHaCaducitat) {
+            throw new IllegalArgumentException(hiHaNumero
+                    ? "Indica també la data de caducitat de la nova targeta"
+                    : "Introdueix el número de targeta per canviar-la");
+        }
+
+        if (hiHaNumero) {
+            dades.setTargetaCaducitat(novaCaducitat);
+            validaTargeta(dades);
+            actual.setTargetaUltims4(dades.getTargetaUltims4());
+            actual.setTargetaCaducitat(dades.getTargetaCaducitat());
+        }
+    }
+
+    /**
+     * Valida les dades de la targeta de pagament i en neteja els camps sensibles abans de persistir:
+     * Verifica longitud, dígit de control Luhn i data de caducitat, conservant només els 4 últims dígits.
+     */
     // Valida la targeta; només es conserven els 4 últims dígits i la caducitat
         // Valida la targeta; només es conserven els 4 últims dígits i la caducitat
     private void validaTargeta(ClientEntity c) {
@@ -352,10 +448,7 @@ public class ClientService {
         if (!num.matches("^[0-9]{13,19}$") || !luhn(num)) {
             throw new IllegalArgumentException("El número de targeta no és vàlid");
         }
-        String cvv = c.getCvv() == null ? "" : c.getCvv().trim();
-        if (!cvv.matches("^[0-9]{3,4}$")) {
-            throw new IllegalArgumentException("El codi de seguretat ha de tenir 3 o 4 xifres");
-        }
+       
 
         YearMonth cad = parseCaducitat(c.getTargetaCaducitat());
         if (cad.isBefore(YearMonth.now())) {
@@ -366,9 +459,13 @@ public class ClientService {
         c.setTargetaCaducitat(cad.toString());
         c.setTargetaUltims4(num.substring(num.length() - 4));
         c.setNumTargeta(null);
-        c.setCvv(null);
+      
     }
 
+    /**
+     * Interpreta i normalitza diversos formats d'entrada per a la data de caducitat d'una targeta:
+     * Admet patrons com yyyy-MM, MM/yy, MM/yyyy, MMyy o MMyyyy i retorna un objecte YearMonth vàlid.
+     */
     // Accepta 2028-05, 2028/05, 05/28, 05-28, 05/2028, 0528 i 052028
     private YearMonth parseCaducitat(String valor) {
         String v = valor == null ? "" : valor.trim().replaceAll("\\s+", "");
@@ -403,6 +500,10 @@ public class ClientService {
         throw new IllegalArgumentException("La data de caducitat de la targeta no és vàlida");
     }
 
+    /**
+     * Verifica la validesa matemàtica d'un número de targeta bancària mitjançant l'algoritme de Luhn:
+     * Duplica els dígits en posicions parelles des de la dreta i comprova que la suma total sigui múltiple de 10.
+     */
     // Algoritme de Luhn: comprova que el número de targeta és matemàticament coherent
     private boolean luhn(String num) {
         int suma = 0;
@@ -421,6 +522,10 @@ public class ClientService {
         return suma % 10 == 0;
     }
 
+    /**
+     * Comprova que una imatge pujada tingui format PNG o JPG i no superi els 5 MB de mida:
+     * Ignora el fitxer si és buit i llança una excepció si el tipus MIME o el pes no són permesos.
+     */
     private void validaImatge(MultipartFile f) {
         if (!hiHa(f)) {
             return;
@@ -433,6 +538,11 @@ public class ClientService {
     }
 
     // ---------- ELIMINACIÓ DE CLIENT ----------
+
+    /**
+     * Elimina definitivament un client tant de MySQL com els seus documents de MongoDB:
+     * Executa primer l'esborrat relacional amb flush per detectar possibles restriccions de clau forana abans d'esborrar els fitxers.
+     */
     @Transactional
     public void eliminar(String dni) {
         ClientEntity c = clientRepository.findById(dni)
@@ -446,6 +556,11 @@ public class ClientService {
     }
 
     // ---------- CANVI D'ESTAT DE VALIDACIÓ (RF82) ----------
+
+    /**
+     * Modifica l'estat de validació d'un client entre PENDENT, VALIDAT i REBUTJAT:
+     * Valida que l'estat rebut sigui permès, recupera el client pel DNI i desa el nou estat al repositori.
+     */
     @Transactional
     public void canviarEstat(String dni, String estat) {
         if (!VALIDAT.equals(estat) && !REBUTJAT.equals(estat) && !PENDENT.equals(estat)) {
@@ -459,6 +574,11 @@ public class ClientService {
     }
 
     // ---------- CANVI D'ESTAT PREMIUM ----------
+
+    /**
+     * Activa o desactiva la condició de client prèmium per a un client determinat:
+     * Cerca l'entitat pel DNI proporcionat, actualitza l'indicador booleà i desa el canvi.
+     */
     @Transactional
     public void canviarPremium(String dni, boolean premium) {
         ClientEntity c = clientRepository.findById(dni)

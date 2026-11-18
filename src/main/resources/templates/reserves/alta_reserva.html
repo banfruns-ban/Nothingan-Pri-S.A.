@@ -18,7 +18,7 @@
 
     <!-- Main Content -->
     <main class="main-content">
-        
+
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
                 <h2 class="fw-bold text-dark m-0">Nova Reserva</h2>
@@ -31,8 +31,8 @@
             </div>
         </div>
 
-        <!-- Missatge d'Error Flash 	 $ <--Accede a una variable. -->
-        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show mb-4" role="alert"> 
+        <!-- Missatge d'Error Flash -->
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
             <span th:text="${error}"></span>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
@@ -45,21 +45,24 @@
                 <div class="mb-4">
                     <!-- Client ja triat (ve des del detall del client) -->
                     <div th:if="${client != null}" class="d-flex align-items-center gap-3 p-3 bg-light rounded border">
-                        <div class="avatar bg-primary text-white rounded-circle fw-bold d-flex align-items-center justify-content-center fs-5" 
+                        <div class="avatar bg-primary text-white rounded-circle fw-bold d-flex align-items-center justify-content-center fs-5"
                              style="width: 48px; height: 48px;" th:attr="data-nom=${client.nom}">?</div>
                         <div>
                             <strong class="d-block text-dark fs-6" th:text="${client.nom}">Nom del client</strong>
                             <span class="text-muted small" th:text="${client.dni} + ' · ' + ${client.email}">DNI · email</span>
                         </div>
-                        <input type="hidden" name="dni" th:value="${client.dni}">
+                        <!-- id="dniFix" + data-premium per al càlcul de la fiança -->
+                        <input type="hidden" id="dniFix" name="dni" th:value="${client.dni}"
+                               th:attr="data-premium=${client.isPremium()}">
                     </div>
 
                     <!-- Desplegable quan no s'ha preseleccionat un client -->
                     <div th:if="${client == null}">
-                        <label for="dni" class="form-label">Selecciona un client (només clients validats)</label>
+                        <label for="dni" class="form-label">Selecciona un client (només clients validats)*</label>
                         <select id="dni" name="dni" class="form-select" required>
                             <option value="">Selecciona un client...</option>
                             <option th:each="c : ${clients}" th:value="${c.dni}"
+                                    th:attr="data-premium=${c.isPremium()}"
                                     th:text="${c.nom} + ' — ' + ${c.dni}"></option>
                         </select>
                     </div>
@@ -68,10 +71,10 @@
                 <!-- 2. Vehicle -->
                 <h5 class="fw-bold text-primary mb-3 border-bottom pb-2">2. Vehicle</h5>
                 <div class="mb-4">
-                    <label for="matricula" class="form-label">Vehicle disponible</label>
+                    <label for="matricula" class="form-label">Vehicle disponible *</label>
                     <select id="matricula" name="matricula" class="form-select" required>
                         <option value="">Selecciona un vehicle...</option>
-                        <option th:each="v : ${vehicles}" 
+                        <option th:each="v : ${vehicles}"
                                 th:value="${v.matricula}"
                                 th:selected="${v.matricula == matriculaPreseleccionada}"
                                 th:attr="data-preu=${v.preuHora}, data-fianca=${v.fianca}"
@@ -84,22 +87,22 @@
                 <h5 class="fw-bold text-primary mb-3 border-bottom pb-2">3. Període de lloguer</h5>
                 <div class="row g-3 mb-3">
                     <div class="col-md-6">
-                        <label for="dataInici" class="form-label">Data d'inici</label>
+                        <label for="dataInici" class="form-label">Data d'inici *</label>
                         <input type="date" id="dataInici" name="dataInici" class="form-control" required
                                th:value="${dataInici != null ? #temporals.format(dataInici, 'yyyy-MM-dd') : ''}">
                     </div>
                     <div class="col-md-6">
-                        <label for="horaInici" class="form-label">Hora d'inici</label>
+                        <label for="horaInici" class="form-label">Hora d'inici *</label>
                         <input type="time" id="horaInici" name="horaInici" class="form-control" required
                                th:value="${horaInici != null ? #temporals.format(horaInici, 'HH:mm') : ''}">
                     </div>
                     <div class="col-md-6">
-                        <label for="dataFi" class="form-label">Data de fi</label>
+                        <label for="dataFi" class="form-label">Data de fi *</label>
                         <input type="date" id="dataFi" name="dataFi" class="form-control" required
                                th:value="${dataFi != null ? #temporals.format(dataFi, 'yyyy-MM-dd') : ''}">
                     </div>
                     <div class="col-md-6">
-                        <label for="horaFi" class="form-label">Hora de fi</label>
+                        <label for="horaFi" class="form-label">Hora de fi *</label>
                         <input type="time" id="horaFi" name="horaFi" class="form-control" required
                                th:value="${horaFi != null ? #temporals.format(horaFi, 'HH:mm') : ''}">
                     </div>
@@ -124,7 +127,7 @@
                 <h5 class="fw-bold text-primary mb-3 border-bottom pb-2">4. Observacions</h5>
                 <div class="mb-4">
                     <label for="observacions" class="form-label">Observacions de la reserva (opcional)</label>
-                    <textarea id="observacions" name="observacions" class="form-control" rows="3" 
+                    <textarea id="observacions" name="observacions" class="form-control" rows="3"
                               placeholder="Ex: El client recollirà el vehicle a l'oficina central..."
                               th:text="${observacions}"></textarea>
                 </div>
@@ -144,6 +147,9 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Descompte premium sobre la fiança (ha de coincidir amb ReservesService.DESCOMPTE_PREMIUM)
+        var DESCOMPTE_PREMIUM = 0.25;
+
         // Inicials de l'avatar del client seleccionat
         try {
             var a = document.querySelector('.avatar[data-nom]');
@@ -161,7 +167,19 @@
             document.getElementById('dataInici').min = iso;
             document.getElementById('dataFi').min = iso;
 
-            var camps = ['matricula', 'dataInici', 'horaInici', 'dataFi', 'horaFi'];
+            // 'dni' només existeix si el client NO ve preseleccionat
+            var camps = ['dni', 'matricula', 'dataInici', 'horaInici', 'dataFi', 'horaFi'];
+
+            // Retorna true si el client triat (hidden o desplegable) és premium
+            function clientEsPremium() {
+                var fix = document.getElementById('dniFix');
+                if (fix) { return fix.getAttribute('data-premium') === 'true'; }
+                var s = document.getElementById('dni');
+                if (!s) { return false; }
+                var o = s.options[s.selectedIndex];
+                return !!o && o.getAttribute('data-premium') === 'true';
+            }
+
             function calcula() {
                 var sel = document.getElementById('matricula');
                 var opt = sel.options[sel.selectedIndex];
@@ -171,18 +189,29 @@
                 if (!opt || !opt.value || !di || !hi || !df || !hf) { resum.classList.add('d-none'); return; }
                 var ms = new Date(df + 'T' + hf) - new Date(di + 'T' + hi);
                 if (isNaN(ms) || ms <= 0) { resum.classList.add('d-none'); return; }
+
                 var hores = Math.ceil(ms / 3600000);
                 var dies = Math.ceil(hores / 24);
                 var preu = parseFloat(opt.getAttribute('data-preu'));
                 var fianca = parseFloat(opt.getAttribute('data-fianca'));
+                if (isNaN(fianca)) { fianca = 0; }
+
+                var premium = clientEsPremium();
+                var fiancaFinal = premium ? fianca * (1 - DESCOMPTE_PREMIUM) : fianca;
+
                 document.getElementById('rDurada').textContent = hores + ' h (' + dies + ' dia' + (dies === 1 ? '' : 's') + ')';
                 document.getElementById('rCost').textContent = (hores * preu).toFixed(2) + ' €';
-                document.getElementById('rFianca').textContent = (isNaN(fianca) ? 0 : fianca).toFixed(2) + ' €';
+                document.getElementById('rFianca').textContent =
+                    fiancaFinal.toFixed(2) + ' €' + (premium ? ' (-' + Math.round(DESCOMPTE_PREMIUM * 100) + '% Premium)' : '');
                 resum.classList.remove('d-none');
             }
-            camps.forEach(function (id) { document.getElementById(id).addEventListener('change', calcula); });
-            
-            // Executa el càlcul inicial si ja hi ha un vehicle preseleccionat
+
+            camps.forEach(function (id) {
+                var el = document.getElementById(id);
+                if (el) { el.addEventListener('change', calcula); }
+            });
+
+            // Executa el càlcul inicial si ja hi ha un vehicle/client preseleccionat
             calcula();
         } catch (e) { }
     </script>

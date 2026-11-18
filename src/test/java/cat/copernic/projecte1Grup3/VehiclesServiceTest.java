@@ -1,3 +1,7 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package cat.copernic.projecte1Grup3;
 
 import cat.copernic.projecte1Grup3.Vehicles.Entity.VehiclesEntity;
@@ -20,6 +24,13 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
+/**
+ * Classe de proves unitàries amb JUnit 5 i Mockito per validar la lògica de negoci de VehiclesService:
+ * Comprova el comportament per defecte en desar nous vehicles, la cerca de disponibilitat amb dates i sense dates.
+ * Verifica també el canvi d'estat i d'activitat durant el procés de desactivació d'un vehicle.
+ *
+ * @author Grup3
+ */
 @ExtendWith(MockitoExtension.class)
 class VehiclesServiceTest {
 
@@ -31,6 +42,10 @@ class VehiclesServiceTest {
 
     private VehiclesEntity vehicleExemple;
 
+    /**
+     * Prepara l'objecte vehicle de mostra abans de l'execució de cada prova unitària:
+     * Inicialitza una instància de VehiclesEntity amb matrícula, marca, model, tipus i estat actiu per defecte.
+     */
     @BeforeEach
     void setUp() {
         vehicleExemple = new VehiclesEntity();
@@ -41,6 +56,10 @@ class VehiclesServiceTest {
         vehicleExemple.setActiu(true);
     }
 
+    /**
+     * Comprova que en donar d'alta un nou vehicle amb el camp actiu nul s'activa automàticament:
+     * Verifica que el vehicle retornat té l'atribut actiu a veritable i s'invoca save() al repositori.
+     */
     @Test
     @DisplayName("Comprovar que guardarVehicle assigna actiu=true si és un nou vehicle i actiu ve nul")
     void testGuardarVehicleNouAssignaActiuTrue() {
@@ -55,6 +74,10 @@ class VehiclesServiceTest {
         verify(vehiclesRepository, times(1)).save(vehicleExemple);
     }
 
+    /**
+     * Verifica que consultar vehicles disponibles sense especificar dates delega al llistat de vehicles actius:
+     * Comprova que s'invoca findByActiuTrue() i s'evita executar la consulta de solapament de reserves per dates.
+     */
     @Test
     @DisplayName("Comprovar que llistarDisponibles crida a llistarActiusPerTipus quan les dates són nul·les")
     void testLlistarDisponiblesSenseDates() {
@@ -69,6 +92,10 @@ class VehiclesServiceTest {
         verify(vehiclesRepository, never()).llistarDisponiblesPerDatesYTipus(any(), any(), any());
     }
 
+    /**
+     * Comprova que la cerca de disponibilitat amb rang de dates executa la consulta filtrada al repositori:
+     * Valida que es passa la data d'inici, la data de fi i la categoria al mètode llistarDisponiblesPerDatesYTipus().
+     */
     @Test
     @DisplayName("Comprovar que llistarDisponibles crida al repositori amb dates quan s'especifiquen")
     void testLlistarDisponiblesAmbDates() {
@@ -85,6 +112,10 @@ class VehiclesServiceTest {
         verify(vehiclesRepository, times(1)).llistarDisponiblesPerDatesYTipus(inici, fi, "Turisme");
     }
 
+    /**
+     * Verifica que la desactivació d'un vehicle n'actualitza l'estat operatiu i l'inhabilita al catàleg:
+     * Comprova que el camp actiu passa a fals, l'estat canvia a "EN MANTENIMENT" i es persisteix l'entitat.
+     */
     @Test
     @DisplayName("Comprovar que desactivarVehicle marca el vehicle com a inactiu")
     void testDesactivarVehicle() {

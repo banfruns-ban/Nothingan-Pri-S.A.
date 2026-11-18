@@ -1,3 +1,7 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package cat.copernic.projecte1Grup3.Ressenya.Service;
 
 import java.time.LocalDateTime;
@@ -11,6 +15,14 @@ import cat.copernic.projecte1Grup3.Vehicles.Repository.VehiclesRepository;
 import cat.copernic.projecte1Grup3.Ressenya.Repository.RessenyaRepository;
 import cat.copernic.projecte1Grup3.Usuaris.Client.Repository.ClientRepository;
 
+/**
+ * Servei de lògica de negoci per a la gestió de ressenyes de vehicles: Coordina
+ * la consulta, creació i eliminació de valoracions aplicant les regles de
+ * validació del sistema. Garanteix la integritat referencial amb vehicles i
+ * clients, evitant valoracions duplicades o fora de rang.
+ *
+ * @author Grup3
+ */
 @Service
 public class RessenyaService {
 
@@ -18,21 +30,43 @@ public class RessenyaService {
     private final VehiclesRepository vehicleRepo;
     private final ClientRepository clientRepo;
 
+    /**
+     * Injecció de dependències dels repositoris de ressenyes, vehicles i
+     * clients: Inicialitza el servei rebent RessenyaRepository,
+     * VehiclesRepository i ClientRepository per operar sobre les dades.
+     */
     public RessenyaService(RessenyaRepository resenyaRepo, VehiclesRepository vehicleRepo, ClientRepository clientRepo) {
         this.resenyaRepo = resenyaRepo;
         this.vehicleRepo = vehicleRepo;
         this.clientRepo = clientRepo;
     }
 
+    /**
+     * Obté el llistat de ressenyes associades a un vehicle: Consulta al
+     * repositori totes les valoracions de la matrícula indicada ordenades de
+     * més recent a més antiga.
+     */
     public List<RessenyaEntity> llistarPerVehicle(String matricula) {
         return resenyaRepo.findByVehicleMatriculaOrderByDataCreacioDesc(matricula);
     }
 
+    /**
+     * Comprova si un client ja ha valorat prèviament un vehicle: Normalitza el
+     * DNI en majúscules i consulta si existeix algun registre coincident a la
+     * base de dades.
+     */
     // Indica si el client ja ha escrit una ressenya per aquest vehicle
     public boolean jaHaValorat(String matricula, String dni) {
         return resenyaRepo.existsByVehicleMatriculaAndClientDni(matricula, dni.trim().toUpperCase());
     }
 
+    /**
+     * Registra una nova ressenya per a un vehicle després de validar les dades:
+     * Verifica l'existència del vehicle i del client, comprova que no hi hagi
+     * una ressenya prèvia, valida el rang de puntuació (1-5) i la longitud
+     * màxima del comentari (500 caràcters). Persisteix la nova entitat
+     * RessenyaEntity amb la data i hora actuals dins d'una transacció.
+     */
     @Transactional
     public void crear(String matricula, String dni, int puntuacio, String comentari) {
         var vehicle = vehicleRepo.findById(matricula)
@@ -63,6 +97,11 @@ public class RessenyaService {
         resenyaRepo.save(r);
     }
 
+    /**
+     * Elimina una ressenya del sistema pel seu identificador (operació
+     * d'administració): Comprova prèviament que la ressenya existeixi a la base
+     * de dades i procedeix al seu esborrat transaccional.
+     */
     @Transactional
     public void eliminar(Long codi) {
         if (!resenyaRepo.existsById(codi)) {
@@ -70,15 +109,23 @@ public class RessenyaService {
         }
         resenyaRepo.deleteById(codi);
     }
-    @Transactional
-public void eliminarDelClient(Long codi, String dni) {
-    RessenyaEntity r = resenyaRepo.findById(codi)
-            .orElseThrow(() -> new IllegalArgumentException("Ressenya no trobada"));
 
-    if (r.getClient() == null || dni == null
-            || !r.getClient().getDni().equalsIgnoreCase(dni.trim())) {
-        throw new IllegalArgumentException("Només pots eliminar les teves ressenyes");
+    /**
+     * Elimina una ressenya verificada per autoria del client: Recupera la
+     * ressenya pel seu codi, comprova que pertanyi al DNI del client
+     * sol·licitant i l'esborra de la base de dades. Llença una
+     * IllegalArgumentException si la valoració no existeix o l'usuari no n'és
+     * l'autor.
+     */
+    @Transactional
+    public void eliminarDelClient(Long codi, String dni) {
+        RessenyaEntity r = resenyaRepo.findById(codi)
+                .orElseThrow(() -> new IllegalArgumentException("Ressenya no trobada"));
+
+        if (r.getClient() == null || dni == null
+                || !r.getClient().getDni().equalsIgnoreCase(dni.trim())) {
+            throw new IllegalArgumentException("Només pots eliminar les teves ressenyes");
+        }
+        resenyaRepo.delete(r);
     }
-    resenyaRepo.delete(r);
-}
 }

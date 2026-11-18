@@ -106,7 +106,7 @@ public class Reserves {
                         .map(ClientEntity::isPremium)
                         .orElse(false));
 
-        return "reserves/crearReservaClient";
+        return "reserves/crear_reserva_client";
     }
 
     /**

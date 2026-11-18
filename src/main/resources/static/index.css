@@ -54,7 +54,7 @@ header {
 .marca small { 
     font-size: 9px; 
     letter-spacing: 1px; 
-    color: #94a3b8; 
+    color: #cbd5e1; 
 }
 
 .accions-usuari { 
@@ -73,7 +73,7 @@ header {
     justify-content: center; 
     border: 1px solid #e2e8f0; 
     background: #fff; 
-    color: #0f172a; 
+    color: #020617; /* Más oscuro (antes #0f172a) */
     font-family: inherit; 
 }
 
@@ -118,7 +118,7 @@ header {
 }
 
 .hero-contingut p { 
-    color: #94a3b8; 
+    color: #cbd5e1; 
     font-size: 13px; 
     line-height: 1.5; 
     margin-bottom: 24px; 
@@ -132,7 +132,7 @@ header {
 /* Per què triar-nos */
 .seccio-perque { 
     background: #fff; 
-    color: #0f172a; 
+    color: #020617; /* Más oscuro (antes #0f172a) */
     padding: 48px 32px; 
     text-align: center; 
 }
@@ -140,6 +140,7 @@ header {
 .seccio-perque h2 { 
     font-size: 24px; 
     margin-bottom: 32px; 
+    color: #020617;
 }
 
 .graella-avantatges { 
@@ -161,11 +162,11 @@ header {
 .targeta-avantatge h3 { 
     font-size: 14px; 
     margin: 12px 0 8px; 
-    color: #0f172a; 
+    color: #020617; /* Más oscuro (antes #0f172a) */
 }
 
 .targeta-avantatge p { 
-    color: #64748b; 
+    color: #334155; /* Mucho más oscuro (antes #64748b) */
     font-size: 12px; 
     margin: 0; 
     line-height: 1.4; 
@@ -198,7 +199,7 @@ header {
 
 .targeta-vehicle { 
     background: #fff; 
-    color: #0f172a; 
+    color: #020617; /* Más oscuro (antes #0f172a) */
     border-radius: 10px; 
     overflow: hidden; 
     border: 1px solid #334155; 
@@ -223,7 +224,7 @@ header {
 
 .etiqueta-v { 
     font-size: 10px; 
-    color: #2563eb; 
+    color: #1e40af; /* Azul más oscuro (antes #2563eb) */
     font-weight: 700; 
     text-transform: uppercase; 
     margin-bottom: 4px; 
@@ -233,10 +234,11 @@ header {
 .targeta-vehicle h3 { 
     font-size: 14px; 
     margin: 0 0 6px; 
+    color: #020617;
 }
 
 .targeta-vehicle p { 
-    color: #64748b; 
+    color: #334155; /* Mucho más oscuro (antes #64748b) */
     font-size: 11px; 
     margin: 0 0 16px; 
 }
@@ -252,19 +254,19 @@ header {
 .preu { 
     font-size: 14px; 
     font-weight: 700; 
-    color: #0f172a; 
+    color: #020617; /* Más oscuro (antes #0f172a) */
 }
 
 .preu small { 
     font-size: 10px; 
-    color: #64748b; 
+    color: #334155; /* Mucho más oscuro (antes #64748b) */
     font-weight: normal; 
 }
 
 /* Peu de pàgina */
 footer { 
     background: #090d16; 
-    color: #94a3b8; 
+    color: #cbd5e1; 
     padding: 32px; 
     display: flex; 
     justify-content: space-between; 

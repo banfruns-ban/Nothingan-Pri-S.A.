@@ -7,9 +7,9 @@
     --sidebar-active: #1d4ed8;
     --main-bg: #f9fafb;
     --card-border: #e5e7eb;
-    --text: #111827;
-    --text-muted: #6b7280;
-    --primary: #2563eb;
+    --text: #030712; /* Más oscuro (antes #111827) */
+    --text-muted: #374151; /* Mucho más oscuro (antes #6b7280) */
+    --primary: #1e40af; /* Azul más oscuro (antes #2563eb) */
 }
 
 * { box-sizing: border-box; }
@@ -26,7 +26,7 @@ body {
 .sidebar {
     width: 260px;
     background-color: var(--sidebar-bg);
-    color: #9ca3af;
+    color: #d1d5db;
     min-height: 100vh;
     position: fixed;
     top: 0;
@@ -45,7 +45,7 @@ body {
 .sidebar .brand span {
     display: block;
     font-size: 0.75rem;
-    color: #6b7280;
+    color: #9ca3af;
     font-weight: 400;
     margin-top: 2px;
 }
@@ -59,7 +59,7 @@ body {
     margin-bottom: 16px;
 }
 .sidebar .nav-link {
-    color: #9ca3af;
+    color: #d1d5db;
     padding: 12px 20px;
     font-size: 0.95rem;
     display: flex;
@@ -95,10 +95,10 @@ body {
     flex-wrap: wrap;
     margin-bottom: 24px;
 }
-.page-header h1 { margin: 0; font-size: 1.6rem; font-weight: 700; }
+.page-header h1 { margin: 0; font-size: 1.6rem; font-weight: 700; color: #030712; }
 .counter {
     background: #dbeafe;
-    color: #1e40af;
+    color: #1e3a8a; /* Azul más oscuro (antes #1e40af) */
     font-weight: 600;
     font-size: 0.8rem;
     padding: 4px 10px;
@@ -120,13 +120,14 @@ body {
     display: block;
     font-size: 0.85rem;
     font-weight: 600;
-    color: #374151;
+    color: #111827; /* Más oscuro (antes #374151) */
     margin-bottom: 0.5rem;
 }
 .filter-card select {
     width: 100%;
     max-width: 480px;
     height: 130px;
+    color: #030712;
 }
 .filter-card .help { display: block; margin-top: 0.25rem; font-size: 0.8rem; color: var(--text-muted); }
 .filter-actions { display: flex; gap: 0.5rem; margin-top: 1rem; flex-wrap: wrap; }
@@ -139,7 +140,7 @@ a:focus-visible, button:focus-visible, select:focus-visible {
 
 /* ---------- Missatges ---------- */
 .message { padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9rem; }
-.message.error { background: #fee2e2; color: #991b1b; }
+.message.error { background: #fee2e2; color: #7f1d1d; } /* Más oscuro (antes #991b1b) */
 .message.info { background: #dbeafe; color: #1e3a8a; }
 
 /* ---------- Taula ---------- */
@@ -164,8 +165,8 @@ a:focus-visible, button:focus-visible, select:focus-visible {
 .table .right { text-align: right; }
 .table .nowrap { white-space: nowrap; }
 .table .empty { text-align: center; color: var(--text-muted); padding: 40px 20px; }
-.client-title { font-weight: 700; margin: 0; }
-tr.cancelled td.struck { text-decoration: line-through; color: #9ca3af; }
+.client-title { font-weight: 700; margin: 0; color: #030712; }
+tr.cancelled td.struck { text-decoration: line-through; color: #4b5563; } /* Más oscuro (antes #9ca3af) */
 
 /* ---------- Badges d'estat ---------- */
 .badge-estat {
@@ -175,12 +176,12 @@ tr.cancelled td.struck { text-decoration: line-through; color: #9ca3af; }
     font-size: 0.75rem;
     text-transform: uppercase;
 }
-.badge-estat.PENDENT    { background: #fef3c7; color: #92400e; }
-.badge-estat.CONFIRMADA { background: #dbeafe; color: #1e40af; }
-.badge-estat.EN_CURS    { background: #cffafe; color: #155e75; }
-.badge-estat.FINALITZADA{ background: #dcfce7; color: #166534; }
-.badge-estat.CANCELADA  { background: #fee2e2; color: #991b1b; }
-.badge-estat.ELIMINADA  { background: #e5e7eb; color: #374151; }
+.badge-estat.PENDENT    { background: #fef3c7; color: #78350f; } /* Más oscuro (antes #92400e) */
+.badge-estat.CONFIRMADA { background: #dbeafe; color: #1e3a8a; } /* Más oscuro (antes #1e40af) */
+.badge-estat.EN_CURS    { background: #cffafe; color: #164e63; } /* Más oscuro (antes #155e75) */
+.badge-estat.FINALITZADA{ background: #dcfce7; color: #14532d; } /* Más oscuro (antes #166534) */
+.badge-estat.CANCELADA  { background: #fee2e2; color: #7f1d1d; } /* Más oscuro (antes #991b1b) */
+.badge-estat.ELIMINADA  { background: #e5e7eb; color: #111827; } /* Más oscuro (antes #374151) */
 
 /* ---------- Peu i paginació ---------- */
 .table-footer {
@@ -200,6 +201,7 @@ tr.cancelled td.struck { text-decoration: line-through; color: #9ca3af; }
     padding: 6px 12px;
     border: 1px solid var(--card-border);
     background: #ffffff;
+    color: #030712;
     border-radius: 6px;
     cursor: pointer;
 }
@@ -222,10 +224,10 @@ tr.cancelled td.struck { text-decoration: line-through; color: #9ca3af; }
     letter-spacing: 0.05em;
     margin-bottom: 4px;
 }
-.total-card .value-text { font-size: 1.6rem; font-weight: 700; }
+.total-card .value-text { font-size: 1.6rem; font-weight: 700; color: #030712; }
 .total-card small { color: var(--text-muted); }
 .total-card.highlight { background: #eff6ff; border-color: #93c5fd; }
-.total-card.highlight .value-text { color: #1d4ed8; }
+.total-card.highlight .value-text { color: #1e3a8a; } /* Más oscuro (antes #1d4ed8) */
 
 /* ---------- Responsive (RN31) ---------- */
 @media (max-width: 900px) {

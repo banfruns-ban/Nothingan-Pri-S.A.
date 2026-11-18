@@ -1,10 +1,9 @@
 <!-- BANNER PRINCIPAL -->
-<!-- BANNER PRINCIPAL -->
 <div align="center">
-  <img src="https://readme-typing-svg.demolab.com?font=Montserrat&weight=800&size=36&duration=4000&pause=10000&color=58A6FF&background=0D1117&center=true&vCenter=true&width=850&height=110&lines=NOTHINGAN+PRI+S.A." alt="Nothingan Pri S.A." />
-  <br/>
-  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=500&size=16&duration=3500&pause=1000&color=C9D1D9&background=0D1117&center=true&vCenter=true&width=850&height=45&lines=Plataforma+Integral+ERP+i+CRM+de+Lloguer+de+Vehicles;Java+%E2%80%A2+Spring+Boot+%E2%80%A2+MySQL+%E2%80%A2+MongoDB" alt="Subtítol" />
+  <img src="https://placehold.co/1200x250/0d1117/58a6ff?text=NOTHINGAN+PRI+S.A.&font=montserrat" width="100%" alt="Nothingan Pri S.A." />
 </div>
+
+<br/>
 
 <div align="center">
   <img src="https://img.shields.io/badge/Java-17%2B-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white" alt="Java" />
@@ -14,6 +13,14 @@
   <img src="https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white" alt="MySQL" />
   <img src="https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white" alt="MongoDB" />
   <img src="https://img.shields.io/badge/JUnit_5-25A162?style=for-the-badge&logo=junit5&logoColor=white" alt="JUnit 5" />
+</div>
+
+<br/>
+
+<div align="center">
+  <a href="https://github.com/banfruns-ban/Nothingan-Pri-S.A./blob/main/Memoria%20Nothingan%20Pri%20S.A.pdf" target="_blank">
+    <img src="https://img.shields.io/badge/📄_Memòria_Tècnica_i_Manual_d'Usuari_(PDF)-D32F2F?style=for-the-badge&logo=adobeacrobatreader&logoColor=white" alt="Memòria Tècnica PDF" />
+  </a>
 </div>
 
 <br/>

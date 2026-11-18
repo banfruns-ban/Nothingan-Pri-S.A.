@@ -52,14 +52,14 @@ public class ClientController {
     /**
      * Mostra el formulari d'alta de client des del panell de control intern:
      * Crea una instància buida de ClientEntity si el model no conté ja dades prèvies d'un intent anterior fallit.
-     * Retorna la vista HTML "client/altaUsuari".
+     * Retorna la vista HTML "client/alta_usuari".
      */
     @GetMapping({"/dashboard/clients/alta", "/dashboard/clients/altaUsuari", "/dashboard/clients/nou"})
     public String mostrarFormulari(Model model) {
         if (!model.containsAttribute("client")) {
             model.addAttribute("client", new ClientEntity());
         }
-        return "client/altaUsuari";
+        return "client/alta_usuari";
     }
 
     /**
@@ -93,7 +93,7 @@ public class ClientController {
         client.setPassword(null);
         client.setNumTargeta(null);
         model.addAttribute("error", error);
-        return "client/altaUsuari";
+        return "client/alta_usuari";
     }
 
     // =====================================================
@@ -122,18 +122,18 @@ public class ClientController {
         model.addAttribute("dni", dni);
         model.addAttribute("poblacio", poblacio);
         model.addAttribute("email", email);
-        return "client/llistaClients";
+        return "client/llista_clients";
     }
 
     /**
      * Mostra la fitxa amb tota la informació detallada d'un client identificat pel seu DNI:
-     * Si el client existeix el carrega al model per mostrar "client/detallClient"; en cas contrari redirigeix al llistat amb un error.
+     * Si el client existeix el carrega al model per mostrar "client/detall_client"; en cas contrari redirigeix al llistat amb un error.
      */
     @GetMapping({"/dashboard/clients/{dni}", "/dashboard/clients/detall/{dni}"})
     public String detall(@PathVariable String dni, Model model, RedirectAttributes ra) {
         return clientLogic.obtenir(dni).map(c -> {
             model.addAttribute("client", c);
-            return "client/detallClient";
+            return "client/detall_client";
         }).orElseGet(() -> {
             ra.addFlashAttribute("error", "Client no trobat");
             return "redirect:/dashboard/clients";
@@ -187,13 +187,13 @@ public class ClientController {
 
     /**
      * Mostra el formulari d'edició precarregat amb les dades d'un client existent:
-     * Recupera el client pel seu DNI i renderitza "client/editarClient", o redirigeix al llistat si no es troba.
+     * Recupera el client pel seu DNI i renderitza "client/editar_client", o redirigeix al llistat si no es troba.
      */
     @GetMapping("/dashboard/clients/{dni}/editar")
     public String formulariEditar(@PathVariable String dni, Model model, RedirectAttributes ra) {
         return clientLogic.obtenir(dni).map(c -> {
             model.addAttribute("client", c);
-            return "client/editarClient";
+            return "client/editar_client";
         }).orElseGet(() -> {
             ra.addFlashAttribute("error", "Client no trobat");
             return "redirect:/dashboard/clients";

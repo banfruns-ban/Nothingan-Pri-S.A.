@@ -53,7 +53,7 @@ public class ReservesClientController {
         model.addAttribute("codi", codi);
         model.addAttribute("dataInici", dataInici);
         model.addAttribute("dataFi", dataFi);
-        return "reserves/LesMevesReserves";
+        return "reserves/les_meves_reserves";
     }
 
     // Vista de detall d'una reserva del client (G3P1-244)
@@ -68,7 +68,7 @@ public class ReservesClientController {
         return reservesClientService.obtenirReservaDelClient(codi, authentication.getName())
                 .map(r -> {
                     model.addAttribute("reserva", r);
-                    return "reserves/detallReservaClient";
+                    return "reserves/detall_reserva_client";
                 })
                 .orElseGet(() -> {
                     ra.addFlashAttribute("error", "No s'ha trobat aquesta reserva o no tens permís per veure-la.");
@@ -129,7 +129,7 @@ public class ReservesClientController {
                     model.addAttribute("jaValorat", ressenyaService.jaHaValorat(
                             r.getVehicle().getMatricula(), r.getClient().getDni()));
                     model.addAttribute("dniClient", r.getClient().getDni());
-                    return "reserves/valorarReserva";
+                    return "reserves/valorar_reserva";
                 })
                 .orElseGet(() -> {
                     ra.addFlashAttribute("error", "No s'ha trobat aquesta reserva.");

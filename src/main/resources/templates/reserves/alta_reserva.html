@@ -56,7 +56,7 @@
 
                     <!-- Desplegable quan no s'ha preseleccionat un client -->
                     <div th:if="${client == null}">
-                        <label for="dni" class="form-label">Selecciona un client (només clients validats)</label>
+                        <label for="dni" class="form-label">Selecciona un client (només clients validats)*</label>
                         <select id="dni" name="dni" class="form-select" required>
                             <option value="">Selecciona un client...</option>
                             <option th:each="c : ${clients}" th:value="${c.dni}"
@@ -68,7 +68,7 @@
                 <!-- 2. Vehicle -->
                 <h5 class="fw-bold text-primary mb-3 border-bottom pb-2">2. Vehicle</h5>
                 <div class="mb-4">
-                    <label for="matricula" class="form-label">Vehicle disponible</label>
+                    <label for="matricula" class="form-label">Vehicle disponible *</label>
                     <select id="matricula" name="matricula" class="form-select" required>
                         <option value="">Selecciona un vehicle...</option>
                         <option th:each="v : ${vehicles}" 
@@ -84,22 +84,22 @@
                 <h5 class="fw-bold text-primary mb-3 border-bottom pb-2">3. Període de lloguer</h5>
                 <div class="row g-3 mb-3">
                     <div class="col-md-6">
-                        <label for="dataInici" class="form-label">Data d'inici</label>
+                        <label for="dataInici" class="form-label">Data d'inici *</label>
                         <input type="date" id="dataInici" name="dataInici" class="form-control" required
                                th:value="${dataInici != null ? #temporals.format(dataInici, 'yyyy-MM-dd') : ''}">
                     </div>
                     <div class="col-md-6">
-                        <label for="horaInici" class="form-label">Hora d'inici</label>
+                        <label for="horaInici" class="form-label">Hora d'inici *</label>
                         <input type="time" id="horaInici" name="horaInici" class="form-control" required
                                th:value="${horaInici != null ? #temporals.format(horaInici, 'HH:mm') : ''}">
                     </div>
                     <div class="col-md-6">
-                        <label for="dataFi" class="form-label">Data de fi</label>
+                        <label for="dataFi" class="form-label">Data de fi *</label>
                         <input type="date" id="dataFi" name="dataFi" class="form-control" required
                                th:value="${dataFi != null ? #temporals.format(dataFi, 'yyyy-MM-dd') : ''}">
                     </div>
                     <div class="col-md-6">
-                        <label for="horaFi" class="form-label">Hora de fi</label>
+                        <label for="horaFi" class="form-label">Hora de fi *</label>
                         <input type="time" id="horaFi" name="horaFi" class="form-control" required
                                th:value="${horaFi != null ? #temporals.format(horaFi, 'HH:mm') : ''}">
                     </div>

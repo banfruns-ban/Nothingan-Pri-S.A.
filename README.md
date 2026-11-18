@@ -1,4 +1,3 @@
-<!-- BANNER PRINCIPAL -->
 <div align="center">
   <img src="https://placehold.co/1200x250/0d1117/58a6ff?text=NOTHINGAN+PRI+S.A.&font=montserrat" width="100%" alt="Nothingan Pri S.A." />
 </div>
@@ -26,61 +25,30 @@
 <br/>
 
 ## 📋 Descripció del Projecte
-
-**Nothingan Pri S.A.** és una plataforma web full-stack desenvolupada com a projecte intermodular de **2n de Desenvolupament d'Aplicacions Multiplataforma (DAM)** (Grup 3 — Curs 2026-27, Institut Nicolau Copèrnic, Terrassa).
-
-L'empresa compta amb més de 36 anys d'experiència en el sector del lloguer de vehicles a Terrassa. Aquest sistema substitueix la gestió tradicional basada en paper i trucades telefòniques per una solució centralitzada **ERP i CRM** que digitalitza tot el cicle de vida del lloguer: registre i validació documental de clients, catàleg interactiu amb bloqueig automàtic de vehicles, gestió de flota, lliurament i retorn amb evidència fotogràfica, càlcul automàtic de fiances/penalitzacions i generació d'informes.
-
----
+**Nothingan Pri S.A.** és una plataforma web full-stack desenvolupada com a projecte intermodular de **2n de Desenvolupament d'Aplicacions Multiplataforma (DAM)** (Grup 3 — Curs 2026-27, Institut Nicolau Copèrnic, Terrassa). Digitalitza la gestió integral de lloguer de vehicles mitjançant un sistema **ERP i CRM** centralitzat.
 
 ## 🚀 Funcionalitats Principals
-
-### 👤 Portal Client
-* **Registre i Verificació Documental (`RF01`, `RF02`, `RF81`):** Formulari d'alta amb càrrega d'imatges del DNI/Passaport i carnet de conduir per a la seva revisió.
-* **Catàleg Dinàmic i Filtratge (`RF11`, `RF16`, `RF17`):** Consulta de vehicles disponibles filtrats per dates, horaris i categoria, amb càlcul automàtic del preu total i descompte del 25% en la fiança per a clients *Premium*.
-* **Gestió de Reserves (`RF05`, `RF12`, `RF26`, `RF28`):** Bloqueig automàtic del vehicle en confirmar la reserva, consulta d'històric i anul·lació prèvia al lliurament.
-* **Sistema de Valoracions:** Ressenyes de 1 a 5 estrelles i comentaris verificats un cop finalitzat el lloguer.
-
-### 🧑‍💼 Panell d'Agent
-* **Dashboard en Temps Real (`RF18`):** Resum operatiu diari amb reserves pendents de lliurament, retorns en curs, vehicles actius i llistat de propers lliuraments.
-* **Gestió Integral de Flota (`RF08`, `RF09`, `RF40`–`RF47`):** Alta, baixa, modificació, activació/desactivació i filtratge multi-criteri de vehicles (matrícula, marca, model, any i disponibilitat).
-* **Lliurament de Vehicles (`RF13`, `RF19`):** Checklist d'estat inicial, lectura d'odòmetre/combustible i captura fotogràfica dels 4 costats més fotografies addicionals il·limitades.
-* **Retorn i Liquidació de Fiança (`RF20`–`RF25`):** Inspecció en devolució, registre de desperfectes imputables o no imputables, adjunció de fotos d'incidències, càlcul automàtic de retencions per danys, carburant o retard i tancament del contracte.
-* **Gestió de Clients (`RF06`, `RF07`, `RF23`–`RF26`):** Alta directa des d'oficina, cerca per DNI/email, filtratge avançat i assignació de categoria *Premium*.
-
-### 🛡️ Panell d'Administrador
-* **Validació de Nous Clients (`RF03`, `RF04`, `RF14`, `RF15`, `RF82`):** Revisió de documentació adjunta, aprovació o rebuig de sol·licituds i notificació automàtica per correu electrònic.
-* **Gestió d'Agents (`RF10`–`RF15`):** Control complet d'empleats i permisos d'accés basats en rols (`CLIENT`, `AGENT`, `ADMIN`).
-* **Informes i Històric (`RF36`, `RF37`, `RF91`):** Consulta d'informes econòmics i estadístics de reserves filtrats per client, vehicle i dates.
-
----
+* **Portal Client:** Registre amb càrrega de DNI/carnet (`RF01`, `RF02`), catàleg filtrable per dates/horaris amb bloqueig automàtic de vehicles (`RF11`, `RF12`), descompte *Premium* i sistema de valoracions (1–5 estrelles).
+* **Panell d'Agent:** Dashboard en temps real (`RF18`), gestió completa de flota (`RF40`–`RF47`), lliurament i retorn amb evidència fotogràfica (`RF13`, `RF19`–`RF25`) i càlcul automàtic de retencions de fiança.
+* **Panell d'Administrador:** Validació documental de nous clients amb notificació per correu (`RF04`, `RF15`), gestió d'agents (`RF10`–`RF15`) i informes econòmics de reserves (`RF91`).
 
 ## 🏗️ Arquitectura i Stack Tecnològic
+* **Backend:** Java 17+, Spring Boot, Spring Data JPA, Spring Security, JavaMailSender
+* **Frontend:** Thymeleaf, HTML5, CSS3, Bootstrap 5, JavaScript
+* **Bases de Dades:** MySQL (dades relacionals del negoci) + MongoDB (documents, fotografies d'inspecció, notificacions i logs)
+* **Testing & Gestió:** JUnit 5, Jira (Scrum), Figma, Git / GitLab / GitHub
 
-El projecte segueix una **arquitectura MVC per capes** (`Entity`, `Repository`, `Service`, `Controller` i vistes `Thymeleaf`) combinant persistència híbrida:
+## ⚙️ Instal·lació i Execució
+1. Clona el repositori: `git clone https://github.com/banfruns-ban/Nothingan-Pri-S.A..git`
+2. Configura les credencials de MySQL, MongoDB i SMTP a `src/main/resources/application.properties`.
+3. Executa el projecte: `mvn spring-boot:run`
+4. Obre el navegador a `https://localhost:8443`
 
-| Capa / Àmbit | Tecnologies |
-| :--- | :--- |
-| **Backend** | Java 17+, Spring Boot, Spring Data JPA, Spring Security, JavaMailSender |
-| **Frontend** | Thymeleaf, HTML5, CSS3, Bootstrap 5, JavaScript |
-| **Base de Dades Relacional** | **MySQL** (Usuaris, Clients, Agents, Administradors, Vehicles, Reserves, Incidències i Ressenyes) |
-| **Base de Dades NoSQL** | **MongoDB** (Documents d'identitat, fotografies d'inspecció, notificacions i logs del sistema) |
-| **Testing & QA** | JUnit 5 (Tests unitaris i d'integració de serveis) |
-| **Gestió & Disseny** | Jira (4 Sprints Scrum), Figma (Prototipatge UI/UX), Git / GitLab / GitHub |
+## 📄 Documentació i Manual d'Usuari
+* 📘 **[Llegir Memòria Tècnica i Manual d'Usuari (PDF)](https://github.com/banfruns-ban/Nothingan-Pri-S.A./blob/main/Memoria%20Nothingan%20Pri%20S.A.pdf)**
 
----
-
-## ⚙️ Instal·lació i Posada en Marxa
-
-### Prerequisits
-* **JDK 17** o superior
-* **Maven 3.8+**
-* **MySQL Server** (port `3306`)
-* **MongoDB** (port `27017`)
-
-### Passos d'execució
-
-1. **Clonar el repositori:**
-   ```bash
-   git clone [https://github.com/banfruns-ban/Nothingan-Pri-S.A..git](https://github.com/banfruns-ban/Nothingan-Pri-S.A..git)
-   cd Nothingan-Pri-S.A.
+## 👥 Development Team (Group 3 — 2n DAM)
+- **[Hugo López Soldado](https://github.com/hlopezsoldado)** — *Agent Management Module, Role-Based Security, Real-Time Dashboard & JUnit Testing*
+- **[Izan Lázaro Egea](https://github.com/izan-tech)** — *Full-Stack & Backend Architecture (Spring Boot & MongoDB), Client & Booking Modules, System Validation & Bug Fixing*
+- **[Brais Anfruns Rodríguez](https://github.com/banfruns-ban)** — *Fleet & Vehicle Management Module (Full CRUD & Availability Control), Functional QA & JUnit Unit/Integration Testing*
+- **[Yuri Andrei Martinello](https://github.com/yuri-martinello)** — *Full-Stack Development, Authentication, Security & Access Permissions, Navigation UX Improvements & Booking Debugging*

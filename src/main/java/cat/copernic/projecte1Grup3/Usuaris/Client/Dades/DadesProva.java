@@ -118,6 +118,10 @@ public class DadesProva {
             crea(repo, passwordEncoder, "41928375L", "Sílvia Domènech Gil", "silvia.client@test.com", "NEf7kIzMCV", "620304050",
                     LocalDate.of(1995, 11, 14), "Espanyola", "Carrer Pantà 50, Terrassa", "B",
                     LocalDate.of(2032, 9, 19), LocalDate.of(2034, 12, 9), "VALIDAT", false);
+
+            crea(repo, passwordEncoder, "58294716R", "Kerry Kopenis", "kerrykopenis@gmail.com", "password123", "611223355",
+                    LocalDate.of(1992, 4, 12), "Estatunidenca", "Carrer de la Pau 18, Terrassa", "B",
+                    LocalDate.of(2031, 5, 20), LocalDate.of(2033, 8, 14), "VALIDAT", false);
         };
     }
 

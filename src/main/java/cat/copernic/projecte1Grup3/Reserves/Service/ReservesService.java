@@ -35,7 +35,13 @@ import cat.copernic.projecte1Grup3.Usuaris.Client.Repository.ClientRepository;
 public class ReservesService {
 
     private static final Logger log = LoggerFactory.getLogger(ReservesService.class);
+
+    // Descompte premium: 25% sobre la fiança
     private static final BigDecimal DESCOMPTE_PREMIUM = new BigDecimal("0.25");
+
+    // Percentatge fix del cost del lloguer que es retorna en anul·lar (criteri de l'empresa)
+    private static final BigDecimal PERCENTATGE_RETORN_LLOGUER = new BigDecimal("25");
+
     public static final String PENDENT = "PENDENT";
     public static final String CONFIRMADA = "CONFIRMADA";
     public static final String EN_CURS = "EN_CURS";
@@ -210,15 +216,20 @@ public class ReservesService {
         reserva.setHoraInici(horaInici);
         reserva.setDataFi(dataFi);
         reserva.setHoraFi(horaFi);
+
+        // El cost total és sempre preu/hora x hores, sense descompte
         BigDecimal cost = vehicle.getPreuHora().multiply(BigDecimal.valueOf(hores));
-
-        if (esPremium(client)) {
-            cost = cost.multiply(BigDecimal.ONE.subtract(DESCOMPTE_PREMIUM));
-            log.info("Descompte premium (25%) aplicat al client {}", client.getDni());
-        }
-
         reserva.setCostTotal(cost.setScale(2, RoundingMode.HALF_UP));
-        reserva.setFianca(vehicle.getFianca());
+
+        // Descompte premium: el 25% s'aplica sobre la fiança
+        BigDecimal fianca = vehicle.getFianca();
+        if (esPremium(client)) {
+            fianca = fianca.multiply(BigDecimal.ONE.subtract(DESCOMPTE_PREMIUM));
+            log.info("Descompte premium (25%) aplicat a la fiança del client {}: {}€ -> {}€",
+                    client.getDni(), vehicle.getFianca(), fianca.setScale(2, RoundingMode.HALF_UP));
+        }
+        reserva.setFianca(fianca.setScale(2, RoundingMode.HALF_UP));
+
         reserva.setEstat(PENDENT);
         reserva.setObservacions(observacions == null || observacions.isBlank()
                 ? null : observacions.trim());
@@ -551,12 +562,24 @@ public class ReservesService {
     }
 
     // ============================================================
-    // MÈTODE PER ANUL·LAR UNA RESERVA DES DEL PANELL D'AGENT
+    // ANUL·LACIÓ DE RESERVA DES DEL PANELL D'AGENT
     // ============================================================
+
+    // Compatibilitat: sense percentatge es retorna tota la fiança (100%)
     @Transactional
     public ReservesEntity anularReserva(Long codiReserva, String motiu) {
+        return anularReserva(codiReserva, motiu, new BigDecimal("100"));
+    }
+
+    // L'agent decideix el % de fiança que es retorna; del lloguer sempre es retorna el 25%
+    @Transactional
+    public ReservesEntity anularReserva(Long codiReserva, String motiu, BigDecimal percentatgeFianca) {
         if (motiu == null || motiu.isBlank()) {
             throw new IllegalArgumentException("Cal indicar el motiu de l'anul·lació.");
+        }
+        if (percentatgeFianca == null || percentatgeFianca.compareTo(BigDecimal.ZERO) < 0
+                || percentatgeFianca.compareTo(new BigDecimal("100")) > 0) {
+            throw new IllegalArgumentException("El percentatge de fiança ha d'estar entre 0 i 100.");
         }
 
         ReservesEntity r = reservesRepository.findById(codiReserva)
@@ -566,12 +589,40 @@ public class ReservesService {
             throw new IllegalArgumentException("Aquesta reserva ja no es pot anul·lar.");
         }
 
+        BigDecimal retornLloguer = calcularRetornLloguer(r);
+        BigDecimal retornFianca = calcularRetornFianca(r, percentatgeFianca);
+
+        StringBuilder obs = new StringBuilder();
+        if (r.getObservacions() != null && !r.getObservacions().isBlank()) {
+            obs.append(r.getObservacions()).append("\n");
+        }
+        obs.append("[Anul·lació ").append(LocalDate.now()).append("]: retorn lloguer 25% (")
+                .append(retornLloguer).append("€); retorn fiança ")
+                .append(percentatgeFianca.stripTrailingZeros().toPlainString()).append("% (")
+                .append(retornFianca).append("€).");
+
+        r.setObservacions(obs.toString());
         r.setEstat(CANCELADA);
         r.setAnulacioMotiu(motiu.trim());
         ReservesEntity guardada = reservesRepository.save(r);
         historicService.desar(guardada, EstatHistoric.CANCELADA);
-        log.info("Reserva #{} anul·lada correctament.", codiReserva);
+        log.warn("Reserva #{} anul·lada. Retorn lloguer {}€, fiança {}% = {}€",
+                codiReserva, retornLloguer, percentatgeFianca, retornFianca);
         return guardada;
+    }
+
+    // 25% del cost del lloguer (sense fiança)
+    public BigDecimal calcularRetornLloguer(ReservesEntity r) {
+        BigDecimal cost = r.getCostTotal() != null ? r.getCostTotal() : BigDecimal.ZERO;
+        return cost.multiply(PERCENTATGE_RETORN_LLOGUER)
+                .divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
+    }
+
+    // Part de la fiança que es retorna segons el % triat per l'agent
+    public BigDecimal calcularRetornFianca(ReservesEntity r, BigDecimal percentatgeFianca) {
+        BigDecimal fianca = r.getFianca() != null ? r.getFianca() : BigDecimal.ZERO;
+        return fianca.multiply(percentatgeFianca)
+                .divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
     }
 
     // ============================================================

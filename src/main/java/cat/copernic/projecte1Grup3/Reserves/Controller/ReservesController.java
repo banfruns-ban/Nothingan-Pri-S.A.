@@ -248,19 +248,21 @@ public class ReservesController {
         return "reserves/anularReserva";
     }
 
-    /**
-     * Processa l'anul·lació d'una reserva registrant-ne el motiu: Crida al
-     * servei per canviar l'estat de la reserva a cancel·lada i desar la
-     * justificació proporcionada. Si falla la validació o el procés, retorna al
-     * formulari d'anul·lació mantenint el text del motiu introduït.
+       /**
+     * Processa l'anul·lació d'una reserva: registra el motiu i el percentatge de fiança
+     * que l'agent decideix retornar (del lloguer sempre es retorna el 25%).
+     * Canvia l'estat a cancel·lada i envia un correu al client. Si el correu falla,
+     * la reserva queda anul·lada igualment i es mostra un avís a l'agent.
+     * Si falla la validació, torna al formulari mantenint el motiu escrit.
      */
     @PostMapping("/dashboard/reserves/{codi}/anular")
     public String anular(
             @PathVariable Long codi,
             @RequestParam("anulacio_motiu") String motiu,
+            @RequestParam("percentatge_fianca") BigDecimal percentatgeFianca,
             RedirectAttributes ra) {
         try {
-            ReservesEntity reservaAnulada = reservesLogic.anularReserva(codi, motiu);
+            ReservesEntity reservaAnulada = reservesLogic.anularReserva(codi, motiu, percentatgeFianca);
             try {
                 reservaAnulacioEmailService.enviarNotificacio(reservaAnulada);
             } catch (MailException | IllegalStateException e) {

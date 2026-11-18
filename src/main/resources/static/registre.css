@@ -2,7 +2,7 @@
     max-width: 800px;
     margin: 40px auto;
     background: #fff;
-    color: #0f172a;
+    color: #020617; /* Más oscuro (antes #0f172a) */
     border-radius: 10px;
     padding: 32px;
     border: 1px solid #e2e8f0;
@@ -12,11 +12,11 @@
 .registre-container h2 {
     margin-top: 0;
     font-size: 20px;
-    color: #0f172a;
+    color: #020617; /* Más oscuro (antes #0f172a) */
 }
 
 .registre-subtitol {
-    color: #64748b;
+    color: #334155; /* Mucho más oscuro (antes #64748b) */
     font-size: 12px;
     margin-bottom: 24px;
 }
@@ -40,7 +40,7 @@
 .form-grup label {
     font-size: 12px;
     font-weight: 600;
-    color: #475569;
+    color: #0f172a; /* Más oscuro (antes #475569) */
 }
 
 .form-grup input, 
@@ -49,6 +49,7 @@
     border: 1px solid #cbd5e1;
     border-radius: 6px;
     font-size: 13px;
+    color: #020617; /* Texto de entrada más oscuro */
     outline: none;
     font-family: inherit;
     background: #fff;
@@ -64,7 +65,7 @@
     grid-column: 1 / -1;
     font-size: 15px;
     font-weight: 700;
-    color: #2563eb;
+    color: #1e3a8a; /* Azul mucho más oscuro (antes #2563eb) */
     border-bottom: 1px solid #e2e8f0;
     padding-bottom: 6px;
     margin-top: 16px;
@@ -72,7 +73,7 @@
 
 .alert-error {
     background: #fef2f2;
-    color: #dc2626;
+    color: #7f1d1d; /* Rojo mucho más oscuro (antes #dc2626) */
     border: 1px solid #fecaca;
     padding: 12px;
     border-radius: 6px;

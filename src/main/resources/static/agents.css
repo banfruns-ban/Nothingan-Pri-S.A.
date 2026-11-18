@@ -7,6 +7,7 @@
 
 body {
     background-color: var(--main-bg);
+    color: #030712; /* Texto base casi negro */
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     min-height: 100vh;
 }
@@ -15,7 +16,7 @@ body {
 .sidebar {
     width: 260px;
     background-color: var(--sidebar-bg);
-    color: #9ca3af;
+    color: #d1d5db;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -47,13 +48,13 @@ body {
 .sidebar .brand span {
     display: block;
     font-size: 0.75rem;
-    color: #6b7280;
+    color: #9ca3af;
     font-weight: 400;
     margin-top: 2px;
 }
 
 .sidebar .nav-link {
-    color: #9ca3af;
+    color: #d1d5db;
     padding: 12px 20px;
     font-size: 0.95rem;
     display: flex;
@@ -89,6 +90,7 @@ body {
 .main-content {
     margin-left: 260px;
     padding: 40px;
+    color: #030712;
 }
 
 /* Cards & Formularios */
@@ -108,7 +110,7 @@ body {
 .filter-card label, .form-card label {
     font-size: 0.85rem;
     font-weight: 600;
-    color: #374151;
+    color: #111827; /* Antes #374151 */
     margin-bottom: 6px;
 }
 
@@ -126,7 +128,7 @@ body {
     font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: #6b7280;
+    color: #374151; /* Antes #6b7280 */
     font-weight: 700;
     padding: 16px 20px;
     border: none;
@@ -137,7 +139,7 @@ body {
     vertical-align: middle;
     font-size: 0.9rem;
     border-bottom: 1px solid #f3f4f6;
-    color: #111827;
+    color: #030712; /* Antes #111827 */
 }
 
 .agent-img {
@@ -158,19 +160,19 @@ body {
 
 .agent-title {
     font-weight: 700;
-    color: #111827;
+    color: #030712; /* Antes #111827 */
     margin: 0;
 }
 
 .agent-sub {
     font-size: 0.8rem;
-    color: #9ca3af;
+    color: #4b5563; /* Antes #9ca3af (mucho más legible) */
 }
 
 /* Botones & Badges */
 .btn-editar {
     background-color: #eff6ff;
-    color: #2563eb;
+    color: #1e40af; /* Antes #2563eb */
     border: none;
     font-weight: 600;
     font-size: 0.85rem;
@@ -181,12 +183,12 @@ body {
 
 .btn-editar:hover {
     background-color: #dbeafe;
-    color: #1d4ed8;
+    color: #1e3a8a;
 }
 
 .btn-desactivar {
     background-color: #f3f4f6;
-    color: #6b7280;
+    color: #374151; /* Antes #6b7280 */
     border: none;
     font-weight: 500;
     font-size: 0.85rem;
@@ -196,12 +198,12 @@ body {
 
 .btn-desactivar:hover {
     background-color: #fee2e2;
-    color: #991b1b;
+    color: #7f1d1d;
 }
 
 .badge-admin {
     background-color: #fee2e2;
-    color: #991b1b;
+    color: #7f1d1d; /* Antes #991b1b */
     font-weight: 600;
     padding: 4px 8px;
     border-radius: 4px;
@@ -211,7 +213,7 @@ body {
 
 .badge-agent {
     background-color: #dbeafe;
-    color: #1e40af;
+    color: #1e3a8a; /* Antes #1e40af */
     font-weight: 600;
     padding: 4px 8px;
     border-radius: 4px;
@@ -222,7 +224,7 @@ body {
 .label-title {
     font-size: 0.8rem;
     text-transform: uppercase;
-    color: #6b7280;
+    color: #374151; /* Antes #6b7280 */
     font-weight: 700;
     letter-spacing: 0.05em;
     margin-bottom: 4px;
@@ -230,13 +232,13 @@ body {
 
 .value-text {
     font-size: 1rem;
-    color: #111827;
+    color: #030712; /* Antes #111827 */
     font-weight: 600;
 }
 
 .section-title {
     font-size: 0.9rem;
-    color: #2563eb;
+    color: #1e40af; /* Antes #2563eb */
     font-weight: 700;
     margin-top: 1.5rem;
     margin-bottom: 1rem;
@@ -250,7 +252,7 @@ body {
 
 .rating { display: inline-flex; flex-direction: row-reverse; gap: 4px; }
 .rating input { display: none; }
-.rating label { font-size: 1.8rem; color: #d1d5db; cursor: pointer; transition: color .15s; }
+.rating label { font-size: 1.8rem; color: #9ca3af; cursor: pointer; transition: color .15s; }
 .rating input:checked ~ label,
 .rating label:hover,
 .rating label:hover ~ label { color: #ffc107; }

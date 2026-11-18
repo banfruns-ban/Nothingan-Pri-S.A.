@@ -21,7 +21,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to ed
     margin: 0 !important;
     font-size: 28px !important;
     line-height: 1;
-    color: #d1d5db !important;
+    color: #9ca3af !important; /* Estrella sin marcar con mayor contraste */
     cursor: pointer;
 }
 
@@ -29,11 +29,11 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to ed
 .rating label:hover,
 .rating label:hover ~ label { color: #ffc107 !important; }
 
-.ressenyes-seccio { margin-top: 32px; border-top: 1px solid #e2e8f0; padding-top: 24px; }
-.ressenyes-seccio h3 { font-size: 16px; margin: 0 0 12px; }
+.ressenyes-seccio { margin-top: 32px; border-top: 1px solid #e2e8f0; padding-top: 24px; color: #020617; }
+.ressenyes-seccio h3 { font-size: 16px; margin: 0 0 12px; color: #020617; }
 
 .ressenya-succes {
-    background: #dcfce7; color: #166534; border: 1px solid #bbf7d0;
+    background: #dcfce7; color: #14532d; border: 1px solid #bbf7d0;
     border-radius: 6px; padding: 10px 12px; font-size: 13px; margin-bottom: 12px;
 }
 
@@ -41,12 +41,13 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to ed
 .ressenya-form textarea {
     width: 100%; box-sizing: border-box; padding: 10px;
     border: 1px solid #cbd5e1; border-radius: 6px; margin: 10px 0; font-family: inherit;
+    color: #020617;
 }
 
-.ressenya-buida { font-size: 13px; color: #64748b; }
+.ressenya-buida { font-size: 13px; color: #334155; }
 
 .ressenya-item { border-bottom: 1px solid #e2e8f0; padding: 12px 0; }
-.ressenya-cap { display: flex; justify-content: space-between; font-size: 13px; }
-.ressenya-data { color: #64748b; }
-.ressenya-estrelles { color: #f59e0b; }
-.ressenya-text { margin: 4px 0 0; font-size: 13px; white-space: pre-line; }
+.ressenya-cap { display: flex; justify-content: space-between; font-size: 13px; color: #020617; }
+.ressenya-data { color: #334155; }
+.ressenya-estrelles { color: #d97706; }
+.ressenya-text { margin: 4px 0 0; font-size: 13px; color: #0f172a; white-space: pre-line; }

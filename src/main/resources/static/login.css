@@ -8,7 +8,7 @@
 
 body {
     background-color: #f8fafc;
-    color: #1e293b;
+    color: #020617;
     min-height: 100vh;
     display: flex;
 }
@@ -53,7 +53,7 @@ body {
 }
 
 .brand-column p {
-    color: #94a3b8;
+    color: #cbd5e1;
     font-size: 1rem;
     line-height: 1.6;
     max-width: 460px;
@@ -81,12 +81,12 @@ body {
 .card-login h2 {
     font-size: 1.75rem;
     font-weight: 700;
-    color: #0f172a;
+    color: #020617;
     margin-bottom: 0.5rem;
 }
 
 .subtitle {
-    color: #64748b;
+    color: #334155;
     font-size: 0.9rem;
     margin-bottom: 1.5rem;
 }
@@ -95,7 +95,7 @@ body {
     display: block;
     font-size: 0.85rem;
     font-weight: 600;
-    color: #0f172a;
+    color: #020617;
     margin-bottom: 0.75rem;
 }
 
@@ -134,7 +134,7 @@ body {
     top: 8px;
     right: 8px;
     background: #dbeafe;
-    color: #1d4ed8;
+    color: #1e3a8a;
     font-size: 0.65rem;
     font-weight: 700;
     padding: 2px 6px;
@@ -143,13 +143,13 @@ body {
 
 .role-card strong {
     font-size: 0.9rem;
-    color: #0f172a;
+    color: #020617;
     margin-top: 0.5rem;
 }
 
 .role-card small {
     font-size: 0.75rem;
-    color: #64748b;
+    color: #334155;
     margin-top: 2px;
 }
 
@@ -161,8 +161,8 @@ body {
 .form-group label {
     display: block;
     font-size: 0.85rem;
-    font-weight: 500;
-    color: #334155;
+    font-weight: 600;
+    color: #0f172a;
     margin-bottom: 0.4rem;
 }
 
@@ -172,6 +172,7 @@ body {
     border: 1px solid #cbd5e1;
     border-radius: 8px;
     font-size: 0.95rem;
+    color: #020617;
     outline: none;
     transition: border-color 0.2s;
 }
@@ -190,12 +191,12 @@ body {
 }
 
 .form-options label {
-    color: #475569;
+    color: #1e293b;
     cursor: pointer;
 }
 
 .link-forgot {
-    color: #2563eb;
+    color: #1e40af;
     text-decoration: none;
     font-weight: 600;
 }
@@ -225,7 +226,7 @@ body {
     padding: 0.85rem 1rem;
     margin-top: 1.25rem;
     font-size: 0.85rem;
-    color: #0369a1;
+    color: #0c4a6e;
 }
 
 .alert {
@@ -238,19 +239,19 @@ body {
 .alert-danger {
     background-color: #fef2f2;
     border: 1px solid #fecaca;
-    color: #b91c1c;
+    color: #7f1d1d;
 }
 
 .alert-success {
     background-color: #f0fdf4;
     border: 1px solid #bbf7d0;
-    color: #15803d;
+    color: #14532d;
 }
 
 .alert-warning {
     background-color: #fffbeb;
     border: 1px solid #fde68a;
-    color: #92400e;
+    color: #78350f;
 }
 
 /* Footer de Registro */
@@ -262,17 +263,17 @@ body {
     margin-top: 1.75rem;
     padding-top: 1.25rem;
     font-size: 0.85rem;
-    color: #64748b;
+    color: #334155;
 }
 
 .btn-register {
     border: 1px solid #cbd5e1;
     background: #ffffff;
-    color: #0f172a;
+    color: #020617;
     padding: 0.4rem 0.85rem;
     border-radius: 8px;
     text-decoration: none;
-    font-weight: 500;
+    font-weight: 600;
     transition: background 0.2s;
 }
 

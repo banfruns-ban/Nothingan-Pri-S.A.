@@ -1,6 +1,9 @@
 <!-- BANNER PRINCIPAL -->
+<!-- BANNER PRINCIPAL -->
 <div align="center">
-  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:0d1117,50:1f6feb,100:58a6ff&height=200&section=header&text=Nothingan%20Pri%20S.A.&fontSize=46&fontColor=ffffff&animation=scaleIn&fontAlignY=35&desc=Plataforma%20Integral%20ERP%20%26%20CRM%20de%20Lloguer%20de%20Vehicles&descAlignY=58&descSize=16" width="100%" />
+  <img src="https://readme-typing-svg.demolab.com?font=Montserrat&weight=800&size=36&duration=4000&pause=10000&color=58A6FF&background=0D1117&center=true&vCenter=true&width=850&height=110&lines=NOTHINGAN+PRI+S.A." alt="Nothingan Pri S.A." />
+  <br/>
+  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=500&size=16&duration=3500&pause=1000&color=C9D1D9&background=0D1117&center=true&vCenter=true&width=850&height=45&lines=Plataforma+Integral+ERP+i+CRM+de+Lloguer+de+Vehicles;Java+%E2%80%A2+Spring+Boot+%E2%80%A2+MySQL+%E2%80%A2+MongoDB" alt="Subtítol" />
 </div>
 
 <div align="center">

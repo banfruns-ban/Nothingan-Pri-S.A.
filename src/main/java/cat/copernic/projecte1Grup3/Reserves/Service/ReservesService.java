@@ -46,7 +46,7 @@ public class ReservesService {
     public static final String CONFIRMADA = "CONFIRMADA";
     public static final String EN_CURS = "EN_CURS";
     public static final String FINALITZADA = "FINALITZADA";
-    public static final String CANCELADA = "CANCELADA"; // O "ANULLADA" segons la teva base de dades
+    public static final String CANCELADA = "CANCELADA";
 
     private final ReservesRepository reservesRepository;
     private final ClientRepository clientRepository;
@@ -217,11 +217,9 @@ public class ReservesService {
         reserva.setDataFi(dataFi);
         reserva.setHoraFi(horaFi);
 
-        // El cost total és sempre preu/hora x hores, sense descompte
         BigDecimal cost = vehicle.getPreuHora().multiply(BigDecimal.valueOf(hores));
         reserva.setCostTotal(cost.setScale(2, RoundingMode.HALF_UP));
 
-        // Descompte premium: el 25% s'aplica sobre la fiança
         BigDecimal fianca = vehicle.getFianca();
         if (esPremium(client)) {
             fianca = fianca.multiply(BigDecimal.ONE.subtract(DESCOMPTE_PREMIUM));
@@ -357,10 +355,22 @@ public class ReservesService {
         return "vehicle_desconegut";
     }
 
+    // Compatibilitat (7 paràmetres)
     @Transactional
     public ReservesEntity lliurar(Long codi, LocalDate dataLliurament, LocalTime horaLliurament,
             Integer kmInicials, String nivellCombustible, String novesObservacions,
             MultipartFile[] fotos) {
+        return lliurar(codi, dataLliurament, horaLliurament, kmInicials, nivellCombustible,
+                novesObservacions, fotos, null, null, null);
+    }
+
+    // Lliurar amb fotos addicionals il·limitades (títol i descripció)
+    @Transactional
+    public ReservesEntity lliurar(Long codi, LocalDate dataLliurament, LocalTime horaLliurament,
+            Integer kmInicials, String nivellCombustible, String novesObservacions,
+            MultipartFile[] fotos,
+            MultipartFile[] fotosAddicionals, String[] titolsFotosAddicionals,
+            String[] descripcionsFotosAddicionals) {
         ReservesEntity r = reservesRepository.findById(codi)
                 .orElseThrow(() -> new IllegalArgumentException("Reserva no trobada: #" + codi));
 
@@ -373,6 +383,8 @@ public class ReservesService {
         r.setEstat(EN_CURS);
 
         String rutesFotos = guardarFotos(r, fotos, "lliurar");
+        String registreFotosAddicionals = guardarFotosAddicionals(
+                r, fotosAddicionals, titolsFotosAddicionals, descripcionsFotosAddicionals, "lliurar");
 
         StringBuilder obs = new StringBuilder();
         if (r.getObservacions() != null && !r.getObservacions().isBlank()) {
@@ -387,6 +399,9 @@ public class ReservesService {
         }
         if (!rutesFotos.isBlank()) {
             obs.append("Fotos lliurament: ").append(rutesFotos).append(". ");
+        }
+        if (!registreFotosAddicionals.isBlank()) {
+            obs.append(registreFotosAddicionals).append(" ");
         }
         if (novesObservacions != null && !novesObservacions.isBlank()) {
             obs.append("Notes: ").append(novesObservacions.trim());
@@ -442,7 +457,6 @@ public class ReservesService {
 
         BigDecimal fiancaOriginal = (r.getFianca() != null) ? r.getFianca() : BigDecimal.ZERO;
 
-        // G3P1-239: Si hi ha desperfectes i són imputables al client, es reté tota la fiança
         BigDecimal carrecDanys = BigDecimal.ZERO;
         if (teDesperfectes && desperfectesImputables) {
             carrecDanys = fiancaOriginal;
@@ -528,9 +542,6 @@ public class ReservesService {
                 .toList();
     }
 
-    // ============================================================
-    // MÈTODE PER FILTRAR RESERVES PER CLIENTS (DNI)
-    // ============================================================
     public List<ReservesEntity> llistarReservesPerClients(List<String> dnisClients) {
         if (dnisClients == null || dnisClients.isEmpty()) {
             return reservesRepository.findAll();
@@ -548,9 +559,6 @@ public class ReservesService {
         return reservesRepository.findByClientDniIn(dnisNets);
     }
 
-    // ============================================================
-    // MÈTODE PER CERCAR LES RESERVES D'UN CLIENT ESPECÍFIC
-    // ============================================================
     public List<ReservesEntity> buscarPerClient(String dni) {
         if (dni == null || dni.isBlank()) {
             return List.of();
@@ -561,17 +569,11 @@ public class ReservesService {
                 .toList();
     }
 
-    // ============================================================
-    // ANUL·LACIÓ DE RESERVA DES DEL PANELL D'AGENT
-    // ============================================================
-
-    // Compatibilitat: sense percentatge es retorna tota la fiança (100%)
     @Transactional
     public ReservesEntity anularReserva(Long codiReserva, String motiu) {
         return anularReserva(codiReserva, motiu, new BigDecimal("100"));
     }
 
-    // L'agent decideix el % de fiança que es retorna; del lloguer sempre es retorna el 25%
     @Transactional
     public ReservesEntity anularReserva(Long codiReserva, String motiu, BigDecimal percentatgeFianca) {
         if (motiu == null || motiu.isBlank()) {
@@ -611,23 +613,18 @@ public class ReservesService {
         return guardada;
     }
 
-    // 25% del cost del lloguer (sense fiança)
     public BigDecimal calcularRetornLloguer(ReservesEntity r) {
         BigDecimal cost = r.getCostTotal() != null ? r.getCostTotal() : BigDecimal.ZERO;
         return cost.multiply(PERCENTATGE_RETORN_LLOGUER)
                 .divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
     }
 
-    // Part de la fiança que es retorna segons el % triat per l'agent
     public BigDecimal calcularRetornFianca(ReservesEntity r, BigDecimal percentatgeFianca) {
         BigDecimal fianca = r.getFianca() != null ? r.getFianca() : BigDecimal.ZERO;
         return fianca.multiply(percentatgeFianca)
                 .divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
     }
 
-    // ============================================================
-    // MÈTODE PER GUARDAR LA RESERVA DES DEL CLIENT
-    // ============================================================
     @Transactional
     public ReservesEntity guardarReservaClient(ReservesEntity reserva) {
         if (reserva == null) {

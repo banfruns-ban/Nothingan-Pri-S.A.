@@ -377,6 +377,10 @@ class ClientServiceTest {
     @DisplayName("Comprovar que el client pot actualitzar el seu perfil")
     void testActualitzarPerfilClient() {
         when(clientRepository.findByEmailIgnoreCase("joan@test.com")).thenReturn(Optional.of(clientExemple));
+        clientExemple.setNumTargeta(null);
+        clientExemple.setTargetaUltims4("1111");
+        clientExemple.setTargetaCaducitat(YearMonth.now().plusYears(2).toString());
+        String caducitatActual = clientExemple.getTargetaCaducitat();
 
         ClientEntity dades = new ClientEntity();
         dades.setNom("Joan G. Soler");
@@ -387,7 +391,47 @@ class ClientServiceTest {
 
         assertEquals("Joan G. Soler", clientExemple.getNom());
         assertEquals("699888777", clientExemple.getTelefon());
+        assertEquals("1111", clientExemple.getTargetaUltims4());
+        assertEquals(caducitatActual, clientExemple.getTargetaCaducitat());
         verify(clientRepository, times(1)).saveAndFlush(clientExemple);
+    }
+
+    @Test
+    @DisplayName("Comprovar que el client pot canviar la targeta des del seu perfil")
+    void testActualitzarTargetaDesDelPerfil() {
+        when(clientRepository.findByEmailIgnoreCase("joan@test.com")).thenReturn(Optional.of(clientExemple));
+        clientExemple.setNumTargeta(null);
+        clientExemple.setTargetaUltims4("1111");
+        clientExemple.setTargetaCaducitat(YearMonth.now().plusYears(1).toString());
+
+        ClientEntity dades = new ClientEntity();
+        dades.setEmail("joan@test.com");
+        dades.setTelefon("699888777");
+        dades.setNumTargeta("5555 5555 5555 4444");
+        dades.setNovaCaducitatTargeta(YearMonth.now().plusYears(3).toString());
+
+        clientService.actualitzarPerfilClient("joan@test.com", dades);
+
+        assertEquals("4444", clientExemple.getTargetaUltims4());
+        assertEquals(YearMonth.now().plusYears(3).toString(), clientExemple.getTargetaCaducitat());
+        assertNull(dades.getNumTargeta());
+        verify(clientRepository, times(1)).saveAndFlush(clientExemple);
+    }
+
+    @Test
+    @DisplayName("Comprovar que el perfil rebutja canviar la caducitat sense número de targeta")
+    void testActualitzarCaducitatTargetaSenseNumero() {
+        when(clientRepository.findByEmailIgnoreCase("joan@test.com")).thenReturn(Optional.of(clientExemple));
+
+        ClientEntity dades = new ClientEntity();
+        dades.setEmail("joan@test.com");
+        dades.setTelefon("699888777");
+        dades.setNovaCaducitatTargeta(YearMonth.now().plusYears(3).toString());
+
+        assertThrows(IllegalArgumentException.class,
+                () -> clientService.actualitzarPerfilClient("joan@test.com", dades));
+
+        verify(clientRepository, never()).saveAndFlush(any());
     }
 
     /**

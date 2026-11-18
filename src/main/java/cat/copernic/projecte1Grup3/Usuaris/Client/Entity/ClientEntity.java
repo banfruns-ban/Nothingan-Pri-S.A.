@@ -72,6 +72,9 @@ public class ClientEntity extends UsuariEntity {
     @Transient
     private String numTargeta;
 
+    @Transient
+    private String novaCaducitatTargeta;
+
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     @Column(name = "data_naixement", nullable = false)
@@ -307,6 +310,14 @@ public class ClientEntity extends UsuariEntity {
      */
     public void setNumTargeta(String numTargeta) {
         this.numTargeta = numTargeta;
+    }
+
+    public String getNovaCaducitatTargeta() {
+        return novaCaducitatTargeta;
+    }
+
+    public void setNovaCaducitatTargeta(String novaCaducitatTargeta) {
+        this.novaCaducitatTargeta = novaCaducitatTargeta;
     }
 
     /**

@@ -134,12 +134,39 @@
                 <input type="text" th:field="*{nacionalitat}" required>
             </div>
 
-            <div class="seccio-títol">Llicència de Conducció i Seguretat</div>
+            <div class="seccio-títol">Llicència de Conducció</div>
 
             <div class="form-grup">
                 <label>Tipus de llicència *</label>
                 <input type="text" th:field="*{tipusLlicencia}" required>
             </div>
+
+            <div class="seccio-títol">Targeta de crèdit</div>
+
+            <div class="form-grup full-width">
+                <p th:if="${client.targetaUltims4 != null}"
+                   th:text="|Targeta actual acabada en ${client.targetaUltims4} · Caduca ${client.targetaCaducitat}|">
+                    Targeta actual
+                </p>
+                <p th:if="${client.targetaUltims4 == null}">
+                    No tens cap targeta desada.
+                </p>
+                <small>Per canviar-la, introdueix les dades de la nova targeta. Només se'n desaran els quatre últims dígits i la caducitat.</small>
+            </div>
+
+            <div class="form-grup">
+                <label for="numTargeta">Número de la nova targeta</label>
+                <input type="text" id="numTargeta" th:field="*{numTargeta}"
+                       inputmode="numeric" autocomplete="off" maxlength="23"
+                       placeholder="Introdueix el número complet">
+            </div>
+
+            <div class="form-grup">
+                <label for="novaCaducitatTargeta">Caducitat de la nova targeta</label>
+                <input type="month" id="novaCaducitatTargeta" th:field="*{novaCaducitatTargeta}">
+            </div>
+
+            <div class="seccio-títol">Seguretat</div>
 
             <div class="form-grup">
                 <label>Nova contrasenya <small style="color: #64748b;">(Deixar en blanc per mantenir l'actual)</small></label>

@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package cat.copernic.projecte1Grup3.Reserves.Controller;
 
 import java.util.Optional;
@@ -104,10 +100,10 @@ public class Reserves {
             model.addAttribute("reserva", new ReservesEntity());
         }
 
-        // Aviso del 25% para clientes premium (AJUSTA getPremium() al campo real de ClientEntity)
+        // Avís del 25% de descompte a la fiança per a clients premium
         model.addAttribute("esPremium",
                 reservesClientService.obtenirClient(authentication.getName())
-                        .map(c -> Boolean.TRUE.equals(c.isPremium()))
+                        .map(ClientEntity::isPremium)
                         .orElse(false));
 
         return "reserves/crear_reserva_client";
@@ -115,7 +111,8 @@ public class Reserves {
 
     /**
      * Processa i desa una nova reserva realitzada pel client: Verifica la
-     * sessió activa, recupera l'entitat del client autenticat i delega a
+     * sessió activa, comprova que el client ha acceptat que l'agent pot demanar
+     * la documentació, recupera l'entitat del client autenticat i delega a
      * ReservesService la creació de la reserva. Redirigeix al llistat de
      * reserves si tot va bé, o torna al formulari conservant les dades en cas
      * d'error.
@@ -124,6 +121,7 @@ public class Reserves {
     @PostMapping("/guardar")
     public String guardarReservaClient(
             @ModelAttribute("reserva") ReservesEntity reserva,
+            @RequestParam(name = "acceptaDocumentacio", defaultValue = "false") boolean acceptaDocumentacio,
             Authentication authentication,
             RedirectAttributes ra) {
 
@@ -135,6 +133,11 @@ public class Reserves {
         String matricula = reserva.getVehicle() != null ? reserva.getVehicle().getMatricula() : "";
 
         try {
+            if (!acceptaDocumentacio) {
+                throw new IllegalArgumentException(
+                        "Cal confirmar que has entès que l'agent pot demanar-te la documentació");
+            }
+
             ClientEntity client = reservesClientService.obtenirClient(authentication.getName())
                     .orElseThrow(() -> new IllegalArgumentException("Client no trobat"));
 
@@ -143,7 +146,7 @@ public class Reserves {
                     reserva.getDataFi(), reserva.getHoraFi(),
                     reserva.getObservacions());
 
-            ra.addFlashAttribute("missatge", "El teu codi de reserva és #" + reservaCreada.getCodiReserva());
+            ra.addFlashAttribute("codiNou", reservaCreada.getCodiReserva());
             return "redirect:/reserves-client";
         } catch (Exception e) {
             ra.addFlashAttribute("error", "No s'ha pogut realitzar la reserva: " + e.getMessage());

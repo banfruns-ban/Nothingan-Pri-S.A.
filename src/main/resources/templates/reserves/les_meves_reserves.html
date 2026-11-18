@@ -66,6 +66,17 @@
             <i class="fa-solid fa-triangle-exclamation"></i> <span th:text="${error}"></span>
         </div>
 
+        <!-- Codi de la reserva acabada de crear (enfatitzat) -->
+        <div th:if="${codiNou != null}" class="reserva-confirmada">
+            <i class="fa-solid fa-circle-check"></i>
+            <div class="reserva-confirmada-text">
+                <span class="reserva-confirmada-titol">Reserva sol·licitada correctament!</span>
+                <span class="reserva-confirmada-etiqueta">El teu codi de reserva és</span>
+                <strong class="reserva-confirmada-codi" th:text="'#' + ${codiNou}">#12</strong>
+                <small>Guarda aquest codi: te'l demanaran en recollir el vehicle.</small>
+            </div>
+        </div>
+
         <!-- Filtres per codi i dates (G3P1-245) -->
         <div class="filter-card-client">
             <form th:action="@{/reserves-client}" method="get" class="filter-grid-client">

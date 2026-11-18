@@ -92,7 +92,6 @@ public class ClientController {
         // Nunca se devuelve la contraseña ni los datos de la tarjeta al formulario
         client.setPassword(null);
         client.setNumTargeta(null);
-        client.setCvv(null);
         model.addAttribute("error", error);
         return "client/altaUsuari";
     }
@@ -319,7 +318,6 @@ public class ClientController {
         // Conservamos lo escrito (nunca la contraseña ni la tarjeta)
         client.setPassword(null);
         client.setNumTargeta(null);
-        client.setCvv(null);
         ra.addFlashAttribute("client", client);
         ra.addFlashAttribute("error", error);
         return "redirect:/registre";

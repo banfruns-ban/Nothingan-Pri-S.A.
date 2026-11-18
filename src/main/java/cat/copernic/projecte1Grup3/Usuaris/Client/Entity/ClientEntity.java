@@ -72,8 +72,6 @@ public class ClientEntity extends UsuariEntity {
     @Transient
     private String numTargeta;
 
-    @Transient
-    private String cvv;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     @Column(name = "data_naixement", nullable = false)
@@ -315,18 +313,13 @@ public class ClientEntity extends UsuariEntity {
      * Obté el codi de seguretat CVV introduït temporalment al formulari:
      * Retorna el valor transitori que no s'emmagatzema mai a la base de dades.
      */
-    public String getCvv() {
-        return cvv;
-    }
-
+   
     /**
      * Assigna el codi de seguretat CVV rebut des del formulari web: Emmagatzema
      * temporalment el codi en memòria per a la seva validació durant el
      * registre o edició.
      */
-    public void setCvv(String cvv) {
-        this.cvv = cvv;
-    }
+   
 
     /**
      * Obté la data de naixement del client: Retorna el valor LocalDate

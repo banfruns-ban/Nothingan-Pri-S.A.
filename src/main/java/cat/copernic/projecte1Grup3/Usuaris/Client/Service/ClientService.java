@@ -427,10 +427,7 @@ public class ClientService {
         if (!num.matches("^[0-9]{13,19}$") || !luhn(num)) {
             throw new IllegalArgumentException("El número de targeta no és vàlid");
         }
-        String cvv = c.getCvv() == null ? "" : c.getCvv().trim();
-        if (!cvv.matches("^[0-9]{3,4}$")) {
-            throw new IllegalArgumentException("El codi de seguretat ha de tenir 3 o 4 xifres");
-        }
+       
 
         YearMonth cad = parseCaducitat(c.getTargetaCaducitat());
         if (cad.isBefore(YearMonth.now())) {
@@ -441,7 +438,7 @@ public class ClientService {
         c.setTargetaCaducitat(cad.toString());
         c.setTargetaUltims4(num.substring(num.length() - 4));
         c.setNumTargeta(null);
-        c.setCvv(null);
+      
     }
 
     /**

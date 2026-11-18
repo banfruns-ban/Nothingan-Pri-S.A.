@@ -172,7 +172,7 @@
 
                         <!-- Observacions -->
                         <div class="card border-0 shadow-sm p-4">
-                            <label for="observacionsRetorn" class="h5 fw-bold text-dark mb-3 d-block">Observacions / Comentaris generals</label>
+                            <label for="observacionsRetorn" class="h5 fw-bold text-dark mb-3 d-block">Observacions / Comentaris de l'estat del vehicle</label>
                             <textarea id="observacionsRetorn" name="observacions" class="form-control" rows="3" placeholder="Descriviu les incidències generals detectades en la devolució..."></textarea>
                         </div>
                     </div>
@@ -294,34 +294,34 @@
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
         <script>
-                                            let comptadorAddicionals = 0;
+            let comptadorAddicionals = 0;
 
-                                            document.addEventListener("DOMContentLoaded", function () {
-                                                const rawContainer = document.getElementById('rawObservacionsLliurament');
-                                                const galeria = document.getElementById('galeriaFotosLliurament');
-                                                if (rawContainer && galeria) {
-                                                    const rawText = rawContainer.innerText.trim();
-                                                    const urlRegex = /(\/uploads\/vehicles\/[^\s]+?\/lliurar\/[^\s]+?\.(?:jpg|jpeg|png|webp))/gi;
-                                                    const fotosLliurament = rawText.match(urlRegex) || [];
+            document.addEventListener("DOMContentLoaded", function () {
+                const rawContainer = document.getElementById('rawObservacionsLliurament');
+                const galeria = document.getElementById('galeriaFotosLliurament');
+                if (rawContainer && galeria) {
+                    const rawText = rawContainer.innerText.trim();
+                    const urlRegex = /(\/uploads\/vehicles\/[^\s]+?\/lliurar\/[^\s]+?\.(?:jpg|jpeg|png|webp))/gi;
+                    const fotosLliurament = rawText.match(urlRegex) || [];
 
-                                                    if (fotosLliurament.length > 0) {
-                                                        galeria.innerHTML = "";
-                                                        fotosLliurament.forEach(fotoUrl => {
-                                                            let nomCostat = "Fotografia lliurament";
-                                                            const urlLower = fotoUrl.toLowerCase();
+                    if (fotosLliurament.length > 0) {
+                        galeria.innerHTML = "";
+                        fotosLliurament.forEach(fotoUrl => {
+                            let nomCostat = "Fotografia lliurament";
+                            const urlLower = fotoUrl.toLowerCase();
 
-                                                            if (urlLower.includes("frontal"))
-                                                                nomCostat = "Frontal";
-                                                            else if (urlLower.includes("posterior"))
-                                                                nomCostat = "Posterior";
-                                                            else if (urlLower.includes("lateral_esquerre"))
-                                                                nomCostat = "Lateral Esquerre";
-                                                            else if (urlLower.includes("lateral_dret"))
-                                                                nomCostat = "Lateral Dret";
+                            if (urlLower.includes("frontal"))
+                                nomCostat = "Frontal";
+                            else if (urlLower.includes("posterior"))
+                                nomCostat = "Posterior";
+                            else if (urlLower.includes("lateral_esquerre"))
+                                nomCostat = "Lateral Esquerre";
+                            else if (urlLower.includes("lateral_dret"))
+                                nomCostat = "Lateral Dret";
 
-                                                            const col = document.createElement('div');
-                                                            col.className = "col text-center";
-                                                            col.innerHTML = `
+                            const col = document.createElement('div');
+                            col.className = "col text-center";
+                            col.innerHTML = `
                                 <div class="card h-100 border shadow-sm p-1 bg-white">
                                     <span class="badge bg-dark text-white mb-1 py-1 extra-small">${nomCostat}</span>
                                     <a href="${fotoUrl}" target="_blank" rel="noopener noreferrer" title="Ampliar foto ${nomCostat}">
@@ -332,24 +332,24 @@
                                     </a>
                                 </div>
                             `;
-                                                            galeria.appendChild(col);
-                                                        });
-                                                    }
-                                                }
-                                                recalcularResum();
-                                            });
+                            galeria.appendChild(col);
+                        });
+                    }
+                }
+                recalcularResum();
+            });
 
-                                            function afegirFotoAddicional() {
-                                                comptadorAddicionals++;
-                                                const idx = comptadorAddicionals;
-                                                const llista = document.getElementById('llistaFotosAddicionals');
-                                                const msgBuit = document.getElementById('missatgeSenseFotosAddicionals');
-                                                if (msgBuit)
-                                                    msgBuit.classList.add('d-none');
+            function afegirFotoAddicional() {
+                comptadorAddicionals++;
+                const idx = comptadorAddicionals;
+                const llista = document.getElementById('llistaFotosAddicionals');
+                const msgBuit = document.getElementById('missatgeSenseFotosAddicionals');
+                if (msgBuit)
+                    msgBuit.classList.add('d-none');
 
-                                                const item = document.createElement('div');
-                                                item.className = "border rounded p-3 bg-light position-relative foto-addicional-item";
-                                                item.innerHTML = `
+                const item = document.createElement('div');
+                item.className = "border rounded p-3 bg-light position-relative foto-addicional-item";
+                item.innerHTML = `
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <span class="badge bg-primary">Fotografia addicional #${idx}</span>
                         <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2" onclick="eliminarFotoAddicional(this)" title="Eliminar aquesta foto">
@@ -382,97 +382,98 @@
                         </div>
                     </div>
                 `;
-                                                llista.appendChild(item);
-                                            }
+                llista.appendChild(item);
+            }
 
-                                            function eliminarFotoAddicional(btn) {
-                                                const item = btn.closest('.foto-addicional-item');
-                                                if (item)
-                                                    item.remove();
+            function eliminarFotoAddicional(btn) {
+                const item = btn.closest('.foto-addicional-item');
+                if (item)
+                    item.remove();
 
-                                                const llista = document.getElementById('llistaFotosAddicionals');
-                                                const restants = llista.querySelectorAll('.foto-addicional-item');
-                                                const msgBuit = document.getElementById('missatgeSenseFotosAddicionals');
-                                                if (restants.length === 0 && msgBuit) {
-                                                    msgBuit.classList.remove('d-none');
-                                                }
-                                            }
+                const llista = document.getElementById('llistaFotosAddicionals');
+                const restants = llista.querySelectorAll('.foto-addicional-item');
+                const msgBuit = document.getElementById('missatgeSenseFotosAddicionals');
+                if (restants.length === 0 && msgBuit) {
+                    msgBuit.classList.remove('d-none');
+                }
+            }
 
-                                            function onToggleDesperfectes() {
-                                                const checkDanys = document.getElementById('cRet1');
-                                                const selectGravetat = document.getElementById('gravetatDany');
-                                                if (checkDanys && selectGravetat) {
-                                                    if (checkDanys.checked && parseFloat(selectGravetat.value) === 0) {
-                                                        selectGravetat.value = "75";
-                                                    } else if (!checkDanys.checked) {
-                                                        selectGravetat.value = "0";
-                                                    }
-                                                }
-                                                recalcularResum();
-                                            }
+            function onToggleDesperfectes() {
+                const checkDanys = document.getElementById('cRet1');
+                const selectGravetat = document.getElementById('gravetatDany');
+                if (checkDanys && selectGravetat) {
+                    if (checkDanys.checked && parseFloat(selectGravetat.value) === 0) {
+                        selectGravetat.value = "75";
+                    } else if (!checkDanys.checked) {
+                        selectGravetat.value = "0";
+                    }
+                }
+                recalcularResum();
+            }
 
-                                            function recalcularResum() {
-                                                const card = document.getElementById('resumEconimicCard');
-                                                const fiancaBase = parseFloat(card.getAttribute('data-fianca')) || 300;
-                                                const preuHora = parseFloat(card.getAttribute('data-preu-hora')) || 0;
-                                                const dataFiStr = card.getAttribute('data-data-fi');
-                                                const horaFiStr = card.getAttribute('data-hora-fi');
+            function recalcularResum() {
+                const card = document.getElementById('resumEconimicCard');
+                const fiancaBase = parseFloat(card.getAttribute('data-fianca')) || 300;
+                const preuHora = parseFloat(card.getAttribute('data-preu-hora')) || 0;
+                const dataFiStr = card.getAttribute('data-data-fi');
+                const horaFiStr = card.getAttribute('data-hora-fi');
 
-                                                // Càlcul d'hores de retard (G3P1-238)
-                                                let horesRetard = 0;
-                                                let deduccioRetard = 0;
-                                                const dataRetornVal = document.getElementById('dataRetorn').value;
-                                                const horaRetornVal = document.getElementById('horaRetorn').value;
+                // Càlcul d'hores de retard (G3P1-238)
+                let horesRetard = 0;
+                let deduccioRetard = 0;
+                const dataRetornVal = document.getElementById('dataRetorn').value;
+                const horaRetornVal = document.getElementById('horaRetorn').value;
 
-                                                if (dataFiStr && horaFiStr && dataRetornVal && horaRetornVal) {
-                                                    const previst = new Date(`${dataFiStr}T${horaFiStr}`);
-                                                    const real = new Date(`${dataRetornVal}T${horaRetornVal}`);
-                                                    if (!isNaN(previst.getTime()) && !isNaN(real.getTime()) && real > previst) {
-                                                        const minutsRetard = Math.floor((real - previst) / 60000);
-                                                        horesRetard = Math.ceil(minutsRetard / 60);
-                                                        deduccioRetard = horesRetard * preuHora;
-                                                    }
-                                                }
+                if (dataFiStr && horaFiStr && dataRetornVal && horaRetornVal) {
+                    const previst = new Date(`${dataFiStr}T${horaFiStr}`);
+                    const real = new Date(`${dataRetornVal}T${horaRetornVal}`);
+                    if (!isNaN(previst.getTime()) && !isNaN(real.getTime()) && real > previst) {
+                        const minutsRetard = Math.floor((real - previst) / 60000);
+                        horesRetard = Math.ceil(minutsRetard / 60);
+                        deduccioRetard = horesRetard * preuHora;
+                    }
+                }
 
-                                                const gravetat = parseFloat(document.getElementById('gravetatDany').value) || 0;
-                                                const imputable = document.getElementById('imputableClient').value === "true";
-                                                const deduccioCarb = parseFloat(document.getElementById('deduccioCarburant').value) || 0;
+                const gravetat = parseFloat(document.getElementById('gravetatDany').value) || 0;
+                const imputable = document.getElementById('imputableClient').value === "true";
+                const deduccioCarb = parseFloat(document.getElementById('deduccioCarburant').value) || 0;
 
-                                                const checkDanys = document.getElementById('cRet1');
-                                                if (checkDanys) {
-                                                    checkDanys.checked = gravetat > 0;
-                                                }
+                const checkDanys = document.getElementById('cRet1');
+                if (checkDanys) {
+                    checkDanys.checked = gravetat > 0;
+                }
 
-                                                // G3P1-239: Si hi ha danys i són imputables al client, es reté tota la fiança
-                                                let deduccioDanys = (gravetat > 0 && imputable) ? fiancaBase : 0;
-                                                let totalDeduccions = deduccioRetard + deduccioDanys + deduccioCarb;
-                                                let importFinal = fiancaBase - totalDeduccions;
-                                                if (importFinal < 0)
-                                                    importFinal = 0;
+                // G3P1-239: Si hi ha danys i són imputables al client, es reté tota la fiança
+                let deduccioDanys = (gravetat > 0 && imputable) ? fiancaBase : 0;
+                let totalDeduccions = deduccioRetard + deduccioDanys + deduccioCarb;
+                let importFinal = fiancaBase - totalDeduccions;
+                if (importFinal < 0)
+                    importFinal = 0;
 
-                                                document.getElementById('horesRetardText').innerText = horesRetard;
-                                                document.getElementById('deduccioRetardText').innerText = deduccioRetard > 0 ? "- " + deduccioRetard.toFixed(2) + " €" : "0,00 €";
-                                                document.getElementById('deduccioText').innerText = deduccioDanys > 0 ? "- " + deduccioDanys.toFixed(2) + " € (100% fiança)" : "0,00 €";
-                                                document.getElementById('deduccioCarburantText').innerText = deduccioCarb > 0 ? "- " + deduccioCarb.toFixed(2) + " €" : "0,00 €";
-                                                document.getElementById('importRetornarText').innerText = importFinal.toFixed(2) + " €";
-                                            }
+                document.getElementById('horesRetardText').innerText = horesRetard;
+                document.getElementById('deduccioRetardText').innerText = deduccioRetard > 0 ? "- " + deduccioRetard.toFixed(2) + " €" : "0,00 €";
+                document.getElementById('deduccioText').innerText = deduccioDanys > 0 ? "- " + deduccioDanys.toFixed(2) + " € (100% fiança)" : "0,00 €";
+                document.getElementById('deduccioCarburantText').innerText = deduccioCarb > 0 ? "- " + deduccioCarb.toFixed(2) + " €" : "0,00 €";
+                document.getElementById('importRetornarText').innerText = importFinal.toFixed(2) + " €";
+            }
 
-                                            function previewFotoAuto(input) {
-                                                if (input.files && input.files[0]) {
-                                                    const label = input.closest('label');
-                                                    const img = label.querySelector('.img-preview');
-                                                    const ph = label.querySelector('.ph-content');
+            function previewFotoAuto(input) {
+                if (input.files && input.files[0]) {
+                    const label = input.closest('label');
+                    const img = label.querySelector('.img-preview');
+                    const ph = label.querySelector('.ph-content');
 
-                                                    const reader = new FileReader();
-                                                    reader.onload = function (e) {
-                                                        img.src = e.target.result;
-                                                        img.classList.remove('d-none');
-                                                        if (ph)
-                                                            ph.classList.add('d-none');
-                                                    };
-                                                    reader.readAsDataURL(input.files[0]);
-                                                }
-                                            }
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        img.src = e.target.result;
+                        img.classList.remove('d-none');
+                        if (ph)
+                            ph.classList.add('d-none');
+                    };
+                    reader.readAsDataURL(input.files[0]);
+                }
+            }
         </script>
     </body>
 </html>
+                                

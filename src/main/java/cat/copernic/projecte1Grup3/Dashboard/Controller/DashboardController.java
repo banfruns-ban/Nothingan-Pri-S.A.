@@ -53,7 +53,7 @@ public class DashboardController {
     /**
      * Càrrega inicial de la vista principal del Dashboard: Calcula els
      * comptadors globals de lliuraments pendents, retorns, vehicles actius i
-     * clients registrats. Afegeix aquestes dades i els propers lliuraments al
+     * clients registrats. Afegegeix aquestes dades i els propers lliuraments al
      * model per renderitzar la plantilla HTML.
      */
     @GetMapping({"/dashboard"})
@@ -105,6 +105,7 @@ public class DashboardController {
 
             // Formateo manual de fecha para enviar un string limpio al cliente JS
             String dataStr = "---";
+            String dataIso = "";
             if (r.getDataInici() != null) {
                 dataStr = String.format("%02d/%02d/%d",
                         r.getDataInici().getDayOfMonth(),
@@ -113,8 +114,10 @@ public class DashboardController {
                 if (r.getHoraInici() != null) {
                     dataStr += ", " + r.getHoraInici() + "h";
                 }
+                dataIso = r.getDataInici().toString(); // Format YYYY-MM-DD per filtrar per dates
             }
             item.put("dataIniciFormatada", dataStr);
+            item.put("dataIniciISO", dataIso);
             item.put("estat", r.getEstat());
             return item;
         }).toList();

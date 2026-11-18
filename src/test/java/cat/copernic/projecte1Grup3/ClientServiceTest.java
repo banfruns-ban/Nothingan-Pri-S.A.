@@ -20,6 +20,7 @@ import org.springframework.mock.web.MockMultipartFile;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
@@ -333,8 +334,12 @@ class ClientServiceTest {
     @DisplayName("Comprovar que actualitzar no sobreescriu les dates amb null")
     void testActualitzarConservaDatesSiNoVenen() throws Exception {
         when(clientRepository.findById("12345678Z")).thenReturn(Optional.of(clientExemple));
+        clientExemple.setNumTargeta(null);
+        clientExemple.setTargetaUltims4("1111");
+        clientExemple.setTargetaCaducitat(YearMonth.now().plusYears(2).toString());
         LocalDate dniAbans = clientExemple.getDataCaducitatDNI();
         LocalDate naixementAbans = clientExemple.getDataNaixement();
+        String caducitatTargetaAbans = clientExemple.getTargetaCaducitat();
 
         ClientEntity dades = new ClientEntity();
         dades.setNom("Joan Garcia Soler");
@@ -347,8 +352,49 @@ class ClientServiceTest {
         assertEquals(naixementAbans, clientExemple.getDataNaixement());
         assertEquals("Joan Garcia Soler", clientExemple.getNom());
         assertEquals("612345678", clientExemple.getTelefon());
+        assertEquals("1111", clientExemple.getTargetaUltims4());
+        assertEquals(caducitatTargetaAbans, clientExemple.getTargetaCaducitat());
         assertTrue(clientExemple.isPremium());
         verify(clientRepository, times(1)).saveAndFlush(clientExemple);
+    }
+
+    @Test
+    @DisplayName("Comprovar que un agent pot canviar la targeta del client")
+    void testActualitzarTargetaClientDesDelPanellAgent() throws Exception {
+        when(clientRepository.findById("12345678Z")).thenReturn(Optional.of(clientExemple));
+        clientExemple.setNumTargeta(null);
+        clientExemple.setTargetaUltims4("1111");
+        clientExemple.setTargetaCaducitat(YearMonth.now().plusYears(1).toString());
+        YearMonth novaCaducitat = YearMonth.now().plusYears(3);
+
+        ClientEntity dades = new ClientEntity();
+        dades.setEmail("joan@test.com");
+        dades.setTelefon("612345678");
+        dades.setNumTargeta("5555 5555 5555 4444");
+        dades.setTargetaCaducitat(novaCaducitat.format(DateTimeFormatter.ofPattern("MM/yy")));
+
+        clientService.actualitzar("12345678Z", dades, "VALIDAT", false, null, null, null);
+
+        assertEquals("4444", clientExemple.getTargetaUltims4());
+        assertEquals(novaCaducitat.toString(), clientExemple.getTargetaCaducitat());
+        assertNull(dades.getNumTargeta());
+        verify(clientRepository, times(1)).saveAndFlush(clientExemple);
+    }
+
+    @Test
+    @DisplayName("Comprovar que un agent no pot canviar només la caducitat de la targeta")
+    void testActualitzarTargetaClientRebutjaCaducitatSenseNumero() {
+        when(clientRepository.findById("12345678Z")).thenReturn(Optional.of(clientExemple));
+
+        ClientEntity dades = new ClientEntity();
+        dades.setEmail("joan@test.com");
+        dades.setTelefon("612345678");
+        dades.setTargetaCaducitat(YearMonth.now().plusYears(3).toString());
+
+        assertThrows(IllegalArgumentException.class,
+                () -> clientService.actualitzar("12345678Z", dades, "VALIDAT", false, null, null, null));
+
+        verify(clientRepository, never()).saveAndFlush(any());
     }
 
     /**

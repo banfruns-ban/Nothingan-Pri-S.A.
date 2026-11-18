@@ -291,6 +291,8 @@ public class ClientService {
         validaImatge(fotoDniPosterior);
         validaImatge(fotoCarnet);
 
+        actualitzarTargeta(c, dades, dades.getTargetaCaducitat());
+
         c.setNom(dades.getNom());
         c.setEmail(email);
         if (dades.getPassword() != null && !dades.getPassword().isBlank()) {
@@ -367,22 +369,7 @@ public class ClientService {
         }
 
         String telefon = validaTelefon(dades.getTelefon());
-        boolean hiHaNumeroTargeta = dades.getNumTargeta() != null && !dades.getNumTargeta().isBlank();
-        boolean hiHaCaducitatNova = dades.getNovaCaducitatTargeta() != null
-                && !dades.getNovaCaducitatTargeta().isBlank();
-
-        if (hiHaNumeroTargeta != hiHaCaducitatNova) {
-            throw new IllegalArgumentException(hiHaNumeroTargeta
-                    ? "Indica també la data de caducitat de la nova targeta"
-                    : "Introdueix el número de targeta per canviar-la");
-        }
-
-        if (hiHaNumeroTargeta) {
-            dades.setTargetaCaducitat(dades.getNovaCaducitatTargeta());
-            validaTargeta(dades);
-            c.setTargetaUltims4(dades.getTargetaUltims4());
-            c.setTargetaCaducitat(dades.getTargetaCaducitat());
-        }
+        actualitzarTargeta(c, dades, dades.getNovaCaducitatTargeta());
 
         c.setNom(dades.getNom());
         c.setEmail(nouEmail);
@@ -430,6 +417,24 @@ public class ClientService {
             throw new IllegalArgumentException("El telèfon ha de tenir exactament 9 xifres");
         }
         return t;
+    }
+
+    private void actualitzarTargeta(ClientEntity actual, ClientEntity dades, String novaCaducitat) {
+        boolean hiHaNumero = dades.getNumTargeta() != null && !dades.getNumTargeta().isBlank();
+        boolean hiHaCaducitat = novaCaducitat != null && !novaCaducitat.isBlank();
+
+        if (hiHaNumero != hiHaCaducitat) {
+            throw new IllegalArgumentException(hiHaNumero
+                    ? "Indica també la data de caducitat de la nova targeta"
+                    : "Introdueix el número de targeta per canviar-la");
+        }
+
+        if (hiHaNumero) {
+            dades.setTargetaCaducitat(novaCaducitat);
+            validaTargeta(dades);
+            actual.setTargetaUltims4(dades.getTargetaUltims4());
+            actual.setTargetaCaducitat(dades.getTargetaCaducitat());
+        }
     }
 
     /**

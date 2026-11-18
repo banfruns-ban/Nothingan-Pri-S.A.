@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class ReservaAnulacioEmailService {
 
-    private static final BigDecimal PERCENTATGE_DEVOLUCIO = new BigDecimal("0.25");
     private static final BigDecimal IMPORT_ZERO = new BigDecimal("0.00");
 
     public record DevolucioClient(BigDecimal importDevolucio, boolean dinsTermini) {
@@ -29,14 +28,21 @@ public class ReservaAnulacioEmailService {
         this.remitent = remitent;
     }
 
-    public void enviarNotificacio(ReservesEntity reserva) {
+    public void enviarNotificacio(
+            ReservesEntity reserva,
+            BigDecimal percentatgeFianca,
+            BigDecimal retornLloguer,
+            BigDecimal retornFianca) {
         ClientEntity client = validarReservaAmbClient(reserva);
-        if (reserva.getCostTotal() == null) {
-            throw new IllegalStateException("La reserva no té cap cost total per calcular la devolució.");
+        if (percentatgeFianca == null || percentatgeFianca.signum() < 0
+                || percentatgeFianca.compareTo(new BigDecimal("100")) > 0) {
+            throw new IllegalArgumentException("El percentatge de fiança no és vàlid.");
         }
-
-        BigDecimal importDevolucio = reserva.getCostTotal()
-                .multiply(PERCENTATGE_DEVOLUCIO)
+        if (retornLloguer == null || retornLloguer.signum() < 0
+                || retornFianca == null || retornFianca.signum() < 0) {
+            throw new IllegalArgumentException("Els imports de devolució no són vàlids.");
+        }
+        BigDecimal importTotal = retornLloguer.add(retornFianca)
                 .setScale(2, RoundingMode.HALF_UP);
 
         SimpleMailMessage missatge = new SimpleMailMessage();
@@ -45,8 +51,12 @@ public class ReservaAnulacioEmailService {
         missatge.setSubject("Anul·lació de la reserva #" + reserva.getCodiReserva());
         missatge.setText("Hola " + client.getNom() + ",\n\n"
                 + "La reserva #" + reserva.getCodiReserva() + " ha estat anul·lada.\n"
-                + "L'import calculat per a la devolució (25% del cost del lloguer) és de "
-                + importDevolucio.toPlainString() + " €; la fiança no s'inclou en aquest càlcul.\n\n"
+                + "Imports calculats per a la devolució:\n"
+                + "- Cost del lloguer: "
+                + retornLloguer.setScale(2, RoundingMode.HALF_UP).toPlainString() + " €.\n"
+                + "- Fiança (" + percentatgeFianca.stripTrailingZeros().toPlainString() + "%): "
+                + retornFianca.setScale(2, RoundingMode.HALF_UP).toPlainString() + " €.\n"
+                + "- Total: " + importTotal.toPlainString() + " €.\n\n"
                 + "Aquest correu és informatiu: el reemborsament no es tramita automàticament "
                 + "des del sistema.\n\n"
                 + "Motiu de l'anul·lació: " + reserva.getAnulacioMotiu() + "\n\n"

@@ -10,6 +10,7 @@ import cat.copernic.projecte1Grup3.Reserves.Entity.ReservesEntity;
 import cat.copernic.projecte1Grup3.Reserves.Repository.ReservesRepository;
 import cat.copernic.projecte1Grup3.Usuaris.Client.Repository.ClientRepository;
 import cat.copernic.projecte1Grup3.Vehicles.Repository.VehiclesRepository;
+import java.math.BigDecimal;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -90,5 +91,14 @@ class ReservesServiceTest {
         assertEquals("Error en la reserva", reserva.getAnulacioMotiu());
         verify(reservesRepository).save(reserva);
         verify(historicService).desar(reserva, EstatHistoric.CANCELADA);
+    }
+
+    @Test
+    void calcularRetornFiancaAplicaElPercentatgeSeleccionat() {
+        ReservesEntity reserva = new ReservesEntity();
+        reserva.setFianca(new BigDecimal("100.55"));
+
+        assertEquals(new BigDecimal("40.22"),
+                service.calcularRetornFianca(reserva, new BigDecimal("40")));
     }
 }

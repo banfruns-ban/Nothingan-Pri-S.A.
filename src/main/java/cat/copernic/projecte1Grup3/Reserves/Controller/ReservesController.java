@@ -264,7 +264,11 @@ public class ReservesController {
         try {
             ReservesEntity reservaAnulada = reservesLogic.anularReserva(codi, motiu, percentatgeFianca);
             try {
-                reservaAnulacioEmailService.enviarNotificacio(reservaAnulada);
+                BigDecimal retornLloguer = reservesLogic.calcularRetornLloguer(reservaAnulada);
+                BigDecimal retornFianca = reservesLogic.calcularRetornFianca(
+                        reservaAnulada, percentatgeFianca);
+                reservaAnulacioEmailService.enviarNotificacio(
+                        reservaAnulada, percentatgeFianca, retornLloguer, retornFianca);
             } catch (MailException | IllegalStateException e) {
                 log.error("Reserva #{} anul·lada però no s'ha pogut enviar el correu al client", codi, e);
                 ra.addFlashAttribute(
